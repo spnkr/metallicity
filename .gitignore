@@ -1,0 +1,12 @@
+*.m~
+Archive.zip
+Tex/images/*
+cache/*
+*.synctex.gz
+*.aux
+*.bbl
+*.blg
+*.log
+.DS_Store
+*.psd
+*.ai
