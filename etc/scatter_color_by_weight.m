@@ -4,7 +4,7 @@ function scatter_color_by_weight(x,y,w,varargin)
 	ttl = arg('title','');
 	xax = arg('x','');
 	yax = arg('y','');
-	vary_size = arg('vary_size',true);
+	vary_size = arg('vary_size',false);
 	dot_size = arg('dot_size',1);
 	cmapname = arg('colormap','winter');
 	change_back = arg('change_back',NaN);
@@ -17,12 +17,12 @@ function scatter_color_by_weight(x,y,w,varargin)
 		colormap(cmapname);
 		curcolmap = colormap;
 		curmapsize = size(curcolmap,1);
-		minz = min(w); maxz = max(w);
-		mapz = round(1 + (w - maxz) ./ (minz-maxz) .* (curmapsize-1));
+		minz = (min(w)); maxz = (max(w));
+		mapz = round(1 + ((w) - maxz) ./ (minz-maxz) .* (curmapsize-1));
 		mapz(~isfinite(mapz))=1;
 		
 		if vary_size
-			mapz_inv = round(1 + (w - minz) ./ (maxz-minz) .* (curmapsize-1));
+			mapz_inv = round(1 + ((w) - minz) ./ (maxz-minz) .* (curmapsize-1));
 		else
 			mapz_inv = dot_size;
 		end
