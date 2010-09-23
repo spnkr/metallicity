@@ -80,6 +80,8 @@ classdef Model < handle
 				mo.cache{k} = Z;
 
 				k=k+1;
+				
+				mo.data{k}(:,[1 2]) = round(mo.data{k}(:,[1 2]).*mo.precision)./mo.precision;
 			end
 			
 			disp('Loaded.')

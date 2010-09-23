@@ -1,7 +1,7 @@
 %% load data etc
 clear
 clc
-format long g
+format short g
 addpath('etc/');
 addpath('data/');
 global im;
@@ -9,51 +9,44 @@ im=1;
 load('cache/models_01.mat');
 
 
-%% 
-stepsize = 0.001;
+%% test speed of new
+stepsize = 0.01;
 [X,Y] = meshgrid(-3:stepsize:0, -.7:stepsize:.9);
 Z = zeros(size(X,1),size(X,2));
 p = size(Z,1);
 q = size(Z,2);
 
-profile on
-
-
-tic
 for i=1:p
 	for j=1:q
 		xs = X(i,j);
 		ys = Y(i,j);
 
 		a = mo.f_ab(1,xs,ys);
-
+		if numel(a)==0
+			a=0;
+		end
 		if isfinite(a)
 			Z(i,j) = a;
 		end
 	end
 end
-cache=toc
 
-
-
+%% 
+'generating 0.01 models'
 tic
- for i=1:p
- 	for j=1:q
- 		xs = X(i,j);
- 		ys = Y(i,j);
- 
- 		a = mo.f_ab_live(1,xs,ys);
- 
- 		if isfinite(a)
- 			Z(i,j) = a;
- 		end
- 	end
- end
-live=toc
+mo = Model(struct('step',0.01,'precision',100));
+mo.save('cache/models_01.mat');
+toc
+'saved 01'
 
+%% 
+'generating 0.001 models'
+tic
+mo = Model(struct('step',0.001,'precision',1000));
+mo.save('cache/models_001.mat');
+toc
+'done generating 0.001 model'
 
-profile off
-profile report
 
 
 %% 
@@ -85,72 +78,6 @@ sigma
 'done comparing all'
 
 
-%% 
-'generating 0.01 models'
-tic
-mo = Model(struct('step',0.01,'precision',100));
-mo.save('cache/models_01.mat');
-toc
-'saved 01'
-
-%% 
-'generating 0.001 models'
-tic
-mo = Model(struct('step',0.001,'precision',1000));
-mo.save('cache/models_001.mat');
-toc
-'done generating 0.001 model'
-
-
-
-%% 
-xs = -0.36
-ys = 0.04
-a = mo.f_ab(1,xs,ys)
-b = mo.f_ab_live(1,xs,ys)
-v = norm(a-b)
-
-%% 
-
-%% 
-stepsize = 0.01;
-[X,Y] = meshgrid(-3:stepsize:0, -.7:stepsize:.9);
-Z = zeros(size(X,1),size(X,2));
-p = size(Z,1);
-q = size(Z,2);
-
-profile on
-
-
-for i=1:p
-	for j=1:q
-		xs = X(i,j);
-		ys = Y(i,j);
-
-		a = mo.f_ab(1,xs,ys);
-
-		if isfinite(a)
-			Z(i,j) = a;
-		end
-	end
-end
-
-% for i=1:p
-% 	for j=1:q
-% 		xs = X(i,j);
-% 		ys = Y(i,j);
-% 
-% 		a = mo.f_ab_live(1,xs,ys);
-% 
-% 		if isfinite(a)
-% 			Z(i,j) = a;
-% 		end
-% 	end
-% end
-
-
-profile off
-profile report
 
 %% 
 obs = load('data/obsdata2.dat');
@@ -183,7 +110,6 @@ lma = models(:,9);
 
 
 
-%% 
 
 
 
@@ -196,25 +122,147 @@ lma = models(:,9);
 
 
 
+%% volume check
+%load('cache/models_01.mat');
+sepr
+vols = [];
+p=1;
+
+for kk=1:1%size(mo.data,2)
+	mdndx=kk;
+	mo.data{mdndx}(:,[1 2]) = round(mo.data{mdndx}(:,[1 2]).*mo.precision)./mo.precision;
+	x = mo.data{mdndx}(:,1);
+	y = mo.data{mdndx}(:,2);
+	z = mo.data{mdndx}(:,3);
+
+
+	X = sort(unique(x));
+	Y = sort(unique(y));
 
 
 
-%% 
-for i=1:25
-subplot(5,5,i);
-view(0,90);
-axis([-3 0 -.5 1]);
+	vol = 0;
+	for i=1:length(X)
+		for j=1:length(Y)
+			if i==1
+				x0 = X(i)-.2;
+			else
+				x0 = X(i-1);
+			end
+			x1 = X(i);
+			if j==1
+				y0 = Y(j)-.2;
+			else
+				y0 = Y(j-1);
+			end
+			y1 = Y(j);
+
+			dens = mo.f_ab(1, mean([x0 x1]), mean([y0 y1]));
+			ar = abs(diff([x0 x1]) * diff([y0 y1]) * dens);
+
+			if dens>0
+				vols(p,:) = [kk x0 x1 y0 y1 dens ar];
+				p=p+1;
+				vol = vol + ar;
+			end
+
+		end
+	end
 end
 
+vols
+vol
+
 
 %% 
-grid_results = {};
+vol=0;
+k=1;
+vols=[];
+dx = mo.data{1}(mo.data{1}(:,3)>0,:)
+for i=1:size(dx,1)
+	vol_of_this_region = (((.2)^2) * dx(i,3));
+	vol = vol + vol_of_this_region;
+	vols(k,:) = [dx(i,1) dx(i,2) dx(i,3) vol_of_this_region];
+	k=k+1;
+end
+'x,y,density,volume'
+vols
+vol
+
+
+%% 
+models = load('data/modeldata2.dat');
+x = models(:,1);
+y = models(:,2);
+freq = models(:,3);
+xbin = models(:,4);
+ybin = models(:,5);
+lta = models(:,6);
+eta = models(:,7);
+hma = models(:,8);
+lma = models(:,9);
+
+%binned on a 5x5 grid
+XBIN = 0;
+YBIN = 0;
+
+%get data for the appropriate bin
+data = models(models(:,4)==XBIN & models(:,5)==YBIN,[1 2 3]);
+
+%points that have mass
+non_zero_data = data(data(:,3)>0,:)
+
+%find volume
+vol=0;
+k=1;
+vols=[];
+for i=1:size(non_zero_data,1)
+	vol_of_this_region = (((.2)^2) * non_zero_data(i,3));
+	vol = vol + vol_of_this_region;
+	vols(k,:) = [non_zero_data(i,1) non_zero_data(i,2) non_zero_data(i,3) vol_of_this_region];
+	k=k+1;
+end
+'x,y,density,volume'
+vols
+vol
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+%% makes grid. works
+
+models = load('data/modeldata2.dat');
+x = models(:,1);
+y = models(:,2);
+freq = models(:,3);
+xbin = models(:,4);
+ybin = models(:,5);
+lta = models(:,6);
+eta = models(:,7);
+hma = models(:,8);
+lma = models(:,9);
+
 stepsize = 0.01;
+
 im=1;
 fg = figure(im);
 clf(fg,'reset')
 
 spndx=1;
+
 for n=min(ybin):max(ybin)
 	for m=min(xbin):max(xbin)
 		subplot(5,5,spndx);
@@ -222,6 +270,8 @@ for n=min(ybin):max(ybin)
 		%--------------------------------------------
 		
 		[X,Y] = meshgrid(-3:stepsize:0, -.7:stepsize:.9);
+		X = round(X.*10)./10;
+		Y = round(Y.*10)./10;
 		Z = zeros(size(X,1),size(X,2));
 
 
@@ -243,15 +293,27 @@ for n=min(ybin):max(ybin)
 			for j=1:q
 				xs = X(i,j);
 				ys = Y(i,j);
-
-				a = bin_data(	bin_data(:,1)==max(x(x<=xs))...
-								& ...
-								bin_data(:,2)==max(y(y<=ys)) ...
-							,3);
-
-				if isfinite(a)
-					Z(i,j) = a;
+				
+				%works
+				if 1==1
+ 				a = bin_data(  bin_data(:,1)==max(x(x<=xs))...
+ 						& ...
+ 							bin_data(:,2)==max(y(y<=ys)) ...
+ 					  ,3);
+				else
+					%doesn't
+					a = mo.f_ab(spndx,xs,ys);
 				end
+				
+				if ~isfinite(a)
+					a=0;
+				end
+				
+				if numel(a)==0
+					a=0;
+				end
+
+				Z(i,j) = a;
 			end
 		end
 		
@@ -281,12 +343,14 @@ for n=min(ybin):max(ybin)
 	end
 end
 
-save('cache/grid_results_0.001.mat','grid_results');
+
+%% 
+save('cache/grid_results_0.01.mat','grid_results');
 
 
 %% 
 figure(3)
-load('cache/grid_results_0.01.mat');
+load('cache/grid_results_0.01_old.mat');
 gx = grid_results{1};
 AlphaData = gx.Z;
 		AlphaData(AlphaData>0) = 1;
