@@ -272,10 +272,10 @@ fg = figure(im);
 clf(fg,'reset')
 %% 
 spndx=1;
-
+hold on
 for n=min(ybin):max(ybin)
 	for m=min(xbin):max(xbin)
-		subplot(5,5,spndx);
+		%subplot(5,5,spndx);
 		
 		%--------------------------------------------
 		
@@ -361,6 +361,41 @@ for n=min(ybin):max(ybin)
 	end
 end
 
+obs = load('data/obsdata2.dat');
+x = obs(:,1);
+y = obs(:,2);
+w = obs(:,3);
+ndx = x>-3;
+x=x(ndx);
+y=y(ndx);
+w=w(ndx);
+
+
+	cmapname = 'jet'
+
+	
+	
+
+		
+		colormap(cmapname);
+		curcolmap = colormap;
+		curmapsize = size(curcolmap,1);
+		minz = (min(w)); maxz = (max(w));
+		mapz = round(1 + ((w) - maxz) ./ (minz-maxz) .* (curmapsize-1));
+		mapz(~isfinite(mapz))=1;
+		
+		mapz_inv = 6;
+		
+		
+		curcolmap = colormap;
+		curmapsize = size(curcolmap,1);
+		
+		scatter(x,y,mapz_inv,curcolmap(mapz,:), 'filled');
+		
+
+	
+	
+hold off
 
 %% 
 save('cache/grid_results_0.01.mat','grid_results');
