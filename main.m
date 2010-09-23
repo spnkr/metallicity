@@ -9,6 +9,16 @@ im=1;
 load('cache/models_01.mat');
 
 
+
+%% 
+XY = [-2 0.1;-1.9 0.1;-1.6 0.1;-1.1 0.1;-1.5 0.2;-1.1 0.2;-2.4 0.3;-2.4 0.4];
+
+for i=1:length(XY)
+	a = mo.f_ab(1,XY(i,1),XY(i,2));
+	b = mo.f_ab_live(1,XY(i,1),XY(i,2));
+	[XY(i,1) XY(i,2) a b]
+end
+
 %% test speed of new
 stepsize = 0.01;
 [X,Y] = meshgrid(-3:stepsize:0, -.7:stepsize:.9);
@@ -260,7 +270,7 @@ stepsize = 0.01;
 im=1;
 fg = figure(im);
 clf(fg,'reset')
-
+%% 
 spndx=1;
 
 for n=min(ybin):max(ybin)
@@ -295,15 +305,21 @@ for n=min(ybin):max(ybin)
 				ys = Y(i,j);
 				
 				%works
-				if 1==1
- 				a = bin_data(  bin_data(:,1)==max(x(x<=xs))...
+				if 1==11
+ 				a0 = bin_data(  bin_data(:,1)==max(x(x<=xs))...
  						& ...
  							bin_data(:,2)==max(y(y<=ys)) ...
  					  ,3);
-				else
-					%doesn't
-					a = mo.f_ab(spndx,xs,ys);
 				end
+					
+					a = mo.f_ab(spndx,xs,ys);
+					%not sure why this one is different
+					%a2 = mo.f_ab_live(1,xs,ys);
+				%end
+				
+				%if a ~= a0
+				%	[xs ys a0 a a2]
+				%end
 				
 				if ~isfinite(a)
 					a=0;
@@ -312,6 +328,8 @@ for n=min(ybin):max(ybin)
 				if numel(a)==0
 					a=0;
 				end
+				
+				
 
 				Z(i,j) = a;
 			end

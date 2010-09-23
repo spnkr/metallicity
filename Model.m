@@ -51,7 +51,7 @@ classdef Model < handle
 			
 			for k=1:length(mo.data)
 				mo.xranges{k} = min(mo.data{k}(:,1)):stepsize:max(mo.data{k}(:,1));
-				mo.yranges{k} = min(mo.data{k}(:,1)):stepsize:max(mo.data{k}(:,1));
+				mo.yranges{k} = min(mo.data{k}(:,2)):stepsize:max(mo.data{k}(:,2));
 				
 				mo.xranges{k} = round(mo.xranges{k}.*precision)./precision;
 				mo.yranges{k} = round(mo.yranges{k}.*precision)./precision;
@@ -79,9 +79,12 @@ classdef Model < handle
 				
 				mo.cache{k} = Z;
 
-				k=k+1;
+				
+				
 				
 				mo.data{k}(:,[1 2]) = round(mo.data{k}(:,[1 2]).*mo.precision)./mo.precision;
+				
+				k=k+1;
 			end
 			
 			disp('Loaded.')
