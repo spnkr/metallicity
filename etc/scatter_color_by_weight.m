@@ -8,11 +8,13 @@ function scatter_color_by_weight(x,y,w,varargin)
 	dot_size = arg('dot_size',1);
 	cmapname = arg('colormap','winter');
 	change_back = arg('change_back',NaN);
-	
+	overlay = arg('overlay',false);
 	
 	if im > -1
-		fg = figure(im);
-		im=im+1;
+		if ~overlay
+			fg = figure(im);
+			im=im+1;
+		end
 		
 		colormap(cmapname);
 		curcolmap = colormap;
@@ -32,9 +34,11 @@ function scatter_color_by_weight(x,y,w,varargin)
 		
 		scatter(x,y,mapz_inv,curcolmap(mapz,:), 'filled');
 		
-		flabel(xax, yax, ttl);
-		if isfinite(change_back)
-			whitebg(fg, change_back);
-		end
-	end
+		if ~overlay
+			flabel(xax, yax, ttl);
+			if isfinite(change_back)
+				whitebg(fg, change_back);
+			end
+		end	
+end
 	
