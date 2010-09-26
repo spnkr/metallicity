@@ -1,3 +1,8 @@
+%%
+matlabpool open
+%% 
+matlabpool close
+
 %% load data etc
 clear
 clc
@@ -7,7 +12,8 @@ addpath('data/');
 global im;
 im=1;
 mo = Model.load('cache/models_01.mat');
-ob = Observed(struct('name','halo002'));
+load('cache/observed.mat');
+
 
 %% 
 mo = Model.generate(0.01,100,struct('save_to','cache/model_temp.mat'));
@@ -19,11 +25,159 @@ mo.plot(struct('overlay',true,'observed',ob));
 mo.plot_single(struct('model',1));
 
 %% 
+ob = Observed(struct('name','halo002'));
+ob.load_models(mo);
+ob.save('cache/observed.mat');
+
 ob.plot();
 
 
+%% 
+try_this_many_times=10;
+all_p = zeros(25,try_this_many_times);
+for i=1:try_this_many_times
+im=i+1;
+[p,P,norms,plike,clike] = ob.em(struct(	'n',2000,...
+						'min_norm',0.005,...
+						'max_iters',50,...
+						'init','rand(m,1)',...
+						'interactive',false));
+all_p(:,i) = p;
+end
+all_p
+
 
 %% 
+im=1;
+[p,P,norms,plike,clike] = ob.em(struct(	'XXn',NaN,...
+						'min_norm',0.00001,...
+						'max_iters',50,...
+						'init','rand(m,1)',...
+						'interactive',true));
+
+
+
+
+					
+					
+
+%% 
+figure(2)
+scatter(1:25,p)
+for i=1:25
+	text(i,p(i),strcat([' ' num2str(mo.props{i}(1)) '-' num2str(mo.props{i}(2)) 'Gyr']),'FontSize',8)
+	disp(sprintf(strcat([num2str(p(i)*100) '\t' num2str(mo.props{i}(1)) '-' num2str(mo.props{i}(2)) 'Gyr\t' ...
+		num2str(mo.props{i}(3)) '-' num2str(mo.props{i}(4)) 'M'])))
+end
+
+%% 
+figure(2)
+plot(all_p(1,:),'k.-')
+hold on
+for i=2:size(all_p,2)
+	plot(all_p(i,:),'k.-')
+end
+hold off
+flabel('Trial','\pi_j','Random starting values, n=2000');
+
+
+%% 
+figure(3)
+
+plot([1 2 3 4],[13 20 38 51],'k.-')
+
+
+%% 
+max_ob_ndx=10;
+ob.x = ob.x(1:max_ob_ndx);
+ob.y = ob.y(1:max_ob_ndx);
+ob.lum = ob.lum(1:max_ob_ndx);
+
+%% 
+max_iters = 20;
+m = length(mo.data);
+n = length(ob.x);
+
+p = (1/m).*ones(m,1);
+P = NaN.*ones(m+1,max_iters);%first row is norm
+
+w0 = zeros(n,m); %col 1 is for p1, col2 for p2, etc.
+w = zeros(n,m);
+
+min_norm = 0.01;
+
+tic
+for counter=1:max_iters
+	p0 = p;
+	
+	for j=1:m
+		for i=1:n
+			p_f_ak_bk = zeros(m,1);
+			
+			x = ob.x(i);
+			y = ob.y(i);
+
+			for k=1:m
+				p_f_ak_bk(k) = p0(k).*mo.f_ab(k,x,y);
+			end
+
+			w(i,j) = (p0(j).*mo.f_ab(j,x,y)) ./ sum(p_f_ak_bk);
+		end
+		
+		p(j) = sum(w(:,j))/n;
+	end
+	
+	P(:,counter) = [norm(p0-p);p]
+	
+	if abs(norm(p0-p)) < min_norm
+		'min norm reached; stopping'
+		break;
+	end
+end
+tmr = toc;
+
+norms = P(1,isfinite(P(1,:)))';
+figure(1)
+
+plot(norms,'k.-');
+legend(strcat(['norm=' num2str(min(norms))]));
+
+flabel('trial','',strcat([num2str(counter) ' runs in ' num2str(tmr) 's']));
+%% 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

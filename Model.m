@@ -127,6 +127,10 @@ classdef Model < handle
 			yndx = find(yr==y);
 			
 			out = data((yndx-1)*length(xr)+xndx,1);
+			
+			if numel(out) == 0
+				out = 0;
+			end
 		end
 		
 		
