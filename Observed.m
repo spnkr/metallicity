@@ -71,6 +71,7 @@ classdef Observed < handle
 			load_args
 			
 			max_iters = arg('max_iters',20);
+			min_iters = arg('min_iters',10);
 			n = arg('n',length(ob.x));
 			min_norm = arg('min_norm',0.01);
 			init_str = arg('init','ones(m,1)');
@@ -129,7 +130,7 @@ classdef Observed < handle
 				plike(counter) = ob.partial_likelihood(p,n,m);
 				clike(counter) = ob.complete_likelihood(p,w,n,m);
 				
-				if norms(counter) < min_norm
+				if norms(counter) < min_norm && counter > min_iters
 					%disp('min norm reached; stopping')
 					break;
 				end

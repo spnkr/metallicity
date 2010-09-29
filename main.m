@@ -15,37 +15,61 @@ mo = Model.load('cache/models_01.mat');
 load('cache/observed.mat');
 
 
+
 %% 
-mo = Model.generate(0.01,100,struct('save_to','cache/model_temp.mat'));
+mo = Model.generate(0.01,100,struct('normalize',false,'save_to','cache/models_temp.mat'));
 mo.test_cache(struct('model_no',1,'step_size',0.005));
 
+%% 
 mo.plot_single(struct('model',1,'step_size',0.01,'precision',100))
 mo.plot();
 mo.plot(struct('overlay',true,'observed',ob));
 mo.plot_single(struct('model',1));
 
+mo.volume(1)
+
 %% 
 ob = Observed(struct('name','halo002'));
 ob.load_models(mo);
-ob.save('cache/observed.mat');
+ob.save('cache/observed_temp.mat');
 
+%% 
 ob.plot();
+[p,P,norms,plike,clike] = ob.em(struct(	'n',100,...
+										'min_norm',0.005,...
+										'max_iters',25,...
+										'min_iters',5,...
+										'init','rand(m,1)',...
+										'interactive',true));
+p
+
+%% 
 
 
 %% 
-try_this_many_times=10;
+mo = Model.load('cache/models_01_normalized.mat');
+load('cache/observed_normalized.mat');
+
+%% 
+mo = Model.load('cache/models_01.mat');
+load('cache/observed.mat');
+
+
+try_this_many_times=50;
 all_p = zeros(25,try_this_many_times);
 for i=1:try_this_many_times
-im=i+1;
-[p,P,norms,plike,clike] = ob.em(struct(	'n',2000,...
-						'min_norm',0.005,...
-						'max_iters',50,...
-						'init','rand(m,1)',...
-						'interactive',false));
-all_p(:,i) = p;
+	im=1;
+	[p,P,norms,plike,clike] = ob.em(struct(	'Xn',NaN,...
+							'min_norm',0.001,...
+							'max_iters',75,...
+							'Xmin_iters',10,...
+							'init','rand(m,1)',...
+							'interactive',false));
+	all_p(:,i) = p;
+	disp(strcat(['Finished run ' num2str(i)]))
 end
 all_p
-
+sepr('finished all')
 
 %% 
 im=1;
@@ -62,7 +86,7 @@ im=1;
 					
 
 %% 
-figure(2)
+figure(1)
 scatter(1:25,p)
 for i=1:25
 	text(i,p(i),strcat([' ' num2str(mo.props{i}(1)) '-' num2str(mo.props{i}(2)) 'Gyr']),'FontSize',8)
@@ -71,14 +95,45 @@ for i=1:25
 end
 
 %% 
-figure(2)
-plot(all_p(1,:),'k.-')
+fg=figure(2)
+clf(fg)
+m = size(all_p,1);
+p = size(all_p,2);
+
+clrs = rand(m,3);
+
+no_std_devs = 2;
+
+subplot(1,2,1);
 hold on
-for i=2:size(all_p,2)
-	plot(all_p(i,:),'k.-')
+for i=1:m
+	plot(all_p(i,:),'.','Color',clrs(i,:))
+	
+	plot(1:p,mean(all_p(i,:)).*ones(1,p),'-','Color',clrs(i,:))
+	
+	plot(1:p,(no_std_devs*std(all_p(1,:))+mean(all_p(i,:))).*ones(1,p),'--','Color',clrs(i,:))
+	plot(1:p,(-no_std_devs*std(all_p(1,:))+mean(all_p(i,:))).*ones(1,p),'--','Color',clrs(i,:))
+end
+
+
+hold off
+flabel('Trial','\pi_j','Random starting values, +/- 2\sigma, n=all');
+
+
+subplot(1,2,2); 
+vls = zeros(m,5);
+hold on
+for i=1:m
+	dv=all_p(i,:);
+	mdv = mean(dv);
+	sdv = std(dv);
+	vls(i,:) = [min(dv) -sdv+mdv mdv mdv+sdv max(dv)];
+% 	plot(i,vls(i,:),'.','Color',clrs(i,:))
+	errorbar(i,mdv,sdv,'.','Color',clrs(i,:))
 end
 hold off
-flabel('Trial','\pi_j','Random starting values, n=2000');
+flabel('j','\pi_j','Error bars for final weights over 50 random starts, n=all');
+%plot(1:size(vls,1),vls,'.','Color',clrs(i,:))
 
 
 %% 
@@ -184,18 +239,31 @@ flabel('trial','',strcat([num2str(counter) ' runs in ' num2str(tmr) 's']));
 
 
 %% volume checks
+for i=1:25
+	x=mo.nonzeros(i);sum(x(:,3))
+end
+
+
+
+%% 
 vol=0;
 k=1;
 vols=[];
-dx = mo.data{1}(mo.data{1}(:,3)>0,:)
+dx = mo.nonzeros(k);
+grid_size = .05;
+
+if 1==1
+dx = mo.cache{k};
+dx = dx(dx(:,1)>0,[2 3 1]);
+grid_size = mo.stepsize;
+end
+
 for i=1:size(dx,1)
-	vol_of_this_region = (((.05)^2) * dx(i,3));
+	vol_of_this_region = (((grid_size)^2) * dx(i,3));
 	vol = vol + vol_of_this_region;
 	vols(k,:) = [dx(i,1) dx(i,2) dx(i,3) vol_of_this_region];
 	k=k+1;
 end
-'x,y,density,volume'
-vols
 vol
 
 

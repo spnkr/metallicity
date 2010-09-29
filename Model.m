@@ -43,6 +43,9 @@ classdef Model < handle
 			mo.precision = precision;
 			mo.stepsize = stepsize;
 			
+			normalize = arg('normalize',false);
+			
+			
 			disp(strcat(['Loading with step of ' num2str(stepsize) ' and prec of ' num2str(precision) '...']))
 			
 			models = load('data/modeldata2.dat');
@@ -62,6 +65,12 @@ classdef Model < handle
 					v = models(models(:,4)==m & models(:,5)==n,[6 7 9 8]);
 					mo.props{k} = [min(v(:,1)) min(v(:,2)) min(v(:,3)) min(v(:,4))];
 					k=k+1;
+				end
+			end
+			
+			if normalize
+				for j=1:length(mo.data)
+					mo.data{j}(:,3) = mo.data{j}(:,3)./mo.volume(j);
 				end
 			end
 			
@@ -306,6 +315,32 @@ classdef Model < handle
 				
 				disp(strcat(['diff of ' num2str(sigma) ' for model no ' num2str(model_no)]))
 			end
+		end
+		
+		
+		function [vol,vols] = volume(mo,k,varargin)
+			load_args
+			
+			use_cache = arg('use_cache',false);
+			grid_size = arg('grid_size',.05);
+			
+			vol=0;
+			vols=[];
+			dx = mo.nonzeros(k);
+
+			if use_cache
+				dx = mo.cache{k};
+				dx = dx(dx(:,1)>0,[2 3 1]);
+				grid_size = mo.stepsize;
+			end
+
+			for i=1:size(dx,1)
+				vol_of_this_region = (((grid_size)^2) * dx(i,3));
+				vol = vol + vol_of_this_region;
+				vols(k,:) = [dx(i,1) dx(i,2) dx(i,3) vol_of_this_region];
+				k=k+1;
+			end
+			
 		end
 		
 		
