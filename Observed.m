@@ -6,6 +6,7 @@ classdef Observed < handle
 		data;
 		x,y,lum;
 		f_ab;
+		num_models;
 	end
 	
 	
@@ -20,8 +21,14 @@ classdef Observed < handle
 			load_args
 			dpath = arg('path',ob.dpath);
 			ob.name = arg('name','halo000');
+			data = arg('data',NaN);
 			
-			ob.data = load(dpath);
+			if ~isfinite(data)
+				ob.data = load(dpath);
+			else
+				ob.data = data;
+			end
+			
 			x = ob.data(:,1);
 			y = ob.data(:,2);
 			lum = ob.data(:,3);
@@ -45,6 +52,7 @@ classdef Observed < handle
 			end
 			
 			ob.f_ab = f_ab;
+			ob.num_models = size(f_ab,2);
 		end
 		
 		function save(ob,path)
@@ -61,7 +69,7 @@ classdef Observed < handle
 		
 		
 		%em
-		function [p,P,norms,plike,clike] = em(ob, varargin)
+		function [p,P,norms,clike] = em(ob, varargin)
 			load_args
 			
 			max_iters = arg('max_iters',20);
@@ -79,7 +87,7 @@ classdef Observed < handle
 			
 			P = NaN.*ones(m,max_iters);
 			norms = zeros(1,1);
-			plike = zeros(1,1);
+% 			plike = zeros(1,1);
 			clike = zeros(1,1);
 			
 			w = zeros(n,m);
@@ -93,7 +101,7 @@ classdef Observed < handle
 				p0 = p;
 				
 				if interactive
-					ob.plot_progress(norms,plike,clike,P,p,n,m,counter,-counter,init_str,im);
+					ob.plot_progress(norms,clike,P,p,n,m,counter,-counter,init_str,im);
 				end
 				
 				for j=1:m
@@ -121,7 +129,7 @@ classdef Observed < handle
 				
 				norms(counter) = abs(norm(p-p0));
 				
-				plike(counter) = ob.partial_likelihood(p,n,m);
+				%plike(counter) = ob.partial_likelihood(p,n,m);
 				clike(counter) = ob.complete_likelihood(p,w,n,m);
 				
 				if norms(counter) < min_norm && counter > min_iters
@@ -135,7 +143,7 @@ classdef Observed < handle
 				warning('min norm not reached!')
 			end
 			
-			ob.plot_progress(norms,plike,clike,P,p,n,m,counter,tmr,init_str,im);
+			ob.plot_progress(norms,clike,P,p,n,m,counter,tmr,init_str,im);
 			
 			im=im+1;
 			
@@ -158,19 +166,20 @@ classdef Observed < handle
 		%includes z
 		function l = complete_likelihood(ob,p,w,n,m)
 			l = 0;
-			for j=1:m
-				for i=1:n
-					l0 = w(i,j) * log(p(j)*ob.f_ab(i,j));
-					if isfinite(l0) && ~isinf(l0)
-						l = l+l0;
-% 					else
-% 						disp(strcat(['error in clike i=' num2str(i) ',j=' num2str(j)]));
-					end
+			for i=1:n
+				l0 = 0;
+				for j=1:m
+					l0 = l0 + p(j)*ob.f_ab(i,j);
 				end
+				lgl0 = log(l0);
+				if ~isfinite(lgl0)
+					lgl0=0;
+				end
+				l = l + lgl0;
 			end
 		end
 		
-		function plot_progress(ob,norms,plike,clike,P,p,n,m,counter,tmr,init_str,im)
+		function plot_progress(ob,norms,clike,P,p,n,m,counter,tmr,init_str,im)
 			figure(im);
 			spr=3;spc=2;
 			subplot(spr,spc,1);
@@ -198,26 +207,26 @@ classdef Observed < handle
 			flabel('Trial','\pi_j',strcat(['Weights over time']));
 
 			subplot(spr,spc,3);
-			scatter(1:25,P(:,1),20.*(1+P(:,1)),10.*(1+P(:,1)))
+			scatter(1:ob.num_models,P(:,1),20.*(1+P(:,1)),10.*(1+P(:,1)))
 			flabel('j','\pi_j','Starting weights');
 			
 			subplot(spr,spc,4);
-			scatter(1:25,p,20.*(1+p),10.*(1+p),'filled')
+			scatter(1:ob.num_models,p,20.*(1+p),10.*(1+p),'filled')
 			flabel('j','\pi_j',strcat(['Weights. \pi^{(0)}=' init_str]));
 			
 			
 			subplot(spr,spc,5);
-			plot(plike,'b.-')
-			flabel('Trial','l(\pi|x,y)',strcat(['Partial Log Likelihood=' num2str(plike(length(plike)))]));
+			plot(clike,'b.-')
+			flabel('Trial','l(\pi|x,y)',strcat(['Complete Log Likelihood=' num2str(clike(length(clike)))]));
 			
-			subplot(spr,spc,6);
-			plot(clike,'m.-')
-			flabel('Trial','l(\pi|x,y,z)',strcat(['Complete Log Likelihood=' num2str(clike(length(clike)))]));
-			
+% 			subplot(spr,spc,6);
+% 			plot(clike,'m.-')
+% 			flabel('Trial','l(\pi|x,y,z)',strcat(['Complete Log Likelihood=' num2str(clike(length(clike)))]));
+% 			
 			
 			
 % 			subplot(2,2,4);
-% 			scatter(1:25,log(p),20.*(1+p),10.*(1+p),'filled')
+% 			scatter(1:ob.num_models,log(p),20.*(1+p),10.*(1+p),'filled')
 % 			flabel('j','log(\pi_j)','Log weights');
 		end
 		
@@ -229,10 +238,10 @@ classdef Observed < handle
 			count = arg('count',1);
 			save_path = arg('save',strcat(['cache/run_auto_' num2str(count) '.mat']));
 			
-			all_p = zeros(25,count);
+			all_p = zeros(ob.num_models,count);
 			for i=1:count
 				im=xim;
-				[p,P,norms,plike,clike] = ob.em(cell2mat(varargin));
+				[p,P,norms,clike] = ob.em(cell2mat(varargin));
 				all_p(:,i) = p;
 				disp(strcat(['Finished run ' num2str(i)]))
 			end

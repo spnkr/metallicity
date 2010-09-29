@@ -60,11 +60,14 @@ classdef Model < handle
 			k=1;
 			for n=min(ybin):max(ybin)
 				for m=min(xbin):max(xbin)
-					mo.data{k} = models(models(:,4)==m & models(:,5)==n,[1 2 3 4 5]);
-					mo.data{k}(:,[1 2]) = round(mo.data{k}(:,[1 2]).*mo.precision)./mo.precision;
-					v = models(models(:,4)==m & models(:,5)==n,[6 7 9 8]);
-					mo.props{k} = [min(v(:,1)) min(v(:,2)) min(v(:,3)) min(v(:,4))];
-					k=k+1;
+					dtk = models(models(:,4)==m & models(:,5)==n,[1 2 3 4 5]);
+					if sum(dtk(:,3)) > 0
+						mo.data{k} = dtk;
+						mo.data{k}(:,[1 2]) = round(mo.data{k}(:,[1 2]).*mo.precision)./mo.precision;
+						v = models(models(:,4)==m & models(:,5)==n,[6 7 9 8]);
+						mo.props{k} = [min(v(:,1)) min(v(:,2)) min(v(:,3)) min(v(:,4))];
+						k=k+1;
+					end
 				end
 			end
 			
@@ -322,7 +325,7 @@ classdef Model < handle
 			load_args
 			
 			use_cache = arg('use_cache',false);
-			grid_size = arg('grid_size',.05);
+			grid_size = arg('grid_size',.1);
 			
 			vol=0;
 			vols=[];
