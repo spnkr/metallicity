@@ -15,6 +15,7 @@ classdef Observed < handle
 	
 	
 	methods
+		%loading
 		function ob = Observed(varargin)
 			load_args
 			dpath = arg('path',ob.dpath);
@@ -29,22 +30,6 @@ classdef Observed < handle
 			ob.x=x(ndx);
 			ob.y=y(ndx);
 			ob.lum=lum(ndx);
-		end
-		
-		
-		
-		function plot(ob,varargin)
-			load_args
-			
-			overlay = arg('overlay',false);
-			dot_size = arg('dot_size',5);
-			axl = arg('axis',[-3 0 -.5 1]);
-			cmp = arg('colormap','winter');
-			
-			scatter_color_by_weight(ob.x,ob.y,log(ob.lum),struct(...
-				'overlay',overlay,...
-			'title', ob.name, 'x','Fe/H', 'y','\alpha/Fe','colormap',cmp,'dot_size',dot_size));
-			axis(axl)
 		end
 		
 		function load_models(ob,mo)
@@ -67,14 +52,23 @@ classdef Observed < handle
 			show(['Saved to ' path])
 		end
 		
+		
+		
+		
+		
+		
+		
+		
+		
+		%em
 		function [p,P,norms,plike,clike] = em(ob, varargin)
 			load_args
 			
 			max_iters = arg('max_iters',20);
-			min_iters = arg('min_iters',10);
+			min_iters = arg('min_iters',1);
 			n = arg('n',length(ob.x));
 			min_norm = arg('min_norm',0.01);
-			init_str = arg('init','ones(m,1)');
+			init_str = arg('init','rand(m,1)');
 			interactive = arg('interactive',true);
 			
 			m = size(ob.f_ab,2);
@@ -227,7 +221,137 @@ classdef Observed < handle
 % 			flabel('j','log(\pi_j)','Log weights');
 		end
 		
+		function [p, all_p] = em_multi(ob, varargin)
+			load_args
+			global im;
+			xim=im;
+			
+			count = arg('count',1);
+			save_path = arg('save',strcat(['cache/run_auto_' num2str(count) '.mat']));
+			
+			all_p = zeros(25,count);
+			for i=1:count
+				im=xim;
+				[p,P,norms,plike,clike] = ob.em(cell2mat(varargin));
+				all_p(:,i) = p;
+				disp(strcat(['Finished run ' num2str(i)]))
+			end
+			
+			save(save_path,'all_p');
+			disp(strcat(['Saved all_p to ' save_path]));
+			
+			ob.plot_weight_changes(struct('all_p',all_p));
+		end
 		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		%convergence
+		function ap = load_em_pis(ob,varargin)
+			load_args
+			
+			pth = arg('path','cache/all_p_50_full_runs.mat');
+			
+			load(pth);
+			ap = all_p;
+		end
+		
+		function plot_weight_changes(ob,varargin)
+			load_args
+			
+			all_p = arg('all_p',NaN);
+			
+			if ~isfinite(all_p)
+				disp('Loading p_all from disk');
+				all_p = ob.load_em_pis(cell2mat(varargin));
+			end
+			
+			global im;
+			fg=figure(im);
+			clf(fg)
+			im=im+1;
+			
+			m = size(all_p,1);
+			p = size(all_p,2);
+
+			clrs = rand(m,3);
+
+			no_std_devs = 2;
+
+			subplot(1,3,1);
+			hold on
+			for i=1:m
+				plot(all_p(i,:),'.','Color',clrs(i,:))
+
+				plot(1:p,mean(all_p(i,:)).*ones(1,p),'-','Color',clrs(i,:))
+
+				plot(1:p,(no_std_devs*std(all_p(1,:))+mean(all_p(i,:))).*ones(1,p),'--','Color',clrs(i,:))
+				plot(1:p,(-no_std_devs*std(all_p(1,:))+mean(all_p(i,:))).*ones(1,p),'--','Color',clrs(i,:))
+			end
+
+
+			hold off
+			flabel('Trial','\pi_j',[num2str(size(all_p,2)) ' random starting values, +/- 2\sigma, n=all']);
+
+
+			subplot(1,3,2); 
+			vls = zeros(m,5);
+			hold on
+			for i=1:m
+				dv=all_p(i,:);
+				mdv = mean(dv);
+				sdv = std(dv);
+			% 	plot(i,vls(i,:),'.','Color',clrs(i,:))
+				errorbar(i,mdv,sdv,'.','Color',clrs(i,:))
+			end
+			hold off
+			flabel('j','\pi_j','Error bars: +/- \sigma');
+
+
+			subplot(1,3,3); 
+			vls = zeros(m,5);
+			hold on
+			for i=1:m
+				dv=all_p(i,:);
+				mdv = mean(dv);
+				sdv = std(dv);
+			% 	plot(i,vls(i,:),'.','Color',clrs(i,:))
+				errorbar(i,mdv,2*sdv,'.','Color',clrs(i,:))
+			end
+			hold off
+			flabel('j','\pi_j','Error bars: +/- 2\sigma');
+			%plot(1:size(vls,1),vls,'.','Color',clrs(i,:))
+		end
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		%visualization
+		function plot(ob,varargin)
+			load_args
+			
+			overlay = arg('overlay',false);
+			dot_size = arg('dot_size',5);
+			axl = arg('axis',[-3 0 -.5 1]);
+			cmp = arg('colormap','winter');
+			
+			scatter_color_by_weight(ob.x,ob.y,log(ob.lum),struct(...
+				'overlay',overlay,...
+			'title', ob.name, 'x','Fe/H', 'y','\alpha/Fe','colormap',cmp,'dot_size',dot_size));
+			axis(axl)
+		end
 		
 	end
 	
