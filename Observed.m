@@ -79,6 +79,8 @@ classdef Observed < handle
 			init_str = arg('init','rand(m,1)');
 			interactive = arg('interactive',true);
 			
+			max_seconds = arg('max_seconds',NaN);
+			
 			m = size(ob.f_ab,2);
 
 			p = eval(init_str);
@@ -95,7 +97,7 @@ classdef Observed < handle
 			global im;
 			figure(im);
 			
-			tic;
+			Tmr = tic;
 			P(:,1) = p;
 			for counter=1:max_iters
 				p0 = p;
@@ -132,16 +134,27 @@ classdef Observed < handle
 				%plike(counter) = ob.partial_likelihood(p,n,m);
 				clike(counter) = ob.complete_likelihood(p,w,n,m);
 				
-				if norms(counter) < min_norm && counter > min_iters
-					%disp('min norm reached; stopping')
-					break;
+				if isfinite(max_seconds)
+					tmr = toc(Tmr);
+					el_sec = tmr;
+					if max_seconds < el_sec
+						disp('time reached');
+						break;
+					end
+				else
+					if norms(counter) < min_norm && counter > min_iters
+						%disp('min norm reached; stopping')
+						break;
+					end
+					
+					if counter==max_iters
+						warning('min norm not reached!')
+					end
 				end
 			end
-			tmr = toc;
+			tmr = toc(Tmr);
 			
-			if counter==max_iters
-				warning('min norm not reached!')
-			end
+			
 			
 			ob.plot_progress(norms,clike,P,p,n,m,counter,tmr,init_str,im);
 			

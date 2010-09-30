@@ -18,6 +18,110 @@ load('cache/observed.mat');
 
 
 
+
+
+
+%% em
+%% 
+im=1;
+[p,P,norms,clike] = ob.em(struct(		'Xn',1,...
+										'max_seconds',90*60,...
+										'min_norm',.00000001,...
+										'max_iters',50000,...
+										'min_iters',5,...
+										'init','rand(m,1)',...
+										'interactive',true));
+p
+
+%% 
+[p,all_p] = ob.em_multi(struct(	'count',5,...
+								'n',10,...
+								'min_norm',0.1,...
+								'max_iters',75,...
+								'interactive',true));
+p
+
+
+
+
+
+%% 
+
+for i=1:length(p)
+	disp(strcat([num2str(100*p(i)) ' T=' num2str(mo.props{i}(1)) '-' num2str(mo.props{i}(2)) '; M=' num2str(mo.props{i}(3)) '-' num2str(mo.props{i}(4))   ]))
+end
+
+
+
+
+
+
+							
+%% em convergence
+%%
+ob.plot_weight_changes(struct('path','cache/all_p_50_full_runs.mat'));
+
+%%  
+mo = Model.load('cache/models_01_normalized.mat');
+load('cache/observed_normalized.mat');
+
+%% 
+mo = Model.load('cache/models_01.mat');
+load('cache/observed.mat');
+
+
+%% 
+[p,all_p] = ob.em_multi(struct(	'count',5,...
+								'Xn',10,...
+								'min_norm',0.0001,...
+								'max_iters',75,...
+								'interactive',true));
+p
+
+
+
+
+
+
+
+
+
+%% plots
+%% 
+mo.plot_single(struct('model',1,'step_size',0.01,'precision',100))
+mo.plot();
+mo.plot(struct('overlay',true,'observed',ob));
+mo.plot_single(struct('model',1));
+
+%% 
+ob.plot();
+
+
+
+
+
+
+
+
+
+
+%% generation
+%% 
+mo = Model.generate(0.01,100,struct('normalize',true,'save_to','cache/models_temp.mat'));
+mo.test_cache(struct('model_no',1,'step_size',0.005));
+
+%% 
+ob = Observed(struct('name','halo002'));
+ob.load_models(mo);
+ob.save('cache/observed_temp.mat');
+
+
+
+
+
+
+
+
 %% simulate
 clc
 im=1;
@@ -132,99 +236,6 @@ im=im+1;
 									'interactive',true));
 p2
 'finished rand starts'
-
-
-%% em
-%% 
-im=3;
-[p,P,norms,clike] = ob.em(struct(		'Xn',100,...
-										'min_norm',0.003,...
-										'max_iters',50,...
-										'min_iters',5,...
-										'init','rand(m,1)',...
-										'interactive',true));
-p
-
-%% 
-[p,all_p] = ob.em_multi(struct(	'count',5,...
-								'n',10,...
-								'min_norm',0.1,...
-								'max_iters',75,...
-								'interactive',true));
-p
-
-
-
-
-
-
-
-
-
-
-							
-%% em convergence
-%%
-ob.plot_weight_changes(struct('path','cache/all_p_50_full_runs.mat'));
-
-%%  
-mo = Model.load('cache/models_01_normalized.mat');
-load('cache/observed_normalized.mat');
-
-%% 
-mo = Model.load('cache/models_01.mat');
-load('cache/observed.mat');
-
-
-%% 
-[p,all_p] = ob.em_multi(struct(	'count',5,...
-								'Xn',10,...
-								'min_norm',0.0001,...
-								'max_iters',75,...
-								'interactive',true));
-p
-
-
-
-
-
-
-
-
-
-%% plots
-%% 
-mo.plot_single(struct('model',1,'step_size',0.01,'precision',100))
-mo.plot();
-mo.plot(struct('overlay',true,'observed',ob));
-mo.plot_single(struct('model',1));
-
-%% 
-ob.plot();
-
-
-
-
-
-
-
-
-
-
-%% generation
-%% 
-mo = Model.generate(0.01,100,struct('normalize',true,'save_to','cache/models_temp.mat'));
-mo.test_cache(struct('model_no',1,'step_size',0.005));
-
-%% 
-ob = Observed(struct('name','halo002'));
-ob.load_models(mo);
-ob.save('cache/observed_temp.mat');
-
-
-
-
-
 
 
 
