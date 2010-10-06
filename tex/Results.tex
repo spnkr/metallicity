@@ -1,0 +1,144 @@
+\documentclass[12pt]{amsart}
+\usepackage{geometry}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{subfig}
+\usepackage[table]{xcolor}
+\usepackage{color}
+\usepackage{natbib}
+
+\geometry{letterpaper}
+
+% general commands
+\definecolor{lemonchiffon}{rgb}{1, .98, .80}
+\definecolor{lightgrass}{rgb}{.89, 1, .87}
+\newcommand{\vect}[1]{\mathbf{#1}}
+\newcommand{\degree}[1]{${#1}^{\circ}$}
+\newcommand{\highlight}{ \rowcolor{lightgrass} }
+\newcommand{\arcmin}[1]{${#1}^{\prime}$}
+\newcommand{\ra}[2]{$#1\rightarrow#2$}
+\newcommand{\rap}[2]{$#1^\%\rightarrow#2^\%$}
+\newcommand{\rat}[2]{$#1^\prime\rightarrow#2^\prime$}
+\newcommand{\script}[1]{\mathcal{#1}}
+\newcommand{\eqn}[1]{\begin{align*}
+#1
+\end{align*}}
+\newcommand{\eqnl}[2]{\begin{align} \label{#1}
+#2
+\end{align}}
+\newcommand{\shblock}{\hspace{3mm}}
+\newcommand{\hblock}{\hspace{8mm}}
+\newcommand{\eqnsep}{\shblock,\hblock}
+
+% paper specific terms
+\newcommand{\vlos}{$V_{los}$}
+\newcommand{\veldisp}{$\sigma^2_{los}$}
+\newcommand{\veldisph}{$\hat{\sigma}^2_{los}$}
+\newcommand{\veldispr}{$\sigma^2_{los}(r)$}
+\newcommand{\veldispri}{$\sigma^2_{los}(r_i)$}
+\newcommand{\lamhr}{$\hat{\lambda}(r)$}
+\newcommand{\lamhri}{$\hat{\lambda}(r_i)$}
+\newcommand{\xom}{x_{\omega i}}
+
+\newcommand{\gammafunc}{\gamma \big( r_i cos(\theta_i-\omega)\big)}
+\newcommand{\gamhr}{$\hat{\gamma} \big( r cos(\theta-\omega)\big)$}
+\newcommand{\gamhri}{$\hat{\gamma} \big( r_i cos(\theta_i-\omega)\big)$}
+
+
+\newcommand{\dens}{$\rho(r)$}
+\newcommand{\mass}{$M(r)$}
+\newcommand{\intens}{$I(r)$}
+\newcommand{\mtol}{$\frac{M}{L}$}
+\newcommand{\nonphysical}{$\frac{\partial M}{\partial r} \ge 0$}
+
+
+\newcommand{\img}[2]{
+	\begin{figure}
+		\centering
+		\includegraphics[width=\textwidth]{#1}
+		\caption{#2}
+	\end{figure}
+}
+
+\newcommand{\imgi}[1]{
+	\vspace{10mm}
+	\includegraphics[width=\textwidth]{#1}
+	\vspace{10mm}
+}
+
+%%% TITLE
+\title{Halo002}
+\author{\today}
+
+%%% BEGIN DOCUMENT
+\begin{document}
+
+\maketitle
+
+
+
+
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+
+
+
+
+
+\section{Results}
+\begin{table}[h]
+	\begin{center}
+		\begin{tabular}{|l l ||l l| l| l|}
+		T	& 	M & $\pi_j$: & 		10k & 		30k & 		50k	\\
+		 \hline
+		 0-2		&	8-9	&		&	18.7\%	&	 		18.09\%	&			17.77\%	\\                
+		 2-8		&	8-9	&		&	17.5\%	&	 		19.21\%	&			18.70\%	\\                
+		 8-10 	&	8-9	&		&	0.22\%	&	 		0.015\%	&			0		 \%	\\                
+		 2-8		&	7-8	&		&	48.9\%	&	 		47.97\%	&			48.64\%	\\                
+		 8-10 	&	7-8	&		&	1.74\%	&	 		0.000\%	&			0		 \%	\\                
+		 10-12	&	7-8	&		&	1.33\%	&	 		3.393\%	&			0		 \%	\\                
+		 2-8		&	6-7	&		&	5.98\%	&	 		5.863\%	&			5.349\%	\\                
+		 8-10 	&	6-7	&		&	2.83\%	&	 		3.007\%	&			3.278\%	\\                
+		 12-14	&	6-7	&		&	4.94\%	&	 		2.750\%	&			0		 \%	\\                
+		 0-2		&	5-6	&		&	0.00\%	&	 		0.143\%	&			0.201\%	\\                
+		 2-8		&	5-6	&		&	0.78\%	&	 		0.457\%	&			0.514\%	\\                
+		 8-10 	&	5-6	&		&	2.15\%	&	 		2.351\%	&			2.391\%	\\                
+		 10-12	&	5-6	&		&	0.96\%	&	 		1.292\%	&			1.413\%	\\                
+		 12-14	&	5-6	&		&	0		\%	&	 		1.069\%	&			0		 \%	\\                
+		 10-12	&	1-5	&		&	0.32\%	&	 		0.079\%	&			0.214\%	\\                
+		 12-14	&	1-5	&		&	1.43\%	&	 		1.500\%	&			1.512\%	\\      
+		\end{tabular}
+	\end{center}
+\end{table}
+
+
+\newpage
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+
+
+
+\end{document}
+
+
+
+
+
+

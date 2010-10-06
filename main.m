@@ -19,8 +19,6 @@ load('cache/observed_10k.mat');
 
 
 
-
-
 %% em
 %% 
 load('cache/observed_10k.mat');
@@ -28,14 +26,14 @@ im=1;
 [p,P,norms,clike] = ob.em(struct(		'Xn',1,...
 										'max_seconds',60*60*1,...
 										'min_norm',.00000001,...
-										'max_iters',400000,...
+										'max_iters',100,...
 										'min_iters',5,...
 										'init','rand(m,1)',...
 										'interactive',true));
 p_10k = p
 
 
-
+%% 
 load('cache/observed_30k.mat');
 im=2;
 [p,P,norms,clike] = ob.em(struct(		'Xn',1,...
@@ -79,9 +77,10 @@ p
 
 
 %% 
-
+p=p_10k
 for i=1:length(p)
-	disp(strcat([num2str(100*p(i)) ' T=' num2str(mo.props{i}(1)) '-' num2str(mo.props{i}(2)) '; M=' num2str(mo.props{i}(3)) '-' num2str(mo.props{i}(4))   ]))
+	disp(sprintf(strcat([num2str(i) '\t' num2str(100*p(i)) '\tT=' num2str(mo.props{i}(1)) ...
+		'-' num2str(mo.props{i}(2)) '\tM=' num2str(mo.props{i}(3)) '-' num2str(mo.props{i}(4))   ])))
 end
 
 
