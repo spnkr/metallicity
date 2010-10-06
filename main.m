@@ -12,9 +12,9 @@ addpath('data/');
 global im;
 im=1;
 mo = Model.load('cache/models_01.mat');
-load('cache/observed.mat');
-
-
+load('cache/observed_10k.mat');
+%load('cache/observed_30k.mat');
+%load('cache/observed_50k.mat');
 
 
 
@@ -23,15 +23,48 @@ load('cache/observed.mat');
 
 %% em
 %% 
+load('cache/observed_10k.mat');
 im=1;
 [p,P,norms,clike] = ob.em(struct(		'Xn',1,...
-										'max_seconds',90*60,...
+										'max_seconds',60*60*1,...
 										'min_norm',.00000001,...
-										'max_iters',50000,...
+										'max_iters',400000,...
 										'min_iters',5,...
 										'init','rand(m,1)',...
 										'interactive',true));
-p
+p_10k = p
+
+
+
+load('cache/observed_30k.mat');
+im=2;
+[p,P,norms,clike] = ob.em(struct(		'Xn',1,...
+										'max_seconds',60*60*1,...
+										'min_norm',.00000001,...
+										'max_iters',4000000,...
+										'min_iters',5,...
+										'init','rand(m,1)',...
+										'interactive',true));
+p_30k = p
+
+
+load('cache/observed_50k.mat');
+im=3;
+[p,P,norms,clike] = ob.em(struct(		'Xn',1,...
+										'max_seconds',60*60*3,...
+										'min_norm',.00000001,...
+										'max_iters',4000000,...
+										'min_iters',5,...
+										'init','rand(m,1)',...
+										'interactive',true));
+p_50k = p
+
+
+
+
+
+
+
 
 %% 
 [p,all_p] = ob.em_multi(struct(	'count',5,...
@@ -111,12 +144,20 @@ mo = Model.generate(0.01,100,struct('normalize',true,'save_to','cache/models_tem
 mo.test_cache(struct('model_no',1,'step_size',0.005));
 
 %% 
-ob = Observed(struct('name','halo002'));
+ob = Observed(struct('name','halo10k','path','data/obsdata2_10000.dat'));
 ob.load_models(mo);
-ob.save('cache/observed_temp.mat');
+ob.save('cache/observed_10k.mat');
+
+
+ob = Observed(struct('name','halo30k','path','data/obsdata2_30000.dat'));
+ob.load_models(mo);
+ob.save('cache/observed_30k.mat');
 
 
 
+ob = Observed(struct('name','halo50k','path','data/obsdata2_50000.dat'));
+ob.load_models(mo);
+ob.save('cache/observed_50k.mat');
 
 
 
