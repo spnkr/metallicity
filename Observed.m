@@ -7,11 +7,19 @@ classdef Observed < handle
 		x,y,lum;
 		f_ab;
 		num_models;
+		
+		actual_log_like=NaN;
+		p_actual=NaN;
 	end
 	
 	
 	methods(Static)
-		
+		function [obx, mox] = load(model_no,sample_size)
+			mox = Model.load(strcat(['cache/models_' num2str(model_no) '.mat']));
+			load(strcat(['cache/observed_' num2str(model_no) '_' num2str(sample_size) 'k.mat']));
+			obx=ob;
+			disp(strcat(['Loaded model data ' num2str(model_no) ' for n=' num2str(sample_size) 'k']))
+		end
 	end
 	
 	
@@ -22,6 +30,7 @@ classdef Observed < handle
 			dpath = arg('path',ob.dpath);
 			ob.name = arg('name','halo000');
 			data = arg('data',NaN);
+			ob.p_actual = arg('p_actual',NaN);
 			
 			if ~isfinite(data)
 				ob.data = load(dpath);
@@ -53,6 +62,13 @@ classdef Observed < handle
 			
 			ob.f_ab = f_ab;
 			ob.num_models = size(f_ab,2);
+			
+			
+			if isfinite(ob.p_actual)
+				n = length(ob.x);
+				m = size(ob.f_ab,2);
+				ob.actual_log_like = ob.complete_likelihood(ob.p_actual,n,m);
+			end
 		end
 		
 		function save(ob,path)
@@ -69,28 +85,33 @@ classdef Observed < handle
 		
 		
 		%em
-		function [p,P,norms,clike] = em(ob, varargin)
+		function [p,P,ll,LL] = em(ob, varargin)
 			load_args
 			
-			max_iters = arg('max_iters',20);
-			min_iters = arg('min_iters',1);
+			max_iters = arg('max_iters',100000);
+			min_iters = arg('min_iters',5);
 			n = arg('n',length(ob.x));
-			min_norm = arg('min_norm',0.01);
+			min_norm = arg('min_norm',0.00000001);
 			init_str = arg('init','rand(m,1)');
+			p = arg('p',NaN);
 			interactive = arg('interactive',true);
 			
 			max_seconds = arg('max_seconds',NaN);
 			
 			m = size(ob.f_ab,2);
 
-			p = eval(init_str);
-			p(p==0) = max(p);
+			if ~isfinite(p)
+				p = eval(init_str);
+				p(p==0) = max(p);
+			end
+			
 			p = p./sum(p);
+			
 			
 			P = NaN.*ones(m,max_iters);
 			norms = zeros(1,1);
 % 			plike = zeros(1,1);
-			clike = zeros(1,1);
+			ll = zeros(1,1);
 			
 			w = zeros(n,m);
 			
@@ -103,7 +124,7 @@ classdef Observed < handle
 				p0 = p;
 				
 				if interactive
-					ob.plot_progress(norms,clike,P,p,n,m,counter,-counter,init_str,im);
+					ob.plot_progress(norms,ll,P,p,n,m,counter,-counter,init_str,im);
 				end
 				
 				for j=1:m
@@ -132,7 +153,7 @@ classdef Observed < handle
 				norms(counter) = abs(norm(p-p0));
 				
 				%plike(counter) = ob.partial_likelihood(p,n,m);
-				clike(counter) = ob.complete_likelihood(p,w,n,m);
+				ll(counter) = ob.complete_likelihood(p,n,m);
 				
 				if isfinite(max_seconds)
 					tmr = toc(Tmr);
@@ -156,10 +177,12 @@ classdef Observed < handle
 			
 			
 			
-			ob.plot_progress(norms,clike,P,p,n,m,counter,tmr,init_str,im);
+			ob.plot_progress(norms,ll,P,p,n,m,counter,tmr,init_str,im);
 			
 			im=im+1;
 			
+			LL = isfinite(ll);
+			ll = ll(length(isfinite(ll)));
 			
 		end
 		
@@ -177,7 +200,7 @@ classdef Observed < handle
 		end
 		
 		%includes z
-		function l = complete_likelihood(ob,p,w,n,m)
+		function l = complete_likelihood(ob,p,n,m)
 			l = 0;
 			for i=1:n
 				l0 = 0;
@@ -192,7 +215,7 @@ classdef Observed < handle
 			end
 		end
 		
-		function plot_progress(ob,norms,clike,P,p,n,m,counter,tmr,init_str,im)
+		function plot_progress(ob,norms,ll,P,p,n,m,counter,tmr,init_str,im)
 			figure(im);
 			spr=3;spc=2;
 			subplot(spr,spc,1);
@@ -211,6 +234,9 @@ classdef Observed < handle
 				'r' 'g' 'b' 'c' 'm' 'y' 'k' 'r' 'g' 'b' 'c' 'm' 'y' 'k'];
 			
 			subplot(spr,spc,2);
+			
+			P = P(:,1:counter);
+			
 			plot(1:size(P,2),P(1,:),strcat([clrs(1) '.-']));
 			for i=2:m
 				hold on
@@ -229,38 +255,45 @@ classdef Observed < handle
 			
 			
 			subplot(spr,spc,5);
-			plot(clike,'b.-')
-			flabel('Trial','l(\pi|x,y)',strcat(['Complete Log Likelihood=' num2str(clike(length(clike)))]));
+			plot(ll,'b.-')
+			hold on
+			plot([0 length(ll)], [ob.actual_log_like ob.actual_log_like], 'r-');
+			hold off
+			flabel('Trial','l(\pi|x,y)',strcat(['Complete Log Likelihood=' num2str(ll(length(ll)))]));
 			
-% 			subplot(spr,spc,6);
-% 			plot(clike,'m.-')
-% 			flabel('Trial','l(\pi|x,y,z)',strcat(['Complete Log Likelihood=' num2str(clike(length(clike)))]));
-% 			
-			
-			
-% 			subplot(2,2,4);
-% 			scatter(1:ob.num_models,log(p),20.*(1+p),10.*(1+p),'filled')
-% 			flabel('j','log(\pi_j)','Log weights');
 		end
 		
-		function [p, all_p] = em_multi(ob, varargin)
+		function [best_ll, best_p, all_p, all_ll] = em_multi(ob, varargin)
 			load_args
 			global im;
 			xim=im;
 			
+			best_p = [];
+			best_ll = NaN;
+			
 			count = arg('count',1);
-			save_path = arg('save',strcat(['cache/run_auto_' num2str(count) '.mat']));
+			save_path = arg('save',strcat(['cache/p_ll_run_auto_' num2str(count) '.mat']));
 			
 			all_p = zeros(ob.num_models,count);
+			all_ll = zeros(count,1);
 			for i=1:count
 				im=xim;
-				[p,P,norms,clike] = ob.em(cell2mat(varargin));
+				[p,P,ll] = ob.em(cell2mat(varargin));
 				all_p(:,i) = p;
+				all_ll(i) = ll;
+				
+				if ~isfinite(best_ll) || best_ll < ll
+					best_ll = ll;
+					best_p = p;
+				end
+				
 				disp(strcat(['Finished run ' num2str(i)]))
 			end
 			
-			save(save_path,'all_p');
-			disp(strcat(['Saved all_p to ' save_path]));
+			p = best_p;
+			
+			save(save_path,'p','all_p','all_ll','best_ll');
+			disp(strcat(['Saved p,best_ll,all_p,all_ll to ' save_path]));
 			
 			ob.plot_weight_changes(struct('all_p',all_p));
 		end
@@ -277,7 +310,7 @@ classdef Observed < handle
 		%convergence
 		function ap = load_em_pis(ob,varargin)
 			load_args
-			
+			error('no disk load atm')
 			pth = arg('path','cache/all_p_50_full_runs.mat');
 			
 			load(pth);
@@ -304,51 +337,142 @@ classdef Observed < handle
 
 			clrs = rand(m,3);
 
-			no_std_devs = 2;
+			num_std_devs = 2;
 
-			subplot(1,3,1);
-			hold on
+			lngrd = 0:p+1;
+			lnones = ones(1,p+2);
+
 			for i=1:m
+				subplot(4,4,i);
+				
+				if isfinite(ob.p_actual)
+					plot(lngrd,ob.p_actual(i).*lnones,'-','LineWidth',10, 'Color', [0.9 .9 0.9])
+				end
+				
+				hold on
+				plot(lngrd,mean(all_p(i,:)).*lnones,'-','Color',clrs(i,:))
+
+				plot(lngrd,(num_std_devs*std(all_p(1,:))+mean(all_p(i,:))).*lnones,':','Color',clrs(i,:))
+				plot(lngrd,(-num_std_devs*std(all_p(1,:))+mean(all_p(i,:))).*lnones,':','Color',clrs(i,:))
+
+
 				plot(all_p(i,:),'.','Color',clrs(i,:))
-
-				plot(1:p,mean(all_p(i,:)).*ones(1,p),'-','Color',clrs(i,:))
-
-				plot(1:p,(no_std_devs*std(all_p(1,:))+mean(all_p(i,:))).*ones(1,p),'--','Color',clrs(i,:))
-				plot(1:p,(-no_std_devs*std(all_p(1,:))+mean(all_p(i,:))).*ones(1,p),'--','Color',clrs(i,:))
+				hold off
+				title(strcat(['\pi_{' num2str(i) '}']))
+			end
+		end
+		
+		
+		
+		
+		
+		
+		
+		
+		%sim
+		function [p,P,ll,LL] = simulate(ob, mo, varargin)
+			load_args
+			
+			m = length(mo.data);
+			n = arg('sample',100);
+			save_data = arg('save_data', strcat(['cache/generated_' num2str(n) '_auto.mat']));
+			obs_save = arg('obs_save', 'cache/observed_generated.mat');
+			
+			tic
+			
+			
+			P = arg('p',ob.p_actual);%[.015 .2 .005 .07 .12 .005 .005 .01 .27 .1 .05 .004 .001 .02 .095 .03];
+			if sum(P) ~= 1
+				warning('P must sum to 1; renormalizing')
+				P = P./sum(P)
 			end
 
+			if m ~= length(P)
+				error('P and models are different lengths')
+			end
+			PC = cumsum(P);
 
-			hold off
-			flabel('Trial','\pi_j',[num2str(size(all_p,2)) ' random starting values, +/- 2\sigma, n=all']);
+			n = 500;
+			data = zeros(n,5);
+			R1 = rand(n,1);
+			RX = rand(n,1);
+			RY = rand(n,1);
+
+			grid_size = arg('grid_size',.1);
+
+			for i=1:n
+				r0 = rand();
+				pi_ndx = sum(PC<=r0)+1;
+
+				r1 = R1(i);
+				nzd = mo.nonzeros(pi_ndx);
+				cnzd = cumsum(nzd(:,3));
+				nzda = [nzd cnzd];
+
+				grid_ndx = sum(cnzd<=r1)+1;
+
+				x = nzda(grid_ndx,1);
+				y = nzda(grid_ndx,2);
+
+				rx = RX(i)*grid_size;
+				ry = RY(i)*grid_size;
+
+				x = x + rx;
+				y = y + ry;
+
+				fab = mo.f_ab(pi_ndx,x,y);
+				data(i,:) = [x y fab pi_ndx r0];
+			end
+
+			data = data(data(:,3)>0,:);
 
 
-			subplot(1,3,2); 
-			vls = zeros(m,5);
+			fig
+			subplot(1,3,1);
+			scatter(data(:,1),data(:,2),data(:,3)./sum(data(:,3)),'k','filled');
+			flabel('Fe/H','\alpha/Fe',[num2str(n) ' generated data points']);
+
+			subplot(1,3,2);
+			scatter(data(:,1),data(:,2),10,'r','filled');
+			flabel('Fe/H','\alpha/Fe',[num2str(n) ' generated data points']);
+
+			subplot(1,3,3);
+			plot(P,'k.')
+			flabel('j','\pi_j','True weights');
+
+
+			save(save_data,'data');
+
+
+			toc
+
+
+			ob = Observed(struct('name','generated halo','data',data));
+			ob.load_models(mo);
+			ob.save(obs_save);
+
+
+
+			'doing em'
+			[p,all_p,ll,LL] = ob.em(cell2mat(varargin));
+			'finished em'
+
+
+
+			fig
+			subplot(1,2,1)
+			plot(P,'k.')
 			hold on
-			for i=1:m
-				dv=all_p(i,:);
-				mdv = mean(dv);
-				sdv = std(dv);
-			% 	plot(i,vls(i,:),'.','Color',clrs(i,:))
-				errorbar(i,mdv,sdv,'.','Color',clrs(i,:))
-			end
+			plot(p,'g.')
 			hold off
-			flabel('j','\pi_j','Error bars: +/- \sigma');
+			flabel('j','\pi_j','Actual (black) v predicted (green)');
 
+			subplot(1,2,2)
+			plot(P-p,'r.')
+			flabel('j','Real - actual','Differences');
 
-			subplot(1,3,3); 
-			vls = zeros(m,5);
-			hold on
-			for i=1:m
-				dv=all_p(i,:);
-				mdv = mean(dv);
-				sdv = std(dv);
-			% 	plot(i,vls(i,:),'.','Color',clrs(i,:))
-				errorbar(i,mdv,2*sdv,'.','Color',clrs(i,:))
-			end
-			hold off
-			flabel('j','\pi_j','Error bars: +/- 2\sigma');
-			%plot(1:size(vls,1),vls,'.','Color',clrs(i,:))
+			
+			
 		end
 		
 		

@@ -8,6 +8,8 @@ classdef Model < handle
 		stepsize;
 		xranges;
 		yranges;
+		
+		path='data/modeldata2.dat';
 	end
 	
 	
@@ -18,8 +20,10 @@ classdef Model < handle
 			
 			do_save = arg('do_save',true);
 			save_to = arg('save_to','cache/models_01.mat');
+			path = arg('path','data/modeldata2.dat');
+			include_blanks = arg('include_blanks',false);
 			
-			mo = Model(struct('step',stepsize,'precision',precision));
+			mo = Model(struct('step',stepsize,'precision',precision,'path',path,'include_blanks',include_blanks));
 			
 			if do_save
 				mo.save(save_to);
@@ -42,13 +46,16 @@ classdef Model < handle
 			precision = arg('precision',10);
 			mo.precision = precision;
 			mo.stepsize = stepsize;
+			mo.path = arg('path',mo.path);
+			
+			include_blanks = arg('include_blanks',false);
 			
 			normalize = arg('normalize',false);
 			
 			
-			disp(strcat(['Loading with step of ' num2str(stepsize) ' and prec of ' num2str(precision) '...']))
+			disp(strcat(['Loading ' mo.path ' with step of ' num2str(stepsize) ' and prec of ' num2str(precision) '...']))
 			
-			models = load('data/modeldata2.dat');
+			models = load(mo.path);
 			xbin = models(:,4);
 			ybin = models(:,5);
 			
@@ -61,7 +68,7 @@ classdef Model < handle
 			for n=min(ybin):max(ybin)
 				for m=min(xbin):max(xbin)
 					dtk = models(models(:,4)==m & models(:,5)==n,[1 2 3 4 5]);
-					if sum(dtk(:,3)) > 0
+					if include_blanks || sum(dtk(:,3)) > 0
 						mo.data{k} = dtk;
 						mo.data{k}(:,[1 2]) = round(mo.data{k}(:,[1 2]).*mo.precision)./mo.precision;
 						v = models(models(:,4)==m & models(:,5)==n,[6 7 9 8]);

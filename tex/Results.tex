@@ -10,6 +10,12 @@
 
 \geometry{letterpaper}
 
+\DeclareFontFamily{OT1}{pzc}{}
+\DeclareFontShape{OT1}{pzc}{m}{it}%
+              {<-> s * [0.900] pzcmi7t}{}
+\DeclareMathAlphabet{\mathpzc}{OT1}{pzc}%
+                                 {m}{it}
+
 % general commands
 \definecolor{lemonchiffon}{rgb}{1, .98, .80}
 \definecolor{lightgrass}{rgb}{.89, 1, .87}
@@ -96,6 +102,43 @@
 
 
 \section{Results}
+
+
+\eqn{
+	l(\theta) := \log L(\theta) = \sum_{i=1}^{n} \log \Big( \sum_{j=1}^{m} \pi_j f_{a_j,b_j}(x_i,y_i) \Big)
+}
+
+
+\begin{table}[h]
+	\begin{center}
+		\begin{tabular}{l| l l l l}
+			& 				True	& EM 10k	& 	EM 30k	&	EM 50k	\\
+		 \hline
+		 Observed 1 $l(\theta)$	&	1	& 1	&	 	1 & 			1	\\
+		 Observed 2 $l(\theta)$	&	1	& 1	&	 	1 & 			1	\\
+		\end{tabular}
+	\end{center}
+\end{table}
+
+
+
+
+
+plot of L better zoomed
+
+2x2 grid
+
+init w true values
+
+init many
+
+generate with true values and see if it extracts
+
+
+
+
+
+
 \begin{table}[h]
 	\begin{center}
 		\begin{tabular}{|l l ||l l| l| l|}

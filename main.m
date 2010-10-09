@@ -11,80 +11,106 @@ addpath('etc/');
 addpath('data/');
 global im;
 im=1;
-mo = Model.load('cache/models_01.mat');
-load('cache/observed_10k.mat');
-%load('cache/observed_30k.mat');
-%load('cache/observed_50k.mat');
 
-
-
-
-%% em
-%% 
-load('cache/observed_10k.mat');
-im=1;
-[p,P,norms,clike] = ob.em(struct(		'Xn',1,...
-										'max_seconds',60*60*1,...
-										'min_norm',.00000001,...
-										'max_iters',100,...
-										'min_iters',5,...
-										'init','rand(m,1)',...
-										'interactive',true));
-p_10k = p
-
-
-%% 
-load('cache/observed_30k.mat');
-im=2;
-[p,P,norms,clike] = ob.em(struct(		'Xn',1,...
-										'max_seconds',60*60*1,...
-										'min_norm',.00000001,...
-										'max_iters',4000000,...
-										'min_iters',5,...
-										'init','rand(m,1)',...
-										'interactive',true));
-p_30k = p
-
-
-load('cache/observed_50k.mat');
-im=3;
-[p,P,norms,clike] = ob.em(struct(		'Xn',1,...
-										'max_seconds',60*60*3,...
-										'min_norm',.00000001,...
-										'max_iters',4000000,...
-										'min_iters',5,...
-										'init','rand(m,1)',...
-										'interactive',true));
-p_50k = p
-
-
-
+[ob, mo] = Observed.load(3,10);
 
 
 
 
 
 %% 
-[p,all_p] = ob.em_multi(struct(	'count',5,...
-								'n',10,...
-								'min_norm',0.1,...
-								'max_iters',75,...
-								'interactive',true));
-p
+[p,P,ll,LL] = ob.simulate(mo,struct('sample',10000,...
+											'max_seconds',60*30,...
+											'interactive',false));
+
+
+
+ 
+multicount = 10;
+max_seconds = 60*5;
+
+multicount = 2;
+max_seconds = 60*5;
+
+sepr('init with real weights plus or minus 10pct random fluctuations to each')
+[best_ll, best_p, all_p, all_ll] = ob.em_multi(struct(	'count',multicount,...
+								'Xn',10,...
+								'save','cache/p_ll_run_weight_pl_10.mat',...
+								'max_seconds', max_seconds, ...
+								'interactive',false,...
+								'p',ob.p_actual.*0.1.*rand(size(ob.p_actual,1),1)));
+print_pi(best_p,mo)
+
+
+sepr('init with rand weights')
+[best_ll, best_p, all_p, all_ll] = ob.em_multi(struct(	'count',multicount,...
+								'Xn',10,...
+								'save','cache/p_ll_run_weight_rand.mat',...
+								'max_seconds', max_seconds, ...
+								'interactive',false));
+print_pi(best_p,mo)
+
+
+sepr('init with real weights plus or minus 30pct random fluctuations to each')
+[best_ll, best_p, all_p, all_ll] = ob.em_multi(struct(	'count',multicount,...
+								'Xn',10,...
+								'save','cache/p_ll_run_weight_pl_30.mat',...
+								'max_seconds', max_seconds, ...
+								'interactive',false,...
+								'p',ob.p_actual.*0.3.*rand(size(ob.p_actual,1),1)));
+print_pi(best_p,mo)
+
+
+
+sepr('init with real weights plus or minus 3pct random fluctuations to each')
+[best_ll, best_p, all_p, all_ll] = ob.em_multi(struct(	'count',floor(multicount/4),...
+								'Xn',10,...
+								'save','cache/p_ll_run_weight_pl_03.mat',...
+								'max_seconds', max_seconds, ...
+								'interactive',false,...
+								'p',ob.p_actual.*0.03.*rand(size(ob.p_actual,1),1)));
+print_pi(best_p,mo)
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 
 
 %% 
-p=p_10k
-for i=1:length(p)
-	disp(sprintf(strcat([num2str(i) '\t' num2str(100*p(i)) '\tT=' num2str(mo.props{i}(1)) ...
-		'-' num2str(mo.props{i}(2)) '\tM=' num2str(mo.props{i}(3)) '-' num2str(mo.props{i}(4))   ])))
+for i=1:4
+	disp(strcat(['Run ' num2str(i)]))
+	[p,P,ll] = ob.em(struct(...
+					'max_seconds',15,...
+					'init','rand(m,1)',...
+					'interactive',true));
+	p
+
+	
+	im=im+1;
+	figure(im);
+	im=im+1;
+	ll_r = ll(1:2);
+	plot(ll_r,'.-')
+	legend(strcat(['Final log like: ' num2str(ll_r(length(ll_r)))]), 'Location', 'SouthEast')
+	flabel('Trial','Log like', ['Complete log like over 1st ' num2str(length(ll_r)) ' runs (' num2str(i) ')']);
+
+	figure(im);
+	im=im+1;
+	plot(ll,'.-')
+	legend(strcat(['Final log like: ' num2str(ll(length(ll)))]), 'Location', 'SouthEast')
+	flabel('Trial','Log like', ['Complete log like over time (' num2str(i) ')']);
+	 
 end
-
-
-
 
 
 
@@ -132,31 +158,74 @@ ob.plot();
 
 
 
+%% 
+clear
+clc
+format short g
+addpath('etc/');
+addpath('data/');
+global im;
+im=1;
 
+[ob, mo] = Observed.load(3,10);
+
+
+
+
+
+%% get real log like
+p_actual = [	14.467074  ;
+				7.4354783  ;
+				20.991296  ;
+				9.2340355  ;
+				33.655754  ;
+				8.0191336  ;
+				2.4001462  ;
+				2.5734037  ;
+			   0.11883542  ;
+			  0.076990272  ;
+			   0.35844400  ;
+			   0.25313549  ;
+			   0.22529346  ;
+			  0.048890239  ;
+			  0.024226458  ;
+			  0.046833900  ];
+p_actual = p_actual./100
+
+n = length(ob.x)
+m = size(ob.f_ab,2)
+
+
+actual_log_like = ob.complete_likelihood(p_actual,n,m)
 
 
 
 
 %% generation
 %% 
-mo = Model.generate(0.01,100,struct('normalize',true,'save_to','cache/models_temp.mat'));
+mo = Model.generate(0.01,100,struct('save_to','cache/models_temp.mat',...
+	'path','data/modeldata3.dat','include_blanks',true));
+mo.plot();
+
+%% 
 mo.test_cache(struct('model_no',1,'step_size',0.005));
 
 %% 
-ob = Observed(struct('name','halo10k','path','data/obsdata2_10000.dat'));
+mo = Model.load('cache/models_3.mat');
+ob = Observed(struct('name','halo10k','path','data/obsdata2_10000.dat','p_actual',p_actual));
 ob.load_models(mo);
-ob.save('cache/observed_10k.mat');
+ob.save('cache/observed_3_10k.mat');
 
 
-ob = Observed(struct('name','halo30k','path','data/obsdata2_30000.dat'));
+ob = Observed(struct('name','halo30k','path','data/obsdata2_30000.dat','p_actual',p_actual));
 ob.load_models(mo);
-ob.save('cache/observed_30k.mat');
+ob.save('cache/observed_3_30k.mat');
 
 
 
-ob = Observed(struct('name','halo50k','path','data/obsdata2_50000.dat'));
+ob = Observed(struct('name','halo50k','path','data/obsdata2_50000.dat','p_actual',p_actual));
 ob.load_models(mo);
-ob.save('cache/observed_50k.mat');
+ob.save('cache/observed_3_50k.mat');
 
 
 
@@ -170,7 +239,7 @@ m = length(mo.data);
 
 tic
 
-P = [.015 .2 .005 .07 .12 .005 .005 .01 .27 .1 .05 .004 .001 .02 .095 .03];
+P = ob.p_actual;%[.015 .2 .005 .07 .12 .005 .005 .01 .27 .1 .05 .004 .001 .02 .095 .03];
 if sum(P) ~= 1
 	error('P must sum to 1')
 end
@@ -180,7 +249,7 @@ if m ~= length(P)
 end
 PC = cumsum(P);
 
-n = 15000;
+n = 500;
 data = zeros(n,5);
 R1 = rand(n,1);
 RX = rand(n,1);
@@ -242,11 +311,8 @@ ob.save('cache/observed_generated.mat');
 
 
 'doing em'
-[p,all_p,norms,clike] = ob.em(struct(	'Xn',100,...
-										'min_norm',0.000001,...
-										'max_iters',300,...
-										'min_iters',5,...
-										'init','rand(m,1)',...
+[p,all_p,ll] = ob.em(struct(	'Xn',100,...
+										'max_seconds', 60,...
 										'interactive',true));
 p
 'finished em'
