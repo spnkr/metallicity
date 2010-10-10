@@ -19,6 +19,36 @@ im=1;
 
 
 %% 
+im=10
+
+sepr('starting multi run')
+tic
+multicount = 180; %120s for 60 iters of one
+max_seconds = 60*5;
+max_iters = 60;%1h for 1500
+sepr('init with rand weights')
+[best_ll, best_p, all_p, all_ll] = ob.em_multi(struct(	'count',multicount,...
+								'Xn',500,...
+								'save','cache/p_ll_run_weight_rand.mat',...
+								'max_iters', max_iters, ...
+								'interactive',false));
+print_pi(best_p,mo)
+ob.plot_differences(best_p)
+toc
+done('done multi run');
+
+%% 
+figure(7)
+for i=1:16
+	subplot(4,4,i)
+	axis([0 10 0 0.5])
+end
+
+
+%% 
+
+
+%% 
 [p,P,ll,LL] = ob.simulate(mo,struct('sample',10000,...
 											'max_seconds',60*30,...
 											'interactive',false));
@@ -29,8 +59,6 @@ im=1;
 multicount = 10;
 max_seconds = 60*5;
 
-multicount = 2;
-max_seconds = 60*5;
 
 sepr('init with real weights plus or minus 10pct random fluctuations to each')
 [best_ll, best_p, all_p, all_ll] = ob.em_multi(struct(	'count',multicount,...
@@ -40,6 +68,7 @@ sepr('init with real weights plus or minus 10pct random fluctuations to each')
 								'interactive',false,...
 								'p',ob.p_actual.*0.1.*rand(size(ob.p_actual,1),1)));
 print_pi(best_p,mo)
+ob.plot_differences(best_p)
 
 
 sepr('init with rand weights')
@@ -49,6 +78,7 @@ sepr('init with rand weights')
 								'max_seconds', max_seconds, ...
 								'interactive',false));
 print_pi(best_p,mo)
+ob.plot_differences(best_p)
 
 
 sepr('init with real weights plus or minus 30pct random fluctuations to each')
@@ -59,6 +89,7 @@ sepr('init with real weights plus or minus 30pct random fluctuations to each')
 								'interactive',false,...
 								'p',ob.p_actual.*0.3.*rand(size(ob.p_actual,1),1)));
 print_pi(best_p,mo)
+ob.plot_differences(best_p)
 
 
 
@@ -70,6 +101,7 @@ sepr('init with real weights plus or minus 3pct random fluctuations to each')
 								'interactive',false,...
 								'p',ob.p_actual.*0.03.*rand(size(ob.p_actual,1),1)));
 print_pi(best_p,mo)
+ob.plot_differences(best_p)
 
 
 
