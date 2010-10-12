@@ -28,6 +28,7 @@ classdef Observed < handle
 		function ob = Observed(varargin)
 			load_args
 			dpath = arg('path',ob.dpath);
+			ob.dpath = dpath;
 			ob.name = arg('name','halo000');
 			data = arg('data',NaN);
 			ob.p_actual = arg('p_actual',NaN);
@@ -242,7 +243,7 @@ classdef Observed < handle
 			
 			
 			subplot(spr,spc,2);
-			roll_window_size = 100;
+			roll_window_size = 50;
 			if kk>roll_window_size
 				norms = norms(kk-roll_window_size:kk);
 			end
@@ -329,7 +330,7 @@ classdef Observed < handle
 			flabel('Trial','l(\pi|x,y)',strcat(['l(\theta)=' num2str(ll(length(ll)))]));
 			
 			
-			roll_window_size = 100;
+			roll_window_size = 50;
 			llr = ll;
 			kk=length(llr);
 			if kk>roll_window_size

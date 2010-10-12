@@ -109,6 +109,9 @@ classdef Model < handle
 						ys = Y(i,j);
 
 						a = mo.f_ab_live(k,xs,ys);
+						if length(a>1)
+							a = max(a);
+						end
 
 						Z(d,:) = [a xs ys];
 						d=d+1;
@@ -205,7 +208,11 @@ classdef Model < handle
 					subplot(5,5,k);
 				end
 				vx.model = k;
-				mo.plot_single(vx);
+				try
+					mo.plot_single(vx);
+				catch
+					disp(strcat(['error plotting ' num2str(i)]))
+				end
 				k=k+1;
 			end
 			

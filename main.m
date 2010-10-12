@@ -12,8 +12,35 @@ addpath('data/');
 global im;
 im=1;
 
-[ob, mo] = Observed.load(3,10);
+[ob, mo] = Observed.load(5,30);
 
+
+
+%% 
+load('cache/p_ll_run_weight_rand_6000.mat')
+ob.actual_log_like
+best_ll
+p
+
+
+
+
+%% 
+im=1;
+[p,P,ll] = ob.em(struct(...
+				'max_seconds',60*60,...
+				'init','rand(m,1)',...
+				'interactive',false));
+p
+
+done
+
+%% 
+
+for i=1:length(p)	 	
+	disp(sprintf(strcat([num2str(i) '\t' num2str(100*p(i)) '\tT=' num2str(mo.props{i}(1)) ...
+	'-' num2str(mo.props{i}(2)) '\tM=' num2str(mo.props{i}(3)) '-' num2str(mo.props{i}(4))   ])))
+end
 
 
 
@@ -46,7 +73,6 @@ end
 
 
 %% 
-
 
 %% 
 [p,P,ll,LL] = ob.simulate(mo,struct('sample',10000,...
@@ -235,31 +261,23 @@ actual_log_like = ob.complete_likelihood(p_actual,n,m)
 
 %% generation
 %% 
-mo = Model.generate(0.01,100,struct('save_to','cache/models_temp.mat',...
-	'path','data/modeldata3.dat','include_blanks',true));
+
+mo = Model.generate(0.01,100,struct('save_to','cache/models_5.mat',...
+	'path','data/modeldata5.dat','include_blanks',false));
+
+mo = Model.load('cache/models_5.mat');
+ob = Observed(struct('name','halo_5_30k','path','data/obsdata5_30000.dat','p_actual',NaN));
+ob.load_models(mo);
+ob.save('cache/observed_5_30k.mat');
+
 mo.plot();
 
 %% 
-mo.test_cache(struct('model_no',1,'step_size',0.005));
-
-%% 
-mo = Model.load('cache/models_3.mat');
-ob = Observed(struct('name','halo10k','path','data/obsdata2_10000.dat','p_actual',p_actual));
-ob.load_models(mo);
-ob.save('cache/observed_3_10k.mat');
-
-
-ob = Observed(struct('name','halo30k','path','data/obsdata2_30000.dat','p_actual',p_actual));
-ob.load_models(mo);
-ob.save('cache/observed_3_30k.mat');
-
-
-
-ob = Observed(struct('name','halo50k','path','data/obsdata2_50000.dat','p_actual',p_actual));
-ob.load_models(mo);
-ob.save('cache/observed_3_50k.mat');
-
-
+[p,P,ll] = ob.em(struct(...
+				'max_seconds',60*5,...
+				'init','rand(m,1)',...
+				'interactive',true));
+p
 
 
 
