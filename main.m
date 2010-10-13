@@ -12,7 +12,7 @@ addpath('data/');
 global im;
 im=1;
 
-[ob, mo] = Observed.load(5,30);
+[ob, mo] = Observed.load(3,10);
 
 
 
@@ -46,18 +46,16 @@ end
 
 
 %% 
-im=10
-
 sepr('starting multi run')
 tic
-multicount = 180; %120s for 60 iters of one
-max_seconds = 60*5;
-max_iters = 60;%1h for 1500
+multicount = 10; %120s for 60 iters of one
+max_seconds = 48*60;
+max_iters = 100;%1h for 1500
 sepr('init with rand weights')
 [best_ll, best_p, all_p, all_ll] = ob.em_multi(struct(	'count',multicount,...
 								'Xn',500,...
-								'save','cache/p_ll_run_weight_rand.mat',...
-								'max_iters', max_iters, ...
+								'save','cache/p_ll_run_weight_rand_m_5_48_60_10.mat',...
+								'max_seconds', max_seconds, ...
 								'interactive',false));
 print_pi(best_p,mo)
 ob.plot_differences(best_p)
