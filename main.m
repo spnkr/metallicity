@@ -11,6 +11,8 @@ addpath('etc/');
 addpath('data/');
 global im;
 im=1;
+multicount = 2;
+max_seconds = 60*60;
 
 [ob, mo] = Observed.load(3,10);
 
@@ -46,61 +48,81 @@ done('end blah');
 
 
 %% 
-[ob, mo] = Observed.load(5,30);
-multicount = 2;
-max_seconds = 1;%60*60;
-
-
-
-
-
-sepr('start model 5')
-ob.em_multi(mo, struct( 'count',multicount,...
-						'max_seconds', max_seconds, ...
-						'interactive',false));
-done('end model 5');
-
-
-
-
-
+multicount = 10;
+max_seconds = 60*20;
 [ob, mo] = Observed.load(3,10);
-sepr('start model 3 true')
-init_p_to_use = ob.p_actual;
-ob.em_multi(mo, struct( 'count',multicount,...
-						'max_seconds', max_seconds, ...
-						'interactive',false,...
-						'p',init_p_to_use,...
-						'save',strcat(['cache/em_multi_m3_true_' num2str(max_seconds) '_' num2str(multicount) 'x.mat'])));
-done('end model 3 true');
+	sepr('start model 3 true')
+		init_p_to_use = ob.p_actual;
+		ob.em_multi(mo, struct( 'count',multicount,...
+								'max_seconds', max_seconds, ...
+								'interactive',false,...
+								'p',init_p_to_use,...
+								'save',strcat(['cache/em_multi_m3_true_' num2str(max_seconds) '_' num2str(multicount) 'x.mat'])));
+		done('end model 3 true');
 
 
-sepr('start model 3 true pm 3')
-init_p_to_use = ob.p_actual.*0.03.*rand(size(ob.p_actual,1),1);
-ob.em_multi(mo, struct( 'count',multicount,...
-						'max_seconds', max_seconds, ...
-						'interactive',false,...
-						'p',init_p_to_use,...
-						'save',strcat(['cache/em_multi_m3_true_pm3_' num2str(max_seconds) '_' num2str(multicount) 'x.mat'])));
-done('end model 3 true pm 3');
-
-
-
-
-sepr('start model 3 rand')
-ob.em_multi(mo, struct( 'count',multicount,...
-						'max_seconds', max_seconds, ...
-						'interactive',false));
-done('end model 3 rand');
+		
+		
+multicount = 2;
+max_seconds = 60*60;
+[ob, mo] = Observed.load(5,30);
+	sepr('start model 5')
+		ob.em_multi(mo, struct( 'count',multicount,...
+								'max_seconds', max_seconds, ...
+								'interactive',false));
+		done('end model 5');
 
 
 
 
 
 
+multicount = 8;
+max_seconds = 7*60;
+[ob, mo] = Observed.load(3,10);
+	sepr('start model 3 true pm 3')
+		init_p_to_use = ob.p_actual.*0.03.*rand(size(ob.p_actual,1),1);
+		ob.em_multi(mo, struct( 'count',multicount,...
+								'max_seconds', max_seconds, ...
+								'interactive',false,...
+								'p',init_p_to_use,...
+								'save',strcat(['cache/em_multi_m3_true_pm3_' num2str(max_seconds) '_' num2str(multicount) 'x.mat'])));
+		done('end model 3 true pm 3');
+	sepr('start model 3 rand')
+		ob.em_multi(mo, struct( 'count',multicount,...
+								'max_seconds', max_seconds, ...
+								'interactive',false));
+		done('end model 3 rand');
 
 
 
+
+
+
+
+max_seconds = 60*60;
+[ob, mo] = Observed.load(3,30);
+	sepr('start model 3 30k rand')
+		[p,P,ll] = ob.em(struct(...
+				'max_seconds',max_seconds,...
+				'init','rand(m,1)',...
+				'interactive',false));
+		print_pi(p,ll,mo);
+		ob.plot_differences(p);
+		done('end model 3 30k rand');
+
+
+max_seconds = 60*60*5;
+[ob, mo] = Observed.load(3,30);
+	sepr('start model 3 30k mega')
+		[p,P,ll] = ob.em(struct(...
+				'max_seconds',max_seconds,...
+				'init','rand(m,1)',...
+				'interactive',false));
+		print_pi(p,ll,mo);
+		ob.plot_differences(p);
+		save('cache/mega_30k_run.mat','p','P','ll');
+		done('end model 3 30k mega');
 
 
 
