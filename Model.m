@@ -9,6 +9,7 @@ classdef Model < handle
 		xranges;
 		yranges;
 		
+		model_number
 		path='data/modeldata2.dat';
 	end
 	
@@ -22,8 +23,11 @@ classdef Model < handle
 			save_to = arg('save_to','cache/models_01.mat');
 			path = arg('path','data/modeldata2.dat');
 			include_blanks = arg('include_blanks',false);
+			shift_data = arg('shift_data',false);
+			normalize = arg('normalize',false);
 			
-			mo = Model(struct('step',stepsize,'precision',precision,'path',path,'include_blanks',include_blanks));
+			mo = Model(struct('step',stepsize,'precision',precision,'path',path,...
+				'include_blanks',include_blanks,'shift_data',shift_data,'normalize',normalize));
 			
 			if do_save
 				mo.save(save_to);
@@ -47,6 +51,8 @@ classdef Model < handle
 			mo.precision = precision;
 			mo.stepsize = stepsize;
 			mo.path = arg('path',mo.path);
+			
+			shift_data = arg('shift_data',false);
 			
 			include_blanks = arg('include_blanks',false);
 			
@@ -78,9 +84,13 @@ classdef Model < handle
 				end
 			end
 			
-			if normalize
-				for j=1:length(mo.data)
+			for j=1:length(mo.data)
+				if normalize
 					mo.data{j}(:,3) = mo.data{j}(:,3)./mo.volume(j);
+				end
+				if shift_data
+					mo.data{j}(:,1) = mo.data{j}(:,1)-(0.05/2);
+					mo.data{j}(:,2) = mo.data{j}(:,2)-(0.05/2);
 				end
 			end
 			
@@ -132,7 +142,8 @@ classdef Model < handle
 		end
 		
 		
-		function save(mo,path)
+		function save(mo)
+			path = strcat(['cache/models_' num2str(mo.model_number) '.mat']);
 			save(path,'mo');
 			show(['Saved to ' path])
 		end
@@ -145,8 +156,8 @@ classdef Model < handle
 			x = round(x.*mo.precision)./mo.precision;
 			y = round(y.*mo.precision)./mo.precision;
 			
-			xndx = find(xr==x);
-			yndx = find(yr==y);
+			xndx = max(find(xr==x));
+			yndx = max(find(yr==y));
 			
 			out = data((yndx-1)*length(xr)+xndx,1);
 			

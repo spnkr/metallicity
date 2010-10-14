@@ -9,5 +9,5 @@ function done(varargin)
 	end
 	
 	load gong
-	sound(y,Fs)
+	sound(y,Fs);
 	

@@ -16,157 +16,107 @@ im=1;
 
 
 
-%% 
-load('cache/p_ll_run_weight_rand_6000.mat')
-ob.actual_log_like
-best_ll
-p
 
-
-
-
-%% 
-im=1;
+%% templates: em
+[ob, mo] = Observed.load(3,10);
 [p,P,ll] = ob.em(struct(...
-				'max_seconds',60*60,...
+				'max_iters',2,...
+				'Xmax_seconds',60*60,...
 				'init','rand(m,1)',...
-				'interactive',false));
-p
-
-done
-
-%% 
-
-for i=1:length(p)	 	
-	disp(sprintf(strcat([num2str(i) '\t' num2str(100*p(i)) '\tT=' num2str(mo.props{i}(1)) ...
-	'-' num2str(mo.props{i}(2)) '\tM=' num2str(mo.props{i}(3)) '-' num2str(mo.props{i}(4))   ])))
-end
+				'interactive',true));
+print_pi(p,ll,mo);
+ob.plot_differences(p);
 
 
+%% template: em multi
+[ob, mo] = Observed.load(3,10);
+multicount = 2;
+max_seconds = 5;
+max_iters = 100;
+
+sepr('start blah')
+ob.em_multi(mo, struct( 'count',multicount,...
+						'max_seconds', max_seconds, ...
+						'interactive',false));
+done('end blah');
 
 
-%% 
-sepr('starting multi run')
-tic
-multicount = 10; %120s for 60 iters of one
-max_seconds = 48*60;
-max_iters = 100;%1h for 1500
-sepr('init with rand weights')
-[best_ll, best_p, all_p, all_ll] = ob.em_multi(struct(	'count',multicount,...
-								'Xn',500,...
-								'save','cache/p_ll_run_weight_rand_m_5_48_60_10.mat',...
-								'max_seconds', max_seconds, ...
-								'interactive',false));
-print_pi(best_p,mo)
-ob.plot_differences(best_p)
-toc
-done('done multi run');
 
-%% 
-figure(7)
-for i=1:16
-	subplot(4,4,i)
-	axis([0 10 0 0.5])
-end
+
 
 
 %% 
+[ob, mo] = Observed.load(5,30);
+multicount = 2;
+max_seconds = 1;%60*60;
 
-%% 
+
+
+
+
+sepr('start model 5')
+ob.em_multi(mo, struct( 'count',multicount,...
+						'max_seconds', max_seconds, ...
+						'interactive',false));
+done('end model 5');
+
+
+
+
+
+[ob, mo] = Observed.load(3,10);
+sepr('start model 3 true')
+init_p_to_use = ob.p_actual;
+ob.em_multi(mo, struct( 'count',multicount,...
+						'max_seconds', max_seconds, ...
+						'interactive',false,...
+						'p',init_p_to_use,...
+						'save',strcat(['cache/em_multi_m3_true_' num2str(max_seconds) '_' num2str(multicount) 'x.mat'])));
+done('end model 3 true');
+
+
+sepr('start model 3 true pm 3')
+init_p_to_use = ob.p_actual.*0.03.*rand(size(ob.p_actual,1),1);
+ob.em_multi(mo, struct( 'count',multicount,...
+						'max_seconds', max_seconds, ...
+						'interactive',false,...
+						'p',init_p_to_use,...
+						'save',strcat(['cache/em_multi_m3_true_pm3_' num2str(max_seconds) '_' num2str(multicount) 'x.mat'])));
+done('end model 3 true pm 3');
+
+
+
+
+sepr('start model 3 rand')
+ob.em_multi(mo, struct( 'count',multicount,...
+						'max_seconds', max_seconds, ...
+						'interactive',false));
+done('end model 3 rand');
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+%% simulate
 [p,P,ll,LL] = ob.simulate(mo,struct('sample',10000,...
 											'max_seconds',60*30,...
 											'interactive',false));
 
-
-
- 
-multicount = 10;
-max_seconds = 60*5;
-
-
-sepr('init with real weights plus or minus 10pct random fluctuations to each')
-[best_ll, best_p, all_p, all_ll] = ob.em_multi(struct(	'count',multicount,...
-								'Xn',10,...
-								'save','cache/p_ll_run_weight_pl_10.mat',...
-								'max_seconds', max_seconds, ...
-								'interactive',false,...
-								'p',ob.p_actual.*0.1.*rand(size(ob.p_actual,1),1)));
-print_pi(best_p,mo)
-ob.plot_differences(best_p)
-
-
-sepr('init with rand weights')
-[best_ll, best_p, all_p, all_ll] = ob.em_multi(struct(	'count',multicount,...
-								'Xn',10,...
-								'save','cache/p_ll_run_weight_rand.mat',...
-								'max_seconds', max_seconds, ...
-								'interactive',false));
-print_pi(best_p,mo)
-ob.plot_differences(best_p)
-
-
-sepr('init with real weights plus or minus 30pct random fluctuations to each')
-[best_ll, best_p, all_p, all_ll] = ob.em_multi(struct(	'count',multicount,...
-								'Xn',10,...
-								'save','cache/p_ll_run_weight_pl_30.mat',...
-								'max_seconds', max_seconds, ...
-								'interactive',false,...
-								'p',ob.p_actual.*0.3.*rand(size(ob.p_actual,1),1)));
-print_pi(best_p,mo)
-ob.plot_differences(best_p)
-
-
-
-sepr('init with real weights plus or minus 3pct random fluctuations to each')
-[best_ll, best_p, all_p, all_ll] = ob.em_multi(struct(	'count',floor(multicount/4),...
-								'Xn',10,...
-								'save','cache/p_ll_run_weight_pl_03.mat',...
-								'max_seconds', max_seconds, ...
-								'interactive',false,...
-								'p',ob.p_actual.*0.03.*rand(size(ob.p_actual,1),1)));
-print_pi(best_p,mo)
-ob.plot_differences(best_p)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-%% 
-for i=1:4
-	disp(strcat(['Run ' num2str(i)]))
-	[p,P,ll] = ob.em(struct(...
-					'max_seconds',15,...
-					'init','rand(m,1)',...
-					'interactive',true));
-	p
-
-	
-	im=im+1;
-	figure(im);
-	im=im+1;
-	ll_r = ll(1:2);
-	plot(ll_r,'.-')
-	legend(strcat(['Final log like: ' num2str(ll_r(length(ll_r)))]), 'Location', 'SouthEast')
-	flabel('Trial','Log like', ['Complete log like over 1st ' num2str(length(ll_r)) ' runs (' num2str(i) ')']);
-
-	figure(im);
-	im=im+1;
-	plot(ll,'.-')
-	legend(strcat(['Final log like: ' num2str(ll(length(ll)))]), 'Location', 'SouthEast')
-	flabel('Trial','Log like', ['Complete log like over time (' num2str(i) ')']);
-	 
-end
 
 
 
@@ -174,30 +124,6 @@ end
 %% em convergence
 %%
 ob.plot_weight_changes(struct('path','cache/all_p_50_full_runs.mat'));
-
-%%  
-mo = Model.load('cache/models_01_normalized.mat');
-load('cache/observed_normalized.mat');
-
-%% 
-mo = Model.load('cache/models_01.mat');
-load('cache/observed.mat');
-
-
-%% 
-[p,all_p] = ob.em_multi(struct(	'count',5,...
-								'Xn',10,...
-								'min_norm',0.0001,...
-								'max_iters',75,...
-								'interactive',true));
-p
-
-
-
-
-
-
-
 
 
 %% plots
@@ -214,7 +140,21 @@ ob.plot();
 
 
 
-%% 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+%% shifts etc
 clear
 clc
 format short g
@@ -229,167 +169,91 @@ im=1;
 
 
 
-%% get real log like
-p_actual = [	14.467074  ;
-				7.4354783  ;
-				20.991296  ;
-				9.2340355  ;
-				33.655754  ;
-				8.0191336  ;
-				2.4001462  ;
-				2.5734037  ;
-			   0.11883542  ;
-			  0.076990272  ;
-			   0.35844400  ;
-			   0.25313549  ;
-			   0.22529346  ;
-			  0.048890239  ;
-			  0.024226458  ;
-			  0.046833900  ];
-p_actual = p_actual./100
-
-n = length(ob.x)
-m = size(ob.f_ab,2)
-
-
-actual_log_like = ob.complete_likelihood(p_actual,n,m)
 
 
 
-
-%% generation
 %% 
+sepr('single dif shift')
+load('cache/models_3.mat');
+load('cache/observed_3_10k.mat');
 
-mo = Model.generate(0.01,100,struct('save_to','cache/models_5.mat',...
-	'path','data/modeldata5.dat','include_blanks',false));
-
-mo = Model.load('cache/models_5.mat');
-ob = Observed(struct('name','halo_5_30k','path','data/obsdata5_30000.dat','p_actual',NaN));
+ob.x = ob.x + (0.05/2);
+ob.y = ob.y + (0.05/2);
 ob.load_models(mo);
-ob.save('cache/observed_5_30k.mat');
 
-mo.plot();
+[p,P,ll] = ob.em(struct(...
+				'min_iters',900,...
+				'init','rand(m,1)',...
+				'interactive',false));
+p
+
+[p,P,ll] = ob.em(struct(...
+				'min_iters',900,...
+				'init','rand(m,1)',...
+				'interactive',false));
+p
+
+
+
+load('cache/models_3_c1.mat');
+load('cache/observed_3_10k_c1.mat');
+
+
+sepr('single very long')
+[p,P,ll] = ob.em(struct(...
+				'min_iters',5000,...
+				'init','rand(m,1)',...
+				'interactive',false));
+p
+
+sepr('single crazy long')
+[p,P,ll] = ob.em(struct(...
+				'min_iters',7000,...
+				'init','rand(m,1)',...
+				'interactive',false));
+p
 
 %% 
+
+im=im+1;
+multicount = 9;
+sepr('multi 1')
+max_seconds = 60*45;
+[best_ll, best_p, all_p, all_ll] = ob.em_multi(struct(	'count',multicount,...
+								'Xn',10,...
+								'save','cache/p_ll_run_weight_rand_c.mat',...
+								'max_seconds', max_seconds, ...
+								'interactive',false));
+print_pi(best_p,mo)
+ob.plot_differences(best_p)
+
+
+sepr('multi 2')
+im=im+1;
+multicount = 9;
+sepr('multi')
+max_seconds = 60*45;
+[best_ll, best_p, all_p, all_ll] = ob.em_multi(struct(	'count',multicount,...
+								'Xn',10,...
+								'save','cache/p_ll_run_weight_rand_c2.mat',...
+								'max_seconds', max_seconds, ...
+								'interactive',false));
+print_pi(best_p,mo)
+ob.plot_differences(best_p)
+
+%% 
+im=5;
+load('cache/models_3.mat');
+load('cache/observed_3_10k.mat');
+
+
+
 [p,P,ll] = ob.em(struct(...
 				'max_seconds',60*5,...
 				'init','rand(m,1)',...
 				'interactive',true));
 p
 
-
-
-%% simulate
-clc
-im=1;
-
-m = length(mo.data);
-
-tic
-
-P = ob.p_actual;%[.015 .2 .005 .07 .12 .005 .005 .01 .27 .1 .05 .004 .001 .02 .095 .03];
-if sum(P) ~= 1
-	error('P must sum to 1')
-end
-
-if m ~= length(P)
-	error('P and models are different lengths')
-end
-PC = cumsum(P);
-
-n = 500;
-data = zeros(n,5);
-R1 = rand(n,1);
-RX = rand(n,1);
-RY = rand(n,1);
-
-grid_size = .1;
-
-for i=1:n
-	r0 = rand();
-	pi_ndx = sum(PC<=r0)+1;
-	
-	r1 = R1(i);
-	nzd = mo.nonzeros(pi_ndx);
-	cnzd = cumsum(nzd(:,3));
-	nzda = [nzd cnzd];
-	
-	grid_ndx = sum(cnzd<=r1)+1;
-	
-	x = nzda(grid_ndx,1);
-	y = nzda(grid_ndx,2);
-	
-	rx = RX(i)*grid_size;
-	ry = RY(i)*grid_size;
-	
-	x = x + rx;
-	y = y + ry;
-	
-	fab = mo.f_ab(pi_ndx,x,y);
-	data(i,:) = [x y fab pi_ndx r0];
-end
-
-data = data(data(:,3)>0,:);
-
-
-fig
-subplot(1,3,1);
-scatter(data(:,1),data(:,2),data(:,3)./sum(data(:,3)),'k','filled');
-flabel('Fe/H','\alpha/Fe',[num2str(n) ' generated data points']);
-
-subplot(1,3,2);
-scatter(data(:,1),data(:,2),10,'r','filled');
-flabel('Fe/H','\alpha/Fe',[num2str(n) ' generated data points']);
-
-subplot(1,3,3);
-plot(P,'k.')
-flabel('j','\pi_j','True weights');
-
-
-save(strcat(['cache/generated_' num2str(n) '_auto.mat']),'data');
-
-
-toc
-
-
-ob = Observed(struct('name','generated halo','data',data));
-ob.load_models(mo);
-ob.save('cache/observed_generated.mat');
-
-
-
-'doing em'
-[p,all_p,ll] = ob.em(struct(	'Xn',100,...
-										'max_seconds', 60,...
-										'interactive',true));
-p
-'finished em'
-
-
-
-fig
-subplot(1,2,1)
-plot(P,'k.')
-hold on
-plot(p,'g.')
-hold off
-flabel('j','\pi_j','Actual (black) v predicted (green)');
-
-subplot(1,2,2)
-plot(P'-p,'r.')
-flabel('j','Real - actual','Differences');
-
-
-im=im+1;
-
-'trying rand starts'
-[p2,all_p] = ob.em_multi(struct(	'count',5,...
-									'Xn',10,...
-									'min_norm',0.00001,...
-									'max_iters',200,...
-									'interactive',true));
-p2
-'finished rand starts'
 
 
 

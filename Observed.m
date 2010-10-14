@@ -2,6 +2,10 @@ classdef Observed < handle
 	
 	properties
 		dpath='data/obsdata2.dat';
+		model_number;
+		point_count;
+		
+		
 		name;
 		data;
 		x,y,lum;
@@ -19,6 +23,12 @@ classdef Observed < handle
 			load(strcat(['cache/observed_' num2str(model_no) '_' num2str(sample_size) 'k.mat']));
 			obx=ob;
 			disp(strcat(['Loaded model data ' num2str(model_no) ' for n=' num2str(sample_size) 'k']))
+		end
+		
+		function save(ob)
+			path = strcat(['cache/observed_' num2str(ob.model_number) '_' num2str(ob.point_count) 'k.mat']);
+			save(path,'ob');
+			show(['Saved to ' path])
 		end
 	end
 	
@@ -57,7 +67,22 @@ classdef Observed < handle
 			
 			for i=1:n
 				for j=1:m
-					f_ab(i,j) = mo.f_ab(j,ob.x(i),ob.y(i));
+					try
+					tval = mo.f_ab(j,ob.x(i),ob.y(i));
+					catch
+						ob.x(i)
+						ob.y(i)
+						sepr
+						tval = mo.f_ab(j,max(ob.x(i)),max(ob.y(i)));
+					end
+					try
+						f_ab(i,j) = tval;
+					catch
+						[ob.x(i) ob.y(i)]
+						tval
+						sepr
+						f_ab(i,j) = max(tval);
+					end
 				end
 			end
 			
@@ -72,10 +97,7 @@ classdef Observed < handle
 			end
 		end
 		
-		function save(ob,path)
-			save(path,'ob');
-			show(['Saved to ' path])
-		end
+		
 		
 		
 		
@@ -110,6 +132,7 @@ classdef Observed < handle
 			
 			init_p = p;
 			
+			changing_norms = [];
 			
 			P = NaN.*ones(m,max_iters);
 			norms = zeros(1,1);
@@ -155,6 +178,12 @@ classdef Observed < handle
 				
 				norms(counter) = abs(norm(p-p0));
 				
+				if counter > 1
+					if norms(counter) < norms(counter-1)
+						changing_norms(length(changing_norms)+1) = counter;
+					end
+				end
+				
 				%plike(counter) = ob.partial_likelihood(p,n,m);
 				ll(counter) = ob.complete_likelihood(p,n,m);
 				
@@ -178,6 +207,9 @@ classdef Observed < handle
 			end
 			tmr = toc(Tmr);
 			
+			if length(changing_norms > 0)
+				changing_norms
+			end
 			
 			
 			ob.plot_progress(norms,ll,P,p,n,m,counter,tmr,init_str,im,init_p);
@@ -242,7 +274,7 @@ classdef Observed < handle
 			
 			
 			
-			subplot(spr,spc,2);
+			subplot(spr,spc,6);
 			roll_window_size = 50;
 			if kk>roll_window_size
 				norms = norms(kk-roll_window_size:kk);
@@ -292,37 +324,37 @@ classdef Observed < handle
 			hold off
 			flabel('j','\pi_j',strcat(['Starting and ending \pi']));
 
-			ppdiff=init_p-p;
-			subplot(spr,spc,5);
-			scatter(1:ob.num_models,ppdiff,20.*(1+ppdiff),pi_colors,'filled')
-			flabel('j','Abs difference',strcat(['\pi^{(0)} vs current \pi']));
+% 			ppdiff=init_p-p;
+% 			subplot(spr,spc,5);
+% 			scatter(1:ob.num_models,ppdiff,20.*(1+ppdiff),pi_colors,'filled')
+% 			flabel('j','Abs difference',strcat(['\pi^{(0)} vs current \pi']));
 			
 			if isfinite(ob.p_actual)
 				ppdiff=ob.p_actual-p;
-				subplot(spr,spc,6);
+				subplot(spr,spc,5);
 				scatter(1:ob.num_models,ppdiff,20.*(1+ppdiff),pi_colors,'filled')
 				flabel('j','Abs difference',strcat(['Current \pi versus true']));
 			end
 			
 			
-			if isfinite(ob.p_actual) & size(P,2) > 1
-				subplot(spr,spc,7);
-				pdc=p;
-				pdc = (pdc-P(:,size(P,2)-1))./P(:,size(P,2)-1);
-				plot(pdc,'b.-')
-% 				hold on
-% % 					pdc = p';
-% % 					pdc = (pdc-ob.p_actual')./ob.p_actual';
-% % 					plot(pdc,'r.-')
-% % 					pdc = p';
-% % 					pdc = (pdc-init_p')./init_p';
-% % 					plot(pdc,'g.-')
-% 				hold off
-				flabel('j','% change',['% \Delta \pi over last (' num2str(counter) ')']);
-			end
+% 			if isfinite(ob.p_actual) & size(P,2) > 1
+% 				subplot(spr,spc,6);
+% 				pdc=p;
+% 				pdc = (pdc-P(:,size(P,2)-1))./P(:,size(P,2)-1);
+% 				plot(pdc,'b.-')
+% % 				hold on
+% % % 					pdc = p';
+% % % 					pdc = (pdc-ob.p_actual')./ob.p_actual';
+% % % 					plot(pdc,'r.-')
+% % % 					pdc = p';
+% % % 					pdc = (pdc-init_p')./init_p';
+% % % 					plot(pdc,'g.-')
+% % 				hold off
+% 				flabel('j','% change',['% \Delta \pi over last (' num2str(counter) ')']);
+% 			end
 			
 			
-			subplot(spr,spc,8);
+			subplot(spr,spc,2);
 			plot(ll,'b.-')
 			hold on
 			plot([0 length(ll)], [ob.actual_log_like ob.actual_log_like], 'r--');
@@ -346,22 +378,34 @@ classdef Observed < handle
 			if kk>roll_window_size
 				llr = llr(kk-roll_window_size:kk);
 			end
-			subplot(spr,spc,9);
+			subplot(spr,spc,7);
 			plot(llr,'b.-','Color',[.7 .8 .8])
 			flabel('Trial','l(\pi|x,y)',['% \Delta l(\theta) roll ' num2str(roll_window_size)]);
 			
 		end
 		
-		function [best_ll, best_p, all_p, all_ll] = em_multi(ob, varargin)
+		function [best_ll, best_p, all_p, all_ll] = em_multi(ob, mo, varargin)
 			load_args
 			global im;
 			xim=im;
 			
+			tic
 			best_p = [];
 			best_ll = NaN;
 			
 			count = arg('count',1);
-			save_path = arg('save',strcat(['cache/p_ll_run_auto_' num2str(count) '.mat']));
+			max_seconds = arg('max_seconds', NaN);
+			max_iters = arg('max_iters', NaN);
+			
+			
+			if isfinite(max_seconds)
+				cont_cond_str = strcat([num2str(max_seconds) 's_']);
+			else
+				cont_cond_str = strcat([num2str(max_iters) 'i_']);
+			end
+			
+			save_path = arg('save',strcat(['cache/em_multi_m' num2str(ob.model_number) '_rand_' cont_cond_str ...
+				num2str(count) 'x.mat']));
 			
 			all_p = zeros(ob.num_models,count);
 			all_ll = zeros(count,1);
@@ -390,6 +434,11 @@ classdef Observed < handle
 			p_pct_change=(all_p-p_pct_change)./p_pct_change;
 			p_pct_change=p_pct_change(2:size(p_pct_change,1),:);
 			ob.plot_weight_changes(struct('all_p',p_pct_change,'pct_change',true));
+			
+			
+			print_pi(best_p,best_ll,mo);
+			ob.plot_differences(best_p);
+			toc
 		end
 		
 		
@@ -576,15 +625,15 @@ classdef Observed < handle
 		
 		function plot_differences(ob,p)
 			fig
-			subplot(1,2,1)
-			plot(ob.p_actual,'k.')
+			subplot(1,2,1);
+			plot(ob.p_actual,'k.');
 			hold on
-			plot(p,'g.')
+			plot(p,'g.');
 			hold off
 			flabel('j','\pi_j','Actual (black) v predicted (green)');
 
-			subplot(1,2,2)
-			plot(ob.p_actual-p,'r.')
+			subplot(1,2,2);
+			plot(ob.p_actual-p,'r.');
 			flabel('j','Real - actual','Differences');
 		end
 		
