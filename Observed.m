@@ -150,7 +150,10 @@ classdef Observed < handle
 				p0 = p;
 				
 				if interactive
-					ob.plot_progress(norms,ll,P,p,n,m,counter,-counter,init_str,im,init_p);
+					norms_pct_change = norms';
+					norms_pct_change = (norms_pct_change-circshift(norms_pct_change,1))./circshift(norms_pct_change,1);
+			
+					ob.plot_progress(norms,norms_pct_change,ll,P,p,n,m,counter,-counter,im,init_p);
 				end
 				
 				for j=1:m
@@ -178,12 +181,6 @@ classdef Observed < handle
 				
 				norms(counter) = abs(norm(p-p0));
 				
-				if counter > 1
-					if norms(counter) < norms(counter-1)
-						changing_norms(length(changing_norms)+1) = counter;
-					end
-				end
-				
 				%plike(counter) = ob.partial_likelihood(p,n,m);
 				ll(counter) = ob.complete_likelihood(p,n,m);
 				
@@ -207,12 +204,20 @@ classdef Observed < handle
 			end
 			tmr = toc(Tmr);
 			
+			
+			
+			norms_pct_change = norms';
+			norms_pct_change = (norms_pct_change-circshift(norms_pct_change,1))./circshift(norms_pct_change,1);
+			ob.plot_progress(norms,norms_pct_change,ll,P,p,n,m,counter,tmr,im,init_p);
+			
+			for i=2:length(norms_pct_change)
+				if sign(norms_pct_change(i)) ~= sign(norms_pct_change(i-1))
+					changing_norms(length(changing_norms)+1) = i;
+				end
+			end
 			if length(changing_norms > 0)
 				changing_norms
 			end
-			
-			
-			ob.plot_progress(norms,ll,P,p,n,m,counter,tmr,init_str,im,init_p);
 			
 			im=im+1;
 			
@@ -250,19 +255,18 @@ classdef Observed < handle
 			end
 		end
 		
-		function plot_progress(ob,norms,ll,P,p,n,m,counter,tmr,init_str,im,init_p)
+		function plot_progress(ob,norms,norms_pct_change,ll,P,p,n,m,counter,tmr,im,init_p)
 			figure(im);
 			spr=3;spc=3;
 			
 			subplot(spr,spc,1);
+			roll_window_size = 50;
 			
-			norms = norms';
-			norms = (norms-circshift(norms,1))./circshift(norms,1);
-			plot(norms,'k.-');
-			kk = length(norms);
+			plot(norms_pct_change,'k.-');
+			kk = length(norms_pct_change);
 			if kk>5
-				kkdelt = std(norms(5:kk));
-				axis([5 kk min(norms(5:kk))-kkdelt max(norms(5:kk))+kkdelt])
+				kkdelt = std(norms_pct_change(5:kk));
+				axis([5 kk min(norms_pct_change(5:kk))-kkdelt max(norms_pct_change(5:kk))+kkdelt])
 			end
 			if tmr<0
 				flabel('Trial','% change',strcat(['(In progress) ' num2str(counter) ' runs, n='...
@@ -275,14 +279,22 @@ classdef Observed < handle
 			
 			
 			subplot(spr,spc,6);
-			roll_window_size = 50;
+			
+			if kk>roll_window_size
+				norms_pct_change = norms_pct_change(kk-roll_window_size:kk);
+			end
+			plot(norms_pct_change,'k.-','Color',[.8 .8 .8]);
+			
+			flabel('Trial','% change',['Rolling ' num2str(roll_window_size) ' norm % change']);
+			
+			subplot(spr,spc,8);
+			kk = length(norms);
 			if kk>roll_window_size
 				norms = norms(kk-roll_window_size:kk);
 			end
 			plot(norms,'k.-','Color',[.8 .8 .8]);
 			
-			flabel('Trial','% change',['Rolling ' num2str(roll_window_size) ' norm % change']);
-			%legend(strcat(['norm=' num2str(min(norms))]));
+			flabel('Trial','norm',['Rolling ' num2str(roll_window_size) ' norm']);
 			
 			
 			pi_colors = 10.*(1+init_p);
@@ -304,7 +316,22 @@ classdef Observed < handle
 				hold off
 			end
 			flabel('Trial','\pi_j',strcat(['Weights over time']));
-
+			
+			
+			subplot(spr,spc,9);
+			if counter>roll_window_size
+				PR = P(:,counter-roll_window_size:counter);
+			else
+				PR = P;
+			end
+			plot(1:size(PR,2),PR(1,:),strcat([clrs(1) '-']));
+			for i=2:m
+				hold on
+				plot(1:size(PR,2),PR(i,:),strcat([clrs(i) '.-']));
+				%scatter(1:size(P,2),P(i,:),5.*(1+P(i,:)),pi_colors(i).*ones(size(P,2),1),'filled')
+				hold off
+			end
+			flabel('Trial','\pi_j',strcat(['Rolling ' num2str(roll_window_size) ' weights over time']));
 			
 			
 % 			subplot(spr,spc,3);
@@ -362,7 +389,6 @@ classdef Observed < handle
 			flabel('Trial','l(\pi|x,y)',strcat(['l(\theta)=' num2str(ll(length(ll)))]));
 			
 			
-			roll_window_size = 50;
 			llr = ll;
 			kk=length(llr);
 			if kk>roll_window_size

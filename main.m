@@ -62,7 +62,7 @@ max_seconds = 60*20;
 
 
 		
-		
+
 multicount = 2;
 max_seconds = 60*60;
 [ob, mo] = Observed.load(5,30);
