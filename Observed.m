@@ -227,8 +227,8 @@ classdef Observed < handle
 				norms(counter) = norm(pi_0 - pi_1);
 				ll(counter) = s;
 				
-				
-				if interactive
+				tl_a = counter/50;tl_whole = floor(tl_a);tl_part = tl_a-tl_whole;
+				if interactive && (counter < 20 || tl_part==0)
 					ob.plot_progress(norms,ll,P,pi_1,N,16,counter,-counter,im,init_p,baseline_p);
 				end
 				
@@ -240,7 +240,8 @@ classdef Observed < handle
 						break;
 					end
 				else
-					if norms(counter) < min_norm && counter > min_iters
+% 					if norms(counter) < min_norm && counter > min_iters
+					if counter > min_iters
 						%disp('min norm reached; stopping')
 						break;
 					end
@@ -311,7 +312,8 @@ classdef Observed < handle
 			for counter=1:max_iters
 				p0 = p;
 				
-				if interactive
+				tl_a = counter/50;tl_whole = floor(tl_a);tl_part = tl_a-tl_whole;
+				if interactive && (counter < 20 || tl_part==0)
 					ob.plot_progress(norms,ll,P,p,n,m,counter,-counter,im,init_p,baseline_p);
 				end
 				
@@ -358,7 +360,8 @@ classdef Observed < handle
 						break;
 					end
 				else
-					if norms(counter) < min_norm && counter > min_iters
+% 					if norms(counter) < min_norm && counter > min_iters
+					if counter > min_iters
 						%disp('min norm reached; stopping')
 						break;
 					end
@@ -415,7 +418,9 @@ classdef Observed < handle
 			figure(im);
 			spr=3;spc=3;
 			pi_colors = 10.*(1+init_p);
+			if ob.model_number==3
 			pi_colors = [11.139; 19.786; 18.486; 10.506; 14.662; 13.257; 16.302; 12.303; 15.799; 16.032; 15.999; 14.484; 10.354; 15.138; 14.077;  11.08];
+			end
 			y_ax_min_span = 1;
 			clrs = ['r' 'g' 'b' 'c' 'm' 'y' 'k' 'r' 'g' 'b' 'c' 'm' 'y' 'k' ...
 				'r' 'g' 'b' 'c' 'm' 'y' 'k' 'r' 'g' 'b' 'c' 'm' 'y' 'k'];

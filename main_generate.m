@@ -28,7 +28,7 @@ p_actual = p_actual./100;
 
 
 mo = Model.generate(0.01,100,struct('path','data/modeldata3.dat','include_blanks',false,...
-	'normalize',false,'shift_data',false));
+	'normalize',true,'shift_data',false));
 
 mo = Model.load('cache/models_3.mat');
 
@@ -61,7 +61,7 @@ Observed.save(ob);
 
 
 mo = Model.generate(0.01,100,struct('path','data/modeldata5.dat','include_blanks',false,...
-	'normalize',false,'shift_data',false));
+	'normalize',true,'shift_data',false));
 
 mo = Model.load('cache/models_5.mat');
 
