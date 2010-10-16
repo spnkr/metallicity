@@ -27,7 +27,7 @@ p_bs_target_3 = [    0.15993;    0.056266;     0.20149;     0.09207;     0.34038
 
 im=1;
 tic
-p_b=ob.em_bodhi(struct(	'max_iters',5000,...
+p_b=ob.em_bodhi(struct(	'max_iters',2156,...
 						'baseline_p',p_bs_target_3,...
 						'p',init_p_val,...
 						'interactive',true,...
@@ -40,11 +40,21 @@ toc
 %% 
 im=2;
 tic
-p_me=ob.em(struct(	'max_seconds',20*60,...
+p_me=ob.em(struct(	'max_iters',2156,...
 					'interactive',true,...
 					'p', init_p_val,...
 					'baseline_p',p_bs_target_3));
 p_me
+toc
+
+%% 
+im=3;
+tic
+p_me2=ob.em(struct(	'max_iters',5000,...
+					'interactive',true,...
+					'p', init_p_val,...
+					'baseline_p',p_bs_target_3));
+p_me2
 toc
 
 
@@ -402,3 +412,100 @@ sepr('done em for 5')
 
 
 sepr('done all')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+%% 
+p_actual = [	14.467074  ;
+				7.4354783  ;
+				20.991296  ;
+				9.2340355  ;
+				33.655754  ;
+				8.0191336  ;
+				2.4001462  ;
+				2.5734037  ;
+			   0.11883542  ;
+			  0.076990272  ;
+			   0.35844400  ;
+			   0.25313549  ;
+			   0.22529346  ;
+			  0.048890239  ;
+			  0.024226458  ;
+			  0.046833900  ];
+p_actual = p_actual./100;
+
+grid_size_fc = 0.1;
+
+% 
+% mo = Model.generate(0.01,100,struct('path','data/modeldata3.dat','include_blanks',false,...
+% 	'normalize',true,'shift_data',false,'model_number',3));
+ob = Observed(struct('name','halo_3_10k','path','data/obsdata2_10000.dat','p_actual',p_actual));
+ob.model_number = 3;
+ob.point_count = 10;
+ob.x = ob.x + (grid_size_fc/2);
+ob.y = ob.y + (grid_size_fc/2);
+ob.load_models(mo);
+Observed.save(ob);
+
+
+%% 
+init_p_val = ones(16,1)./16;
+[ob, mo] = Observed.load(3,10);
+
+
+im=3;
+tic
+p_me=ob.em(struct(	'max_iters',100,...
+					'interactive',true,...
+					'p', init_p_val,...
+					'model_path','data/modeldata2.dat',...
+					'obs_path','data/obsdata2_10000.dat'));
+p_me
+toc
+
+
+
+
+
+im=2;
+tic
+p_me=ob.em(struct(	'max_iters',2156,...
+					'interactive',true,...
+					'p', init_p_val,...
+					'model_path','data/modeldata2.dat',...
+					'obs_path','data/obsdata2_10000.dat'));
+p_me
+toc
+
+
+
+
+
+
+%% 
+[ob, mo] = Observed.load(5,30);
+im=3;
+tic
+p_me=ob.em(struct(	'max_iters',2156,...
+					'interactive',true,...
+					'model_path','data/modeldata5.dat',...
+					'obs_path','data/obsdata5_30000.dat'));
+p_me
+toc
+
+
+
+
+
+

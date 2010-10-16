@@ -68,12 +68,12 @@ classdef Observed < handle
 			for i=1:n
 				for j=1:m
 					try
-					tval = mo.f_ab(j,ob.x(i),ob.y(i));
+					tval = mo.f_ab_live(j,ob.x(i),ob.y(i));
 					catch
 						ob.x(i)
 						ob.y(i)
 						sepr
-						tval = mo.f_ab(j,max(ob.x(i)),max(ob.y(i)));
+						tval = mo.f_ab_live(j,max(ob.x(i)),max(ob.y(i)));
 					end
 					try
 						f_ab(i,j) = tval;
@@ -115,6 +115,7 @@ classdef Observed < handle
 			interactive = arg('interactive',true);
 			max_seconds = arg('max_seconds',NaN);
 			baseline_p = arg('baseline_p',NaN);
+			interactive_print_interval = arg('interactive_print_interval', 100);
 			
 			obs_path = arg('obs_path','');
 			model_path = arg('model_path','');
@@ -218,7 +219,7 @@ classdef Observed < handle
 				pi_0 = pi_1; 
 				pi_1 = sum(w)'/N;
 				
-				tl_a = counter/50;tl_whole = floor(tl_a);tl_part = tl_a-tl_whole;
+				tl_a = counter/interactive_print_interval;tl_whole = floor(tl_a);tl_part = tl_a-tl_whole;
 				if tl_part == 0
 					pi_1
 				end
@@ -239,16 +240,8 @@ classdef Observed < handle
 						disp('time reached');
 						break;
 					end
-				else
-% 					if norms(counter) < min_norm && counter > min_iters
-					if counter > min_iters
-						%disp('min norm reached; stopping')
-						break;
-					end
-					
-					if counter==max_iters
-						warning('min norm not reached!')
-					end
+				elseif counter==max_iters
+					break;
 				end
 			end
 			tmr = toc(Tmr);
@@ -270,6 +263,74 @@ classdef Observed < handle
 		%em
 		function [p,P,ll,LL] = em(ob, varargin)
 			load_args
+			obs_path = arg('obs_path','');
+			model_path = arg('model_path','');
+			
+			%--
+			
+			fid = fopen(obs_path,'r'); x = fscanf(fid,'%f',[3,inf]); x= x';
+			
+
+			xmin = -3; xmax = 0; ymin = -0.5; ymax = 1;
+			idx = ((x(:,1) >= xmin) & (x(:,1) <= xmax) & (x(:,2) >= ymin) & (x(:,2) <= ymax));
+
+			x  = x(idx,:);
+			
+			fid = fopen(model_path,'r'); data = fscanf(fid,'%f',[9,inf]); data = data';
+
+
+
+			% return;
+ 			r = sqrt(2*0.05*0.05);
+ 			t = (1/8:1/4:1)'*2*pi; x1 = r*sin(t); x2 = r*cos(t);
+
+ 			k = 0; s = 0; 
+			for i=0:4,
+ 				for j =0:4,
+ 					k = k + 1;
+ 					idx = ((data(:,4)==j) & (data(:,5)==i) & (data(:,3)~=0));
+ 					distx = data(idx==1,:); n = length(distx);
+ 					%subplot(5,5,k); axis([-3 0 -0.5 1]);
+ 					if (n ~= 0) s = s + 1; end
+%  					for l = 1:n,
+%  						subplot(5,5,k); fill(distx(l,1)+x1,distx(l,2)+x2,[distx(l,3) 0 0]); hold on;
+%  					end
+ 					%xlabel('[\alpha/Fe]'); ylabel('[Fe/H]'); axis([-3 0 -0.5 1]);
+ 					% return;
+ 				end
+ 			end
+ 			T = s;
+ 			xn = 30; yn = 17;
+ 			xgrid = -2.95:0.1:-0.05;
+ 			ygrid = -0.65:0.1:0.95;
+ 
+
+ 			k=0; sq = zeros(xn,yn);
+ 			f = zeros(T,xgrid,ygrid);
+ 			indic= zeros(25,1); m = 0;
+ 			for i=0:4,
+ 				for j =0:4,
+ 					m = m + 1;
+ 					idx = ((data(:,4)==j) & (data(:,5)==i));
+ 					distx = data(idx==1,:); n = sum(distx(:,3)~=0);
+ 					if (n==0) continue; end
+ 					l = 0; k = k + 1;
+ 					indic(m) = 1;
+ 					for ix = 1:xn,
+ 						for iy = 1:yn,
+ 							l = l + 1;
+ 							sq(ix,iy) = distx(l,3);
+ 							f(k,ix,iy) = distx(l,3);
+ 						end
+ 					end
+ 					%figure(5); subplot(5,5,m); mesh(xgrid,ygrid,sq'); hold on;
+ 				end
+ 			end
+
+			f = 100*f;
+			fval = EvalDens(x(:,1),x(:,2),f,xgrid,ygrid,T,xn,yn);
+			id = (sum(fval')~=0); fval = fval(id,:); 
+			%--
 			
 			max_iters = arg('max_iters',100000);
 			min_iters = arg('min_iters',5);
@@ -279,7 +340,7 @@ classdef Observed < handle
 			p = arg('p',NaN);
 			interactive = arg('interactive',true);
 			baseline_p = arg('baseline_p',NaN);
-			
+			interactive_print_interval = arg('interactive_print_interval', 100);
 			max_seconds = arg('max_seconds',NaN);
 			
 			m = size(ob.f_ab,2);
@@ -307,36 +368,50 @@ classdef Observed < handle
 				clf(tfgr);
 			end
 			
+			ob.f_ab = fval;
+			
 			Tmr = tic;
 			P(:,1) = p;
+			w = zeros(n,m);
 			for counter=1:max_iters
 				p0 = p;
 				
-				tl_a = counter/50;tl_whole = floor(tl_a);tl_part = tl_a-tl_whole;
+				tl_a = counter/interactive_print_interval;tl_whole = floor(tl_a);tl_part = tl_a-tl_whole;
 				if interactive && (counter < 20 || tl_part==0)
 					ob.plot_progress(norms,ll,P,p,n,m,counter,-counter,im,init_p,baseline_p);
 				end
 				
-				for j=1:m
-					for i=1:n
-						p_f_ak_bk = zeros(m,1);
-
-% 						xi = ob.x(i);
-% 						yi = ob.y(i);
-
-						for k=1:m
-							p_f_ak_bk(k) = p0(k).*ob.f_ab(i,k);
-						end
-						
-						wij = (p0(j).*ob.f_ab(i,j)) ./ sum(p_f_ak_bk);
-						if ~isfinite(wij)
-							wij = 0;
-						end
-						w(i,j) = wij;
-					end
+				
+				
+				for i=1:n
+					w(i,:) = p0'.*ob.f_ab(i,:);
+					totalw = sum(w(i,:));
 					
-					p(j) = sum(w(:,j))/n;
+					w(i,:) = w(i,:)./totalw;
 				end
+				
+				p = sum(w)'./n;
+				
+% 				for j=1:m
+% 					for i=1:n
+% 						p_f_ak_bk = zeros(m,1);
+% 
+% % 						xi = ob.x(i);
+% % 						yi = ob.y(i);
+% 
+% 						for k=1:m
+% 							p_f_ak_bk(k) = p0(k).*ob.f_ab(i,k);
+% 						end
+% 						
+% 						wij = (p0(j).*ob.f_ab(i,j)) ./ sum(p_f_ak_bk);
+% 						if ~isfinite(wij)
+% 							wij = 0;
+% 						end
+% 						w(i,j) = wij;
+% 					end
+% 					
+% 					p(j) = sum(w(:,j))/n;
+% 				end
 				
 				P(:,counter+1) = p;
 				
@@ -359,16 +434,8 @@ classdef Observed < handle
 						disp('time reached');
 						break;
 					end
-				else
-% 					if norms(counter) < min_norm && counter > min_iters
-					if counter > min_iters
-						%disp('min norm reached; stopping')
-						break;
-					end
-					
-					if counter==max_iters
-						warning('min norm not reached!')
-					end
+				elseif counter==max_iters
+					break;
 				end
 			end
 			tmr = toc(Tmr);

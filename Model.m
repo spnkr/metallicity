@@ -177,14 +177,14 @@ classdef Model < handle
 			xa = data(:,1);
 			ya = data(:,2);
 			
-			x_bound = max(xa(xa<=x));
+			x_bound = max(xa(xa<x));
 			
 			if numel(x_bound)==0
 				out=0;
 				return;
 			end
 			
-			y_bound = max(ya(ya<=y));
+			y_bound = max(ya(ya<y));
 			
 			if numel(y_bound)==0
 				out=0;
