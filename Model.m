@@ -9,7 +9,7 @@ classdef Model < handle
 		xranges;
 		yranges;
 		
-		model_number
+		model_number;
 		path='data/modeldata2.dat';
 	end
 	
@@ -20,7 +20,6 @@ classdef Model < handle
 			load_args
 			
 			do_save = arg('do_save',true);
-			save_to = arg('save_to','cache/models_01.mat');
 			path = arg('path','data/modeldata2.dat');
 			include_blanks = arg('include_blanks',false);
 			shift_data = arg('shift_data',false);
@@ -29,8 +28,10 @@ classdef Model < handle
 			mo = Model(struct('step',stepsize,'precision',precision,'path',path,...
 				'include_blanks',include_blanks,'shift_data',shift_data,'normalize',normalize));
 			
+			mo.model_number = arg('model_number','UNKNOWN');
+			
 			if do_save
-				mo.save(save_to);
+				mo.save();
 			end
 		end
 		

@@ -1,6 +1,6 @@
-close all
+
 clear all
-fid = fopen('obsdata2_10000.dat','r'); x = fscanf(fid,'%f',[3,inf]); x= x';
+fid = fopen('data/obsdata2_10000.dat','r'); x = fscanf(fid,'%f',[3,inf]); x= x';
 figure(1); plot(x(:,1),x(:,2),'.'); xlabel('[\alpha/Fe]'); ylabel('[Fe/H]'); 
 
 xmin = -3; xmax = 0; ymin = -0.5; ymax = 1;
@@ -11,7 +11,7 @@ figure(2); plot(x(:,1),x(:,2),'.'); xlabel('[\alpha/Fe]'); ylabel('[Fe/H]');
 
 
 
-fid = fopen('modeldata2.dat','r'); data = fscanf(fid,'%f',[9,inf]); data = data';
+fid = fopen('data/modeldata2.dat','r'); data = fscanf(fid,'%f',[9,inf]); data = data';
 figure(3); plot(data(:,1),data(:,2),'.'); xlabel('[\alpha/Fe]'); ylabel('[Fe/H]'); 
 
 
@@ -76,6 +76,12 @@ eps = 0.0001;
 k = 0;
 N = length(fval);
 w = zeros(N,T);
+
+figure(10);
+subplot(1,2,1);
+plot(1,1);
+hold on;
+
 while (norm(pi_0 - pi_1) >= eps)
     k = k + 1;
     s = 0;
@@ -87,7 +93,10 @@ while (norm(pi_0 - pi_1) >= eps)
     end
     pi_0 = pi_1; 
     pi_1 = sum(w)'/N
-    figure(10); plot(k,pi_1,'.'); hold on;
-    figure(11); plot(k,s,'.'); hold on;
+    subplot(1,2,1); plot(k,pi_1,'.');
+	
+    subplot(1,2,2); plot(k,s,'.');
+	
     if(k > 500) break; end
 end
+hold off;

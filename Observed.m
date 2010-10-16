@@ -102,7 +102,166 @@ classdef Observed < handle
 		
 		
 		
+		%---
+		function [p,P] = em_bodhi(ob, varargin)
+			load_args
+			
+			max_iters = arg('max_iters',100000);
+			min_iters = arg('min_iters',5);
+			n = arg('n',length(ob.x));
+			min_norm = arg('min_norm',0.0000000001);
+			init_str = arg('init','rand(m,1)');
+			p = arg('p',NaN);
+			interactive = arg('interactive',true);
+			max_seconds = arg('max_seconds',NaN);
+			baseline_p = arg('baseline_p',NaN);
+			
+			obs_path = arg('obs_path','');
+			model_path = arg('model_path','');
+			
+			
+			P = zeros(16,1);
+			norms = [];
+			ll = [];
+			
+			fid = fopen(obs_path,'r'); x = fscanf(fid,'%f',[3,inf]); x= x';
+			
+
+			xmin = -3; xmax = 0; ymin = -0.5; ymax = 1;
+			idx = ((x(:,1) >= xmin) & (x(:,1) <= xmax) & (x(:,2) >= ymin) & (x(:,2) <= ymax));
+
+			x  = x(idx,:);
+			
+			fid = fopen(model_path,'r'); data = fscanf(fid,'%f',[9,inf]); data = data';
+
+
+
+			% return;
+ 			r = sqrt(2*0.05*0.05);
+ 			t = (1/8:1/4:1)'*2*pi; x1 = r*sin(t); x2 = r*cos(t);
+
+ 			k = 0; s = 0; 
+			for i=0:4,
+ 				for j =0:4,
+ 					k = k + 1;
+ 					idx = ((data(:,4)==j) & (data(:,5)==i) & (data(:,3)~=0));
+ 					distx = data(idx==1,:); n = length(distx);
+ 					%subplot(5,5,k); axis([-3 0 -0.5 1]);
+ 					if (n ~= 0) s = s + 1; end
+%  					for l = 1:n,
+%  						subplot(5,5,k); fill(distx(l,1)+x1,distx(l,2)+x2,[distx(l,3) 0 0]); hold on;
+%  					end
+ 					%xlabel('[\alpha/Fe]'); ylabel('[Fe/H]'); axis([-3 0 -0.5 1]);
+ 					% return;
+ 				end
+ 			end
+ 			T = s;
+ 			xn = 30; yn = 17;
+ 			xgrid = -2.95:0.1:-0.05;
+ 			ygrid = -0.65:0.1:0.95;
+ 
+
+ 			k=0; sq = zeros(xn,yn);
+ 			f = zeros(T,xgrid,ygrid);
+ 			indic= zeros(25,1); m = 0;
+ 			for i=0:4,
+ 				for j =0:4,
+ 					m = m + 1;
+ 					idx = ((data(:,4)==j) & (data(:,5)==i));
+ 					distx = data(idx==1,:); n = sum(distx(:,3)~=0);
+ 					if (n==0) continue; end
+ 					l = 0; k = k + 1;
+ 					indic(m) = 1;
+ 					for ix = 1:xn,
+ 						for iy = 1:yn,
+ 							l = l + 1;
+ 							sq(ix,iy) = distx(l,3);
+ 							f(k,ix,iy) = distx(l,3);
+ 						end
+ 					end
+ 					%figure(5); subplot(5,5,m); mesh(xgrid,ygrid,sq'); hold on;
+ 				end
+ 			end
+
+			f = 100*f;
+			fval = EvalDens(x(:,1),x(:,2),f,xgrid,ygrid,T,xn,yn);
+			id = (sum(fval')~=0); fval = fval(id,:); 
+
+			% return
+			%The EM algorithm
+			u = gamrnd(1/T,1,T,1);
+			pi_0 = u/sum(u); 
+			pi_1 = ones(T,1)/T;
+			pi_0 = pi_1 + 1;
+			k = 0;
+			N = length(fval);
+			w = zeros(N,T);
+			
+			init_p = pi_1;
+
+			global im;
+			if interactive
+				tfgr = figure(im);
+				clf(tfgr);
+			end
+			Tmr = tic;
+			
+			for counter=1:max_iters
+				k = k + 1;
+				s = 0;
+				for i = 1:N,
+					w(i,:) = pi_1.*fval(i,:)'; 
+					tot = sum(w(i,:));
+					w(i,:) = w(i,:)/tot;
+					s = s + log(tot);
+				end
+				pi_0 = pi_1; 
+				pi_1 = sum(w)'/N;
+				
+				tl_a = counter/50;tl_whole = floor(tl_a);tl_part = tl_a-tl_whole;
+				if tl_part == 0
+					pi_1
+				end
+				
+				P(:,counter) = pi_1;
+				norms(counter) = norm(pi_0 - pi_1);
+				ll(counter) = s;
+				
+				
+				if interactive
+					ob.plot_progress(norms,ll,P,pi_1,N,16,counter,-counter,im,init_p,baseline_p);
+				end
+				
+				if isfinite(max_seconds)
+					tmr = toc(Tmr);
+					el_sec = tmr;
+					if max_seconds < el_sec
+						disp('time reached');
+						break;
+					end
+				else
+					if norms(counter) < min_norm && counter > min_iters
+						%disp('min norm reached; stopping')
+						break;
+					end
+					
+					if counter==max_iters
+						warning('min norm not reached!')
+					end
+				end
+			end
+			tmr = toc(Tmr);
+			
+			ob.plot_progress(norms,ll,P,pi_1,N,16,counter,tmr,im,init_p,baseline_p);
+			
+			
+			
+			p = pi_1;
+			
+		end
 		
+		
+		%----
 		
 		
 		
@@ -118,6 +277,7 @@ classdef Observed < handle
 			init_str = arg('init','rand(m,1)');
 			p = arg('p',NaN);
 			interactive = arg('interactive',true);
+			baseline_p = arg('baseline_p',NaN);
 			
 			max_seconds = arg('max_seconds',NaN);
 			
@@ -132,8 +292,6 @@ classdef Observed < handle
 			
 			init_p = p;
 			
-			changing_norms = [];
-			
 			P = NaN.*ones(m,max_iters);
 			norms = zeros(1,1);
 % 			plike = zeros(1,1);
@@ -141,8 +299,12 @@ classdef Observed < handle
 			
 			w = zeros(n,m);
 			
+			
 			global im;
-			figure(im);
+			if interactive
+				tfgr = figure(im);
+				clf(tfgr);
+			end
 			
 			Tmr = tic;
 			P(:,1) = p;
@@ -150,10 +312,7 @@ classdef Observed < handle
 				p0 = p;
 				
 				if interactive
-					norms_pct_change = norms';
-					norms_pct_change = (norms_pct_change-circshift(norms_pct_change,1))./circshift(norms_pct_change,1);
-			
-					ob.plot_progress(norms,norms_pct_change,ll,P,p,n,m,counter,-counter,im,init_p);
+					ob.plot_progress(norms,ll,P,p,n,m,counter,-counter,im,init_p,baseline_p);
 				end
 				
 				for j=1:m
@@ -178,6 +337,13 @@ classdef Observed < handle
 				end
 				
 				P(:,counter+1) = p;
+				
+				%print every 10 p's
+				tl_a = counter/10;tl_whole = floor(tl_a);tl_part = tl_a-tl_whole;
+				if tl_part == 0
+					p
+				end
+				
 				
 				norms(counter) = abs(norm(p-p0));
 				
@@ -205,19 +371,9 @@ classdef Observed < handle
 			tmr = toc(Tmr);
 			
 			
+			ob.plot_progress(norms,ll,P,p,n,m,counter,tmr,im,init_p,baseline_p);
 			
-			norms_pct_change = norms';
-			norms_pct_change = (norms_pct_change-circshift(norms_pct_change,1))./circshift(norms_pct_change,1);
-			ob.plot_progress(norms,norms_pct_change,ll,P,p,n,m,counter,tmr,im,init_p);
 			
-			for i=2:length(norms_pct_change)
-				if sign(norms_pct_change(i)) ~= sign(norms_pct_change(i-1))
-					changing_norms(length(changing_norms)+1) = i;
-				end
-			end
-			if length(changing_norms > 0)
-				changing_norms
-			end
 			
 			im=im+1;
 			
@@ -255,12 +411,21 @@ classdef Observed < handle
 			end
 		end
 		
-		function plot_progress(ob,norms,norms_pct_change,ll,P,p,n,m,counter,tmr,im,init_p)
+		function plot_progress(ob,norms,ll,P,p,n,m,counter,tmr,im,init_p,baseline_p)
 			figure(im);
 			spr=3;spc=3;
+			pi_colors = 10.*(1+init_p);
+			pi_colors = [11.139; 19.786; 18.486; 10.506; 14.662; 13.257; 16.302; 12.303; 15.799; 16.032; 15.999; 14.484; 10.354; 15.138; 14.077;  11.08];
+			y_ax_min_span = 1;
+			clrs = ['r' 'g' 'b' 'c' 'm' 'y' 'k' 'r' 'g' 'b' 'c' 'm' 'y' 'k' ...
+				'r' 'g' 'b' 'c' 'm' 'y' 'k' 'r' 'g' 'b' 'c' 'm' 'y' 'k'];
 			
 			subplot(spr,spc,1);
 			roll_window_size = 50;
+			mini_roll_window_size = 10;
+			
+			norms_pct_change = norms';
+			norms_pct_change = (norms_pct_change-circshift(norms_pct_change,1))./circshift(norms_pct_change,1);
 			
 			plot(norms_pct_change,'k.-');
 			kk = length(norms_pct_change);
@@ -277,32 +442,46 @@ classdef Observed < handle
 			end
 			
 			
-			
-			subplot(spr,spc,6);
-			
-			if kk>roll_window_size
-				norms_pct_change = norms_pct_change(kk-roll_window_size:kk);
+			if isfinite(baseline_p)
+				spbi = subplot(spr,spc,7);
+				scatter(1:ob.num_models,(baseline_p-p)./p,20.*(1+init_p),pi_colors)
+				flabel('j','% \Delta', '% \Delta v other estimate');
+				
+				if counter > 20 && max(abs((baseline_p-p)./p)) > 1
+					fds=11;
+				end
+				
+				axis(spbi, 'tight')
+				currax = axis(spbi);
+				if abs(abs(currax(3)) - abs(currax(4))) < y_ax_min_span
+					currax(3) = currax(3)-y_ax_min_span;
+					currax(4) = currax(4)+y_ax_min_span;
+					axis(currax)
+				end
+				
+				y_ax_min_span = 0.5;
+ 				spbi = subplot(spr,spc,8);
+ 				scatter(1:ob.num_models,baseline_p-p,20.*(1+init_p),pi_colors,'filled')
+ 				flabel('j','\Delta', '\Delta v other estimate');
+				axis(spbi, 'tight')
+				currax = axis(spbi);
+				if abs(abs(currax(3)) - abs(currax(4))) < y_ax_min_span
+					currax(3) = currax(3)-y_ax_min_span;
+					currax(4) = currax(4)+y_ax_min_span;
+					axis(currax)
+				end
+				y_ax_min_span = 1;
+				
+% 				subplot(spr,spc,7);
+% 				scatter(1:ob.num_models,baseline_p,20.*(1+init_p),pi_colors)
+% 				hold on
+% 				scatter(1:ob.num_models,p,20.*(1+init_p),pi_colors,'filled')
+% 				hold off
+% 				flabel('j','\pi_j', '\pi vs other estimate');
 			end
-			plot(norms_pct_change,'k.-','Color',[.8 .8 .8]);
-			
-			flabel('Trial','% change',['Rolling ' num2str(roll_window_size) ' norm % change']);
-			
-			subplot(spr,spc,8);
-			kk = length(norms);
-			if kk>roll_window_size
-				norms = norms(kk-roll_window_size:kk);
-			end
-			plot(norms,'k.-','Color',[.8 .8 .8]);
-			
-			flabel('Trial','norm',['Rolling ' num2str(roll_window_size) ' norm']);
 			
 			
-			pi_colors = 10.*(1+init_p);
-			
-			
-
-			clrs = ['r' 'g' 'b' 'c' 'm' 'y' 'k' 'r' 'g' 'b' 'c' 'm' 'y' 'k' ...
-				'r' 'g' 'b' 'c' 'm' 'y' 'k' 'r' 'g' 'b' 'c' 'm' 'y' 'k'];
+		
 			
 			subplot(spr,spc,3);
 			
@@ -312,73 +491,110 @@ classdef Observed < handle
 			for i=2:m
 				hold on
 				plot(1:size(P,2),P(i,:),strcat([clrs(i) '.-']));
-				%scatter(1:size(P,2),P(i,:),5.*(1+P(i,:)),pi_colors(i).*ones(size(P,2),1),'filled')
 				hold off
 			end
 			flabel('Trial','\pi_j',strcat(['Weights over time']));
 			
 			
+			
+			
+			
+			if counter>2
+				subplot(spr,spc,6);
+				
+				PPC = P(:,1:counter)';
+				ppc0=circshift(PPC,1);
+				ppc0 = ppc0';
+				PPC = PPC';
+				ppc0=(PPC-ppc0)./ppc0;
+				ppc0=ppc0(:,1:size(ppc0,2));
+				PPC = 100.*ppc0;
+				PPC = PPC(:,2:size(PPC,2));
+
+% 				plot(2:size(PPC,2)+1,PPC(1,:),strcat([clrs(1) '-']));
+% 				for i=2:m
+% 					hold on
+% 					plot(2:size(PPC,2)+1,PPC(i,:),strcat([clrs(i) '.-']));
+% 					hold off
+% 				end
+% 				flabel('Trial','% \Delta',strcat(['% change \pi over last \pi']));
+				
+				subplot(spr,spc,6);
+				
+				roll_window_size = mini_roll_window_size;
+				if counter>roll_window_size
+					ppc_cols = counter-roll_window_size:counter-1;
+					PPC = PPC(:,ppc_cols);
+				else
+					ppc_cols = 1:size(PPC,2);
+				end
+				
+				plot(ppc_cols,PPC(1,:),strcat([clrs(1) '.-']));
+				for i=2:m
+					hold on
+					plot(ppc_cols,PPC(i,:),strcat([clrs(i) '.-']));
+					hold off
+				end
+				flabel('Trial','% \Delta',strcat(['Roll ' num2str(roll_window_size) ' % \Delta'...
+					'\pi over last \pi']));
+			end
+			
+			
+			
+			
+			
+			
 			subplot(spr,spc,9);
-			if counter>roll_window_size
-				PR = P(:,counter-roll_window_size:counter);
-			else
-				PR = P;
-			end
-			plot(1:size(PR,2),PR(1,:),strcat([clrs(1) '-']));
-			for i=2:m
-				hold on
-				plot(1:size(PR,2),PR(i,:),strcat([clrs(i) '.-']));
-				%scatter(1:size(P,2),P(i,:),5.*(1+P(i,:)),pi_colors(i).*ones(size(P,2),1),'filled')
-				hold off
-			end
-			flabel('Trial','\pi_j',strcat(['Rolling ' num2str(roll_window_size) ' weights over time']));
-			
-			
-% 			subplot(spr,spc,3);
-% 			scatter(1:ob.num_models,P(:,1),20.*(1+P(:,1)),10.*(1+P(:,1)))
-% 			flabel('j','\pi_j','Starting weights');
-% 			
-% 			subplot(spr,spc,4);
-% 			scatter(1:ob.num_models,p,20.*(1+p),10.*(1+p),'filled')
-% 			flabel('j','\pi_j',strcat(['Weights. \pi^{(0)}=' init_str]));
-			
-			
-			
-			subplot(spr,spc,4);
 			scatter(1:ob.num_models,init_p,20.*(1+init_p),pi_colors)
 			hold on
 			scatter(1:ob.num_models,p,20.*(1+p),pi_colors,'filled')
 			hold off
 			flabel('j','\pi_j',strcat(['Starting and ending \pi']));
-
-% 			ppdiff=init_p-p;
-% 			subplot(spr,spc,5);
-% 			scatter(1:ob.num_models,ppdiff,20.*(1+ppdiff),pi_colors,'filled')
-% 			flabel('j','Abs difference',strcat(['\pi^{(0)} vs current \pi']));
 			
 			if isfinite(ob.p_actual)
+				y_ax_min_span = 0.5;
 				ppdiff=ob.p_actual-p;
-				subplot(spr,spc,5);
+				spbi=subplot(spr,spc,5);
 				scatter(1:ob.num_models,ppdiff,20.*(1+ppdiff),pi_colors,'filled')
-				flabel('j','Abs difference',strcat(['Current \pi versus true']));
+				flabel('j','\Delta',strcat(['\Delta v true']));
+				axis(spbi, 'tight')
+				currax = axis(spbi);
+				if abs(abs(currax(3)) - abs(currax(4))) < y_ax_min_span
+					currax(3) = currax(3)-y_ax_min_span;
+					currax(4) = currax(4)+y_ax_min_span;
+					axis(currax)
+				end
+				y_ax_min_span = 1;
+				
+				spbi=subplot(spr,spc,4);
+				ppdiff=100.*(ob.p_actual-p)./p;
+				dotweights = 20.*(1+init_p);
+				sx = 1:ob.num_models;
+				
+				pct_diff_limit=35;
+				
+				ndx = ppdiff<pct_diff_limit & ppdiff>-pct_diff_limit;
+				if sum(ndx)>0
+					scatter(sx(ndx),ppdiff(ndx),dotweights(ndx),pi_colors(ndx))
+				end
+				hold on
+				ndx = ppdiff>=pct_diff_limit | ppdiff<=-pct_diff_limit;
+				if sum(ndx)>0
+					scatter(sx(ndx),pct_diff_limit.*ones(1,sum(ndx)),50.*ones(1,sum(ndx)),pi_colors(ndx),'filled')
+				end
+				hold off
+				
+				axis(spbi, 'tight')
+				currax = axis(spbi);
+				if abs(abs(currax(3)) - abs(currax(4))) < y_ax_min_span
+					currax(3) = currax(3)-y_ax_min_span;
+					currax(4) = currax(4)+y_ax_min_span;
+					axis(currax)
+				end
+				
+				flabel('j','% \Delta', '% \Delta v true');
 			end
 			
-			
-% 			if isfinite(ob.p_actual) & size(P,2) > 1
-% 				subplot(spr,spc,6);
-% 				pdc=p;
-% 				pdc = (pdc-P(:,size(P,2)-1))./P(:,size(P,2)-1);
-% 				plot(pdc,'b.-')
-% % 				hold on
-% % % 					pdc = p';
-% % % 					pdc = (pdc-ob.p_actual')./ob.p_actual';
-% % % 					plot(pdc,'r.-')
-% % % 					pdc = p';
-% % % 					pdc = (pdc-init_p')./init_p';
-% % % 					plot(pdc,'g.-')
-% % 				hold off
-% 				flabel('j','% change',['% \Delta \pi over last (' num2str(counter) ')']);
-% 			end
 			
 			
 			subplot(spr,spc,2);
@@ -389,24 +605,6 @@ classdef Observed < handle
 			flabel('Trial','l(\pi|x,y)',strcat(['l(\theta)=' num2str(ll(length(ll)))]));
 			
 			
-			llr = ll;
-			kk=length(llr);
-			if kk>roll_window_size
-				llr = llr(kk-roll_window_size:kk);
-			end
-% 			subplot(spr,spc,8);
-% 			plot(llr,'b.-')
-% 			flabel('Trial','l(\pi|x,y)',['Rolling ' num2str(roll_window_size) ' l(\theta)']);
-			
-			llr = ll';
-			llr = (llr-circshift(llr,1))./circshift(llr,1);
-			kk=length(llr);
-			if kk>roll_window_size
-				llr = llr(kk-roll_window_size:kk);
-			end
-			subplot(spr,spc,7);
-			plot(llr,'b.-','Color',[.7 .8 .8])
-			flabel('Trial','l(\pi|x,y)',['% \Delta l(\theta) roll ' num2str(roll_window_size)]);
 			
 		end
 		
