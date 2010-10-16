@@ -1,7 +1,10 @@
+1. get lrt sig value
+2. print diag for 5
+
 finals
 
 model 5 bem 300i
-
+ll=24912
 	       53.849
 	        7.423
 	       22.389
