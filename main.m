@@ -15,7 +15,8 @@ multicount = 2;
 max_seconds = 60*60;
 
 
-[ob, mo] = Observed.load(3,10);
+[ob2, mo2] = Observed.load(2,10);
+[ob5, mo5] = Observed.load(5,30);
 
 init_p_val = ones(16,1)./16;
 p_my_target_3 = [    0.13093;   0.0011212;     0.23474;    0.067527;     0.32525;    0.083172;    0.016957;    0.031472;  1.0601e-36;   0.0007638;   0.0027027;  2.9913e-10;   0.0036901;  1.1769e-09; 4.5421e-115;   0.0022481];
@@ -40,22 +41,24 @@ pval = 1-chi2cdf(t,15)
 
 
 %%
-
-
-
-
-
-
 im=1;
-tic
-p_b=ob.em_bodhi(struct(	'max_iters',2156,...
-						'baseline_p',p_bs_target_3,...
-						'p',init_p_val,...
-						'interactive',true,...
-						'model_path','data/modeldata2.dat',...
-						'obs_path','data/obsdata2_10000.dat'));
+p_b=ob2.em(struct(	'max_seconds',60,...
+							'p',init_p_val,...
+							'interactive',true,...
+							'interactive_print_interval',1));
 p_b
-toc
+
+
+
+
+
+%% 
+im=2;
+p_b=ob5.em(struct(	'max_seconds',60,...
+							'p',init_p_val,...
+							'interactive',true,...
+							'interactive_print_interval',1));
+p_b
 
 
 %% 

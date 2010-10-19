@@ -14,13 +14,19 @@ classdef Observed < handle
 		
 		actual_log_like=NaN;
 		p_actual=NaN;
+		
+		obs_path,model_path;
 	end
 	
 	
 	methods(Static)
 		function [obx, mox] = load(model_no,sample_size)
-			mox = Model.load(strcat(['cache/models_' num2str(model_no) '.mat']));
-			load(strcat(['cache/observed_' num2str(model_no) '_' num2str(sample_size) 'k.mat']));
+ 			mox = Model.load(strcat(['cache/models_' num2str(model_no) '.mat']));
+ 			load(strcat(['cache/observed_' num2str(model_no) '_' num2str(sample_size) 'k.mat']));
+			
+			ob.obs_path = strcat(['data/obsdata' num2str(model_no) '_' num2str(sample_size) '000.dat']);
+			ob.model_path = strcat(['data/modeldata' num2str(model_no) '.dat']);
+			
 			obx=ob;
 			disp(strcat(['Loaded model data ' num2str(model_no) ' for n=' num2str(sample_size) 'k']))
 		end
@@ -103,7 +109,7 @@ classdef Observed < handle
 		
 		
 		%---
-		function [p,P] = em_bodhi(ob, varargin)
+		function [p,P] = em(ob, varargin)
 			load_args
 			
 			max_iters = arg('max_iters',100000);
@@ -117,11 +123,11 @@ classdef Observed < handle
 			baseline_p = arg('baseline_p',NaN);
 			interactive_print_interval = arg('interactive_print_interval', 100);
 			
-			obs_path = arg('obs_path','');
-			model_path = arg('model_path','');
+			obs_path = ob.obs_path;
+			model_path = ob.model_path;
 			
 			
-			P = zeros(16,1);
+			
 			norms = [];
 			ll = [];
 			
@@ -199,7 +205,9 @@ classdef Observed < handle
 			w = zeros(N,T);
 			
 			init_p = pi_1;
-
+			P = zeros(T,1);
+			ob.num_models=T;
+			
 			global im;
 			if interactive
 				tfgr = figure(im);
@@ -228,9 +236,9 @@ classdef Observed < handle
 				norms(counter) = norm(pi_0 - pi_1);
 				ll(counter) = s;
 				
-				tl_a = counter/50;tl_whole = floor(tl_a);tl_part = tl_a-tl_whole;
+				tl_a = counter/interactive_print_interval;tl_whole = floor(tl_a);tl_part = tl_a-tl_whole;
 				if interactive && (counter < 20 || tl_part==0)
-					ob.plot_progress(norms,ll,P,pi_1,N,16,counter,-counter,im,init_p,baseline_p);
+					ob.plot_progress(norms,ll,P,pi_1,N,T,counter,-counter,im,init_p,baseline_p);
 				end
 				
 				if isfinite(max_seconds)
@@ -246,7 +254,7 @@ classdef Observed < handle
 			end
 			tmr = toc(Tmr);
 			
-			ob.plot_progress(norms,ll,P,pi_1,N,16,counter,tmr,im,init_p,baseline_p);
+			ob.plot_progress(norms,ll,P,pi_1,N,T,counter,tmr,im,init_p,baseline_p);
 			
 			
 			
@@ -261,7 +269,7 @@ classdef Observed < handle
 		
 		
 		%em
-		function [p,P,ll,LL] = em(ob, varargin)
+		function [p,P,ll,LL] = em_cached_old(ob, varargin)
 			load_args
 			obs_path = arg('obs_path','');
 			model_path = arg('model_path','');
@@ -484,10 +492,10 @@ classdef Observed < handle
 		function plot_progress(ob,norms,ll,P,p,n,m,counter,tmr,im,init_p,baseline_p)
 			figure(im);
 			spr=3;spc=3;
-			pi_colors = 10.*(1+init_p);
-			if ob.model_number==3
-			pi_colors = [11.139; 19.786; 18.486; 10.506; 14.662; 13.257; 16.302; 12.303; 15.799; 16.032; 15.999; 14.484; 10.354; 15.138; 14.077;  11.08];
-			end
+ 			pi_colors = [11.139; 19.786; 18.486; 10.506; 14.662; 13.257; 16.302; 12.303; 15.799; 16.032; 15.999; 14.484; 10.354; 15.138; 14.077;  11.08; 16.032; 15.999; 14.484; 10.354; 15.138; 14.077;  11.08];
+ 			
+			pi_colors = pi_colors(1:m);
+			
 			y_ax_min_span = 1;
 			clrs = ['r' 'g' 'b' 'c' 'm' 'y' 'k' 'r' 'g' 'b' 'c' 'm' 'y' 'k' ...
 				'r' 'g' 'b' 'c' 'm' 'y' 'k' 'r' 'g' 'b' 'c' 'm' 'y' 'k'];
