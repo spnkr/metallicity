@@ -12,17 +12,17 @@ addpath('data/');
 global im;
 im=1;
 
-[ob2, mo2] = Observed.load(2,10);
+[ob3, mo3] = Observed.load(3,10);
 [ob5, mo5] = Observed.load(5,30);
 
 init_p_val = ones(16,1)./16;
 
 %% model 2 realization 2
 im=1;
-p_b=ob2.em(struct(	'max_seconds',60,...
+p_b=ob3.em(struct(	'max_seconds',60,...
 					'p',init_p_val,...
 					'interactive',true,...
-					'interactive_print_interval',1));
+					'interactive_print_interval',10));
 p_b
 
 
@@ -31,7 +31,7 @@ im=2;
 p_b=ob5.em(struct(	'max_seconds',60,...
 					'p',init_p_val,...
 					'interactive',true,...
-					'interactive_print_interval',1));
+					'interactive_print_interval',5));
 p_b
 
 

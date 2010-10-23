@@ -1,0 +1,223 @@
+\documentclass[12pt]{amsart}
+\usepackage{geometry}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{subfig}
+\usepackage[table]{xcolor}
+\usepackage{color}
+\usepackage{natbib}
+
+\geometry{letterpaper}
+
+%\usepackage[T1]{fontenc}
+
+% general commands
+\definecolor{lemonchiffon}{rgb}{1, .98, .80}
+\definecolor{lightgrass}{rgb}{.89, 1, .87}
+\newcommand{\vect}[1]{\boldsymbol{\mathbf{#1}}}
+\newcommand{\degree}[1]{${#1}^{\circ}$}
+\newcommand{\highlight}{ \rowcolor{lightgrass} }
+\newcommand{\script}[1]{\mathcal{#1}}
+
+\newcommand{\eqn}[1]{\begin{align*}
+#1
+\end{align*}}
+\newcommand{\eqnl}[2]{\begin{align} \label{#1}
+#2
+\end{align}}
+\newcommand{\shblock}{\hspace{3mm}}
+\newcommand{\hblock}{\hspace{8mm}}
+\newcommand{\eqnsep}{\shblock,\hblock}
+
+\newcommand{\bl}{\big\{}
+\newcommand{\br}{\big\}}
+\newcommand{\Bl}{\Big\{}
+\newcommand{\Br}{\Big\}}
+
+\newcommand{\vz}{\vect{z}}
+\newcommand{\vx}{\vect{x}}
+\newcommand{\vy}{\vect{y}}
+\newcommand{\vp}{\vect{\pi}}
+
+\newcommand{\indicator}{\mathbf{1}}
+
+% paper specific terms
+\newcommand{\fab}{f_j}
+\newcommand{\llp}{l(\vect{\pi})}
+
+
+\newcommand{\sumn}{\sum^n_{i=1}}
+\newcommand{\summ}{\sum^m_{j=1}}
+\newcommand{\sumk}{\sum^m_{k=1}}
+
+
+\newcommand{\img}[2]{
+	\begin{figure}
+		\centering
+		\includegraphics[width=\textwidth]{#1}
+		\caption{#2}
+	\end{figure}
+}
+
+\newcommand{\imgi}[1]{
+	\vspace{10mm}
+	\includegraphics[width=\textwidth]{#1}
+	\vspace{10mm}
+}
+
+%%% TITLE
+\title{Metallicity}
+\author{\today}
+
+%%% BEGIN DOCUMENT
+\begin{document}
+
+\maketitle
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Mixture model}
+
+For each observation of ($L, \frac{\alpha}{\text{Fe}}, \frac{\text{Fe}}{\text{H}})$, let $\bl (x_i,y_i) \br^n_{i=1}$ represent observed metallicities of stars drawn from one of $m$ known model densities. We model the density of observations using the mixture model
+
+\eqn{
+	f(x,y) = \summ \pi_i \fab(x,y)
+}
+
+With an (incomplete data) likelihood of
+
+\eqn{
+	L(\vect{\pi}) &= \prod^n_{i=1} f(x_i,y_i)	 = \prod^n_{i=1} \Bl  \summ \pi_i \fab(x,y)  \Br	\\
+	\llp &= \sumn \log \Big( \summ \pi_i \fab(x,y)  \Big)
+}
+
+Evaluation of $\partial l(\vect{\pi})/\partial \pi$ can be avoided by adding a latent indicator, $z$, to the observed data $(x,y)$, representing the model group from which that observation was generated. Let $G_j$ be the $j^\text{th}$ model group, and let
+
+\eqn{z_{ij} = \indicator \bl (x_i,y_i) \mapsto G_j \br}
+
+
+The complete data likelihood is defined over the complete data $\bl (x_i,y_i,\vect{z}_i) \br^n_{i=1}$ as
+
+\eqn{
+	L(\vect{\pi}) &= \prod^n_{i=1} \prod^m_{j=1} \Bl \fab(x_i,y_i) \Br ^{z_{ij}} \pi_j^{z_{ij}}	\\
+	\llp &= \sumn \summ z_{ij}  \log \bl \pi_j  \fab(x_i,y_i) \br
+}
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\clearpage
+\section{EM}
+
+First we find the expected value of $\llp$ conditional on the distribution of z. Since $z_{ij}$ is an indicator function, its expected value is equal to the probability that data point $i$ comes from model $j$.
+
+\subsection{Expected value of $\llp$}
+The expected value of  $\llp$ is
+
+\eqn{
+	\text{E}_{\vp}\Big[\llp \big| \vx,\vy \Big] &= \sumn E(\vp | x_i, y_i) l(\vp | x_i, y_i) 		\\
+	&= \sumn \summ E_{\vp}\big[z_{ij}|x_i,y_i\big] \bl \log \fab(x_i,y_i) + \log \pi_j  \br
+}
+
+where
+\eqn{
+	\text{E}_{\vp}\Big[  z_{ij} | x_i, y_i \Big] = \text{Probability}\Big((x_i,y_i) \mapsto G_j \big | x_i,y_i\Big)
+}
+
+
+
+
+
+
+
+
+\subsection{Expected value of $\pi|\vect{x},\vect{y}$}
+The expected value of $z_{ij}$ is the same as the expected value of $\pi_j$, given the data. This can be specified as
+
+\eqn{
+	\text{E}_{\vp}\Big[ z_{j} | x_i,y_i \Big] = P(z_j|x_i,y_i) = \frac{P(x_i,y_i|z_j=1)P(z_j=1)}{P(x_i,y_i)}
+}
+
+with constituent parts:
+\eqn{
+	P(x_i,y_i | z_j=1) = f_j(x_i,y_i) \eqnsep  P(x_i,y_i|z_j) = \prod^m_{j=1}f_j^{z_i}	 \eqnsep  P(z_j) = \prod^m_{j=1} \pi_j^{z_j}
+}
+
+thus
+\eqn{
+	\text{E}_{\vp}\Big[ z_{j} | x_i,y_i \Big] &=  \frac{\pi_j \fab(x_i,y_i)}{\summ \pi_j \fab(x_i,y_i)}
+}
+
+
+Defining $w^{(t)}_{ij}$ as the expected value of $z_{ij}$ at the $t^\text{th}$ step, and $\pi^{(t)}_j$ as the MLE of $\pi_j$  at the $t^\text{th}$ step, yeilds
+\eqn{
+	w^{(t+1)}_{ij} &= \frac{\pi^{(t)}_{j} \fab(x_i,y_i)}{\sumk \pi^{(t)}_{k}f_k(x_i,y_i)}
+}
+
+
+
+
+
+
+
+\subsection{Solving for $\vp$}
+\eqn{
+	0 &= \frac{\partial}{\partial \pi_k} \text{E}_{\vect{\pi}}\Big[\llp \big| \vect{x},\vect{y}\Big]    \\
+	& =      \sumn \Bl  w^{(0)}_{ij} \frac{1}{\pi_k} - w^{(0)}_{im} \frac{1}{1-\pi_1-\ldots-\pi_{m-1}}   \Br, k=1,\ldots,m-1
+}
+
+Therefore
+
+
+\eqn{
+	\frac{1}{\pi_1} \sumn w^{(0)}_{i1} &= \ldots = \frac{1}{\pi_{m-1}} \sumn w^{(0)}_{i,m-1} = c	\\
+	\hat{\pi}_k &= \frac{\sumn w^{(0)}_{ik}}{c}		\\
+	\pi^{(1)}_j &= \frac{\sumn w^{(0)}_{ij}}{n}
+}
+
+And in general,
+
+
+\eqn{
+	\pi^{(t+1)}_j = \frac{\sumn w^{(t)}_{ij}}{n}
+}
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\clearpage
+\section{Standard errors}
+
+
+
+
+
+
+
+
+
+\end{document}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

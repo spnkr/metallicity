@@ -15,7 +15,7 @@ multicount = 2;
 max_seconds = 60*60;
 
 
-[ob2, mo2] = Observed.load(2,10);
+[ob3, mo3] = Observed.load(3,10);
 [ob5, mo5] = Observed.load(5,30);
 
 init_p_val = ones(16,1)./16;
