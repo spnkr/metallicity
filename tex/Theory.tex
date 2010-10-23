@@ -28,27 +28,59 @@
 \end{align}}
 \newcommand{\shblock}{\hspace{3mm}}
 \newcommand{\hblock}{\hspace{8mm}}
-\newcommand{\eqnsep}{\shblock,\hblock}
+\newcommand{\eqnsep}{\shblock\hblock}
 
 \newcommand{\bl}{\big\{}
 \newcommand{\br}{\big\}}
 \newcommand{\Bl}{\Big\{}
 \newcommand{\Br}{\Big\}}
 
+
+\newcommand{\indicator}{\mathbf{1}}
+
+\newcommand{\mtx}[4]{
+\[
+#1 = #2
+\left[ {\begin{array}{#3}
+ #4
+ \end{array} } \right]
+\]
+}
+
+\newcommand{\eqnset}[4]{
+\[ #1 = #2 \left\{ \begin{array}{#3}
+        #4
+\end{array} \right. \] 
+}
+
+
+
+        
+        
+        
+        
+
+% paper specific terms
 \newcommand{\vz}{\vect{z}}
 \newcommand{\vx}{\vect{x}}
 \newcommand{\vy}{\vect{y}}
 \newcommand{\vp}{\vect{\pi}}
+\newcommand{\vph}{\hat{\vect{\pi}}}
 
-\newcommand{\indicator}{\mathbf{1}}
 
-% paper specific terms
+
 \newcommand{\fab}{f_j}
 \newcommand{\llp}{l(\vect{\pi})}
+\newcommand{\llpp}{l(\vect{\pi^\prime})}
+
+
+\newcommand{\hessll}[2]{\sumn \frac{f_{#1}}{(\summ \pi_j f_j)^2 f_{#2}}}
+\newcommand{\hesslld}[2]{\frac{\partial^2 \llpp}{\partial \pi_{#1} \partial \pi_{#2}}}
 
 
 \newcommand{\sumn}{\sum^n_{i=1}}
 \newcommand{\summ}{\sum^m_{j=1}}
+\newcommand{\sumg}{\sum^g_{j=1}}
 \newcommand{\sumk}{\sum^m_{k=1}}
 
 
@@ -86,14 +118,14 @@
 For each observation of ($L, \frac{\alpha}{\text{Fe}}, \frac{\text{Fe}}{\text{H}})$, let $\bl (x_i,y_i) \br^n_{i=1}$ represent observed metallicities of stars drawn from one of $m$ known model densities. We model the density of observations using the mixture model
 
 \eqn{
-	f(x,y) = \summ \pi_i \fab(x,y)
+	f(x,y) = \summ \pi_j \fab(x,y) \eqnsep \summ \pi_j = 1 \eqnsep \pi_j \geq 0, j=1,\ldots,m
 }
 
 With an (incomplete data) likelihood of
 
 \eqn{
-	L(\vect{\pi}) &= \prod^n_{i=1} f(x_i,y_i)	 = \prod^n_{i=1} \Bl  \summ \pi_i \fab(x,y)  \Br	\\
-	\llp &= \sumn \log \Big( \summ \pi_i \fab(x,y)  \Big)
+	L(\vect{\pi}) &= \prod^n_{i=1} f(x_i,y_i)	 = \prod^n_{i=1} \Bl  \summ \pi_j \fab(x_i,y_i)  \Br	\\
+	\llp &= \sumn \log \Big( \summ \pi_j \fab(x_i,y_i)  \Big)
 }
 
 Evaluation of $\partial l(\vect{\pi})/\partial \pi$ can be avoided by adding a latent indicator, $z$, to the observed data $(x,y)$, representing the model group from which that observation was generated. Let $G_j$ be the $j^\text{th}$ model group, and let
@@ -194,11 +226,41 @@ And in general,
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \clearpage
-\section{Standard errors}
+\section{Observed Information}
+
+As $\pi_m = 1-\summ \pi_j$ there are only $g$ free parameters. Thus let $g=m-1$, and $\vp^\prime=\vp[1,\ldots,g]$. The observed information matrix, $I(\vp^\prime|\vx,\vy)$ is given by the $g\times g$ negative hessian:
+
+\eqn{
+	\llpp &= \sumn \log \Big( \sumg \pi_j \fab  \Big)		\\
+	\frac{\partial \llpp}{\partial \pi_k} &= \sumn \frac{f_k}{\sumg \pi_j f_j}	\\
+	\frac{\partial^2 \llpp}{\partial \pi_k \partial \pi_r} &= -\sumn \frac{f_k}{(\sumg \pi_j f_j)^2 f_r}
+}
+
+\mtx{I(\vp|\vx,\vy)=-\frac{\partial^2 \llpp}{\partial \vp^\prime \partial \vp^{\prime T}}}{-}{cccc}{
+	\frac{\partial^2 \llpp}{\partial \pi_1^2} & \hesslld{1}{2} & \ldots & \hesslld{1}{g}	\\
+	\vdots & \vdots & & \vdots	\\
+	\hesslld{g}{1} & \hesslld{g}{2} & \ldots & \frac{\partial^2 \llpp}{\partial \pi_{g}^2}
+}
+
+\mtx{}{}{cccc}{
+	\sumn \frac{1}{(\sumg \pi_j f_j)^2} & \hessll{1}{2} & \ldots & \hessll{1}{g}	\\
+	\vdots & \vdots & & \vdots	\\
+	\hessll{g}{1} & \hessll{g}{2} & \ldots & \sumn \frac{1}{(\sumg \pi_j f_j)^2}
+}
 
 
+\subsection{Variance and Covariance of $\vp$}
+The asymptotic covariance matrix of $\vp$ can be approximated by the inverse of the observed information matrix, $I^{-1}(\vph|\vx,\vy)$, yielding
 
+\eqnset{\text{Cov}(\pi_p,\pi_q)}{}{ll}{
+	I^{-1}(\vph) 				& p,q<m	\\
+	\sum\limits_{j\neq q} \text{Cov}(\pi_p,\pi_j)		& p=m,q<m	\\
+	\sum\limits_{j\neq q}\sum\limits_{k\neq q} \text{Cov}(\pi_j,\pi_k)		& p, q=m	\\
+}
 
+\eqn{
+	\text{Var}(\pi_j) &= \sigma^2_j = \Bl \text{Cov}(\vp) \Br_{jj}
+}
 
 
 
