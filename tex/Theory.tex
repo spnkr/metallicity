@@ -121,7 +121,7 @@ For each observation of ($L, \frac{\alpha}{\text{Fe}}, \frac{\text{Fe}}{\text{H}
 	f(x,y) = \summ \pi_j \fab(x,y) \eqnsep \summ \pi_j = 1 \eqnsep \pi_j \geq 0, j=1,\ldots,m
 }
 
-With an (incomplete data) likelihood of
+With a complete likelihood of
 
 \eqn{
 	L(\vect{\pi}) &= \prod^n_{i=1} f(x_i,y_i)	 = \prod^n_{i=1} \Bl  \summ \pi_j \fab(x_i,y_i)  \Br	\\
@@ -133,7 +133,7 @@ Evaluation of $\partial l(\vect{\pi})/\partial \pi$ can be avoided by adding a l
 \eqn{z_{ij} = \indicator \bl (x_i,y_i) \mapsto G_j \br}
 
 
-The complete data likelihood is defined over the complete data $\bl (x_i,y_i,\vect{z}_i) \br^n_{i=1}$ as
+The incomplete data likelihood is defined over the complete data $\bl (x_i,y_i,\vect{z}_i) \br^n_{i=1}$ as
 
 \eqn{
 	L(\vect{\pi}) &= \prod^n_{i=1} \prod^m_{j=1} \Bl \fab(x_i,y_i) \Br ^{z_{ij}} \pi_j^{z_{ij}}	\\

@@ -1,8 +1,8 @@
-function [fval]= EvalDens(x,y,f,xgrid,ygrid,T,xn,yn)
+function [fval]= EvalDens(x,y,f,xgrid,ygrid,T,xn,yn,gap)
 n = length(x);
 xmin = min(xgrid); xmax = max(xgrid);
 ymin = min(ygrid); ymax = max(ygrid);
-gap =0.05;
+
 fval= zeros(n,T);
 
 for j = 1:n,
