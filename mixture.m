@@ -6,14 +6,13 @@ classdef Mixture < handle
 		x;
 		f;
 		
-		true_loglike;
-		est_loglike;
-		true_pi;
-		est_pi;
-		est_pi_all;
-		est_loglike_all;
+		loglike_true;
+		loglike_est;
+		pi_true;
+		pi_est;
+		pi_est_all;
+		loglike_est_all;
 		
-		em_optimal_iters;
 		em_run_iters;
 		em_run_seconds;
 		em_init_p;
@@ -23,6 +22,13 @@ classdef Mixture < handle
 		bin_step=0.1;
 		xrange;
 		yrange;
+		
+		pval_lrt;
+		
+		info;
+		covar;
+		variance;
+		stdev;
 	end
 	
 	
@@ -32,7 +38,7 @@ classdef Mixture < handle
 			mix=mi;
 		end
 		
-		function tp = get_true_pi(halonum)
+		function tp = get_pi_true(halonum)
 			tp=NaN;
 			if halonum==3
 				tp = [	14.467074  ;
@@ -63,22 +69,26 @@ classdef Mixture < handle
 			load_args
 			
 			mi.filename = arg('save_as',NaN);
-			mi.em_optimal_iters = arg('em_optimal_iters',NaN);
 			obs_path = arg('obs_path',NaN);
 			model_path = arg('model_path',NaN);
 			mi.f = arg('f',NaN);
-			mi.true_pi = arg('true_pi',NaN);
+			mi.x = arg('x',NaN);
+			mi.pi_true = arg('pi_true',NaN);
 			mi.bin_step = arg('bin_step',mi.bin_step);
 			graph = arg('graph',false);
 			if graph
 				fig
 			end
 			
-			x = load(obs_path);
-			x = x(x(:,1)>-3,[1 2]);
-			mi.x=x;
+			if ~isfinite(mi.x)
+				x = load(obs_path);
+				x = x(x(:,1)>-3,[1 2]);
+				mi.x=x;
+			end
 			
- 			if ~isfinite(mi.f)
+ 			if isfinite(mi.f)
+				mi.num_models = size(mi.f,2);
+			else
  				models = load(model_path);
 				
 				xbin = models(:,4);
@@ -146,8 +156,8 @@ classdef Mixture < handle
 				mi.yrange=yrange;
 			end
 			
-			if isfinite(mi.true_pi)
-				mi.true_loglike = mi.complete_log_like(mi.f,mi.true_pi,length(mi.x),mi.num_models);
+			if isfinite(mi.pi_true)
+				mi.loglike_true = mi.complete_log_like(mi.f,mi.pi_true,length(mi.x),mi.num_models);
 			end
 			
 			
@@ -166,48 +176,79 @@ classdef Mixture < handle
 			mi.save();
 		end
 		
-		%\llp &= \sumn \log \Big( \summ \pi_j \fab(x_i,y_i)  \Big)
-		function l = complete_log_like(mi,f,p,n,m)
-			l = 0;
-			for i=1:n
-				l0 = 0;
-				for j=1:m
-					l0 = l0 + p(j)*f(i,j);
-				end
-				lgl0 = log(l0);
-				if ~isfinite(lgl0)
-					lgl0=0;
-				end
-				l = l + lgl0;
-			end
-		end
-		
 		function [p,ll,P,LL] = em(mi,varargin)
 			load_args
 			car = cell2mat(varargin);
 			
-			if ~isfinite(arg('max_iters',NaN)) && ~isfinite(arg('max_seconds',NaN)) && isfinite(mi.em_optimal_iters)
-				car.max_iters = mi.em_optimal_iters;
+			n=arg('n',NaN);
+			if isfinite(n)
+				mi.x = mi.x(1:n,:);
+				mi.f = mi.f(1:n,:);
+				if isfinite(mi.pi_true)
+					mi.loglike_true = mi.complete_log_like(mi.f,mi.pi_true,length(mi.x),mi.num_models);
+				end
 			end
 			
 			car.num_models = mi.num_models;
-			car.p_actual = mi.true_pi;
-			car.true_loglike = mi.true_loglike;
+			car.p_actual = mi.pi_true;
+			car.loglike_true = mi.loglike_true;
 			
-			
+			global im;
 			[p,ll,P,LL,init_p,counter,tmr] = em(mi.x,mi.f,car);
+			im=im+1;
 			
-			mi.est_pi = p;
-			mi.est_loglike = ll;
-			mi.est_pi_all = P;
-			mi.est_loglike_all = LL;
+			mi.pi_est = p;
+			mi.loglike_est = ll;
+			mi.pi_est_all = P;
+			mi.loglike_est_all = LL;
 			mi.em_run_seconds = tmr;
 			mi.em_run_iters = counter;
 			mi.em_init_p = init_p;
-			
-			mi.save
 		end
 		
+		function update_stats(mi)
+			if isfinite(mi.pi_true)
+				mi.loglike_true = mi.complete_log_like(mi.f,mi.pi_true,length(mi.x),mi.num_models);
+			end
+			
+			mi.get_pval_lrt();
+			
+			[I,S,V,stdev] = fisher_info(mi.pi_est,mi.f);
+			mi.info = I;
+			mi.covar = S;
+			mi.variance = V;
+			mi.stdev = stdev;
+		end
+		
+		function text_summary(mi)
+			if isfinite(mi.pi_true)
+				pi_true_diff = 100.*[mi.pi_est mi.pi_true mi.pi_est-mi.pi_true]
+			else
+				pi = mi.pi_est
+			end
+		end
+		
+		
+		
+		%--internal
+		%\llp &= \sumn \log \Big( \summ \pi_j \fab(x_i,y_i)  \Big)
+		function l = complete_log_like(mi,f,p,n,m)
+			l = complete_log_like(f,p,n,m);
+		end
+		
+		
+		
+		function [p,t] = get_pval_lrt(mi)
+			t=-2*(mi.loglike_true - mi.loglike_est);
+			df=mi.num_models-1;
+			
+			%chi2inv(.95,15)
+
+			chance_less_than_or_equal_to = 100*chi2cdf(t,df);
+			chance_more_extreme = 100-chance_less_than_or_equal_to;
+			p = chance_more_extreme;
+			mi.pval_lrt = p;
+		end
 	end
 	
 end

@@ -75,6 +75,7 @@
 
 
 \newcommand{\hessll}[2]{\sumn \frac{f_{#1}}{(\summ \pi_j f_j)^2 f_{#2}}}
+\newcommand{\hessllg}[2]{\sumn \frac{f_{#1}}{(\sumg \pi_j f_j)^2 f_{#2}}}
 \newcommand{\hesslld}[2]{\frac{\partial^2 \llpp}{\partial \pi_{#1} \partial \pi_{#2}}}
 
 
@@ -243,28 +244,148 @@ As $\pi_m = 1-\summ \pi_j$ there are only $g$ free parameters. Thus let $g=m-1$,
 }
 
 \mtx{}{}{cccc}{
-	\sumn \frac{1}{(\sumg \pi_j f_j)^2} & \hessll{1}{2} & \ldots & \hessll{1}{g}	\\
+	\sumn \frac{1}{(\sumg \pi_j f_j)^2} & \hessllg{1}{2} & \ldots & \hessllg{1}{g}	\\
 	\vdots & \vdots & & \vdots	\\
-	\hessll{g}{1} & \hessll{g}{2} & \ldots & \sumn \frac{1}{(\sumg \pi_j f_j)^2}
+	\hessllg{g}{1} & \hessllg{g}{2} & \ldots & \sumn \frac{1}{(\sumg \pi_j f_j)^2}
 }
 
+*Excluding $i$ where $(\sumg \pi_j f_j)^2 f_{i}=0$ to avoid dividing by zero.
 
 \subsection{Variance and Covariance of $\vp$}
 The asymptotic covariance matrix of $\vp$ can be approximated by the inverse of the observed information matrix, $I^{-1}(\vph|\vx,\vy)$, yielding
 
 \eqnset{\text{Cov}(\pi_p,\pi_q)}{}{ll}{
 	I^{-1}(\vph) 				& p,q<m	\\
-	\sum\limits_{j\neq q} \text{Cov}(\pi_p,\pi_j)		& p=m,q<m	\\
-	\sum\limits_{j\neq q}\sum\limits_{k\neq q} \text{Cov}(\pi_j,\pi_k)		& p, q=m	\\
+	\sum\limits_{j=1}^g \text{Cov}(\pi_j,\pi_q)		& p=m,q<m	\\
+	\sum\limits_{j=1}^g \sum\limits_{k=1}^g \text{Cov}(\pi_j,\pi_k)		& p, q=m	\\
 }
 
 \eqn{
-	\text{Var}(\pi_j) &= \sigma^2_j = \Bl \text{Cov}(\vp) \Br_{jj}
+	\text{Var}(\pi_j) &= \sigma^2_j = \Bl \big | \text{Cov}(\vp) \big | \Br_{jj}
+}
+* There are many negative covariances; this is ok I think.
+
+
+
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\clearpage
+\section{Likelihood ratio test}
+Given certain conditions
+\eqn{
+	H_0: \vp = \vp_\text{true}	\\
+	H_1: \vp \neq \vp_\text{true}
 }
 
+\eqn{
+	\Lambda = -2 \log \frac{ \sup_{\vp=\vp_\text{true}} \llp}{ \sup_{\vp} \llp }  = -2\bl l(\vp_\text{true}) - l(\vph) \br \sim \chi^2_{m-1}	\\
+}
+\eqn{
+	\Lambda_\text{Halo 3} &= 25.025 \sim \chi^2_{15}	\\
+	\text{p-value 10k} &= 4.961\%\\
+	\text{p-value 30k} &= 1.3\times 10^{-5}\%\\
+	\text{p-value 50k} &= 1.4\times 10^{-12}\%
+}
+
+Thus we accept $H_0$ when requiring 95\% or less confidence; there is only a 4.961\% chance we would see a value this extreme or more given $H_0$ is true. This holds for 400 to 1600 EM iterations.
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\clearpage
+\section{Other}
+\subsection{Convergence}
+$\llp$ from 1.235 to 1.236 over past 25 runs is the slowest rate of convergence.
+
+\subsection{To do}
+Bias, consistency, efficiency, method of moments, $\sigma$ as a function of n. Bootstrapping, n+1 bootstrapping as a check that n is large enough for fisher info.
+
+
+MAP 2.8.5.
+
+Alt T 2.7.3.
+
+basis of test 2.7.1.
+
+deterministic annealing em algo 2.12.4.
+
+stochiastic em 2.13.
+
+conditional bootstrap 2.15.5. 
+
+
+alt approach to fisher info: 2.16.1: using wald and reduced parameter holding out.
+
+full bootstrap 2.16.2
+
+
+
+2.18.2 modified lrt
+
+2.18.1 outliers
+
+2.19 partial classification
+
+3.5
+
+3.8.1
+
+
+spectral decomposition: 3.12.1
+
+k means classification for auto binning?
+
+4: mcmc for mixture
+
+5.5.2: exactly what we did--nonormal
+
+5.5.4: mulitcycle
+
+5.13 hierarchical mixtures of experts
+
+
+6.13 skewness of lrt and m
+
+6.3.2
+
+6.5
+
+6.6 bootstrapping lrts
+
+6.7 pval boots
+
+6.7.2 double boots
+
+6.8 bias corr for log like, aic, boots info, cv info
+
+6.9 bayeseian info
+
+6.10 classification based info
+
+9 fitting mix to bin data
+
+11 mix analys of directional data
+
+13 hidden markov models
 
 \end{document}
 

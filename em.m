@@ -5,15 +5,22 @@ function [p,ll,P,LL,init_p,counter,tmr] = em(x,f,varargin)
 	min_iters = arg('min_iters',5);
 	n = arg('n',length(x));
 	min_norm = arg('min_norm',0.0000000001);
-	init_str = arg('p0_eval',NaN);%rand(num_models,1)
-	init_p = arg('p0',NaN);
+	p0_eval = arg('p0_eval',NaN);%rand(num_models,1)
+	init_p = arg('init_p',NaN);
 	interactive = arg('interactive',true);
 	max_seconds = arg('max_seconds',NaN);
 	baseline_p = arg('baseline_p',NaN);
-	quick_print = arg('quick_print', 100);
+	quick_print = arg('quick_print', 50);
+	if ~isfinite(quick_print)
+		quick_print = max_iters;
+	end
 	true_loglike = arg('true_loglike',NaN);
 	num_models=arg('num_models',NaN);
 	p_actual=arg('p_actual',NaN);
+	
+	%1.235 to 1.236 over past 25 runs is the slowest rate of convergence
+	ll_stop_prec=arg('ll_stop_prec',1000);
+	ll_stop_lookback=arg('ll_stop_lookback',25);
 	
 	norms = [];
 	LL = [];
@@ -26,8 +33,8 @@ function [p,ll,P,LL,init_p,counter,tmr] = em(x,f,varargin)
 	
 	if isfinite(init_p)
 		pi_1 = init_p;
-	elseif isfinite(init_str)
-		pi_1 = eval(init_str);
+	elseif isfinite(p0_eval)
+		pi_1 = eval(p0_eval);
 	else
 		pi_1 = ones(num_models,1)/num_models;
 	end
@@ -75,7 +82,27 @@ function [p,ll,P,LL,init_p,counter,tmr] = em(x,f,varargin)
 			plot_progress(norms,LL,P,pi_1,N,num_models,counter,-counter,im,init_p,baseline_p,...
 				true_loglike,num_models,p_actual,quick_print);
 		end
-
+		
+		if 1==11
+		if counter>min_iters && (...
+					sign((norms(counter)-norms(counter-1))/norms(counter-1)) ~= ...
+						sign((norms(counter-1)-norms(counter-2))/norms(counter-2))...
+				)
+			disp(strcat(['norm percent change sign flipped over last; stopping at ' num2str(counter)]));
+			break;
+		end
+		end
+		
+		
+		if counter>min_iters && counter>ll_stop_lookback && round(ll_stop_prec*LL(counter))/ll_stop_prec...
+				== round(ll_stop_prec*LL(counter-1))/ll_stop_prec && ...
+				round(ll_stop_prec*LL(counter))/ll_stop_prec == ...
+				round(ll_stop_prec*LL(counter-ll_stop_lookback))/ll_stop_prec
+			disp(strcat(['ll did not change more than ' num2str(ll_stop_prec) ' dec places '...
+				'in last ' num2str(ll_stop_lookback) ' iters; stopping at ' num2str(counter)]));
+			break;
+		end
+		
 		if isfinite(max_seconds)
 			tmr = toc(Tmr);
 			el_sec = tmr;
@@ -119,10 +146,12 @@ end
 		kk = length(norms_pct_change);
 		if kk>5
 			kkdelt = std(norms_pct_change(5:kk));
-			axis([5 kk min(norms_pct_change(5:kk))-kkdelt max(norms_pct_change(5:kk))+kkdelt])
+			if isfinite(kkdelt)
+				axis([5 kk min(norms_pct_change(5:kk))-kkdelt max(norms_pct_change(5:kk))+kkdelt])
+			end
 		end
 		if tmr<0
-			flabel('Trial','% change',strcat(['(In progress) ' num2str(counter) ' runs, n='...
+			flabel(['Trial ' num2str(1000*norms_pct_change(length(norms_pct_change)))],'% change',strcat(['(In progress) ' num2str(counter) ' runs, n='...
 				num2str(n)]));
 		else
 			flabel('Trial','% change',strcat([num2str(counter) ' runs in ' ...
@@ -175,7 +204,7 @@ end
 
 		P = P(:,1:counter);
 
-		plot(1:size(P,2),P(1,:),strcat([clrs(1) '-']));
+		plot(1:size(P,2),P(1,:),strcat([clrs(1) '.-']));
 		for i=2:m
 			hold on
 			plot(1:size(P,2),P(i,:),strcat([clrs(i) '.-']));

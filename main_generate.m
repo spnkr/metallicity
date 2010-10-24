@@ -1,4 +1,5 @@
-%% regenerate all
+
+%% load data etc
 clear
 clc
 format short g
@@ -6,69 +7,106 @@ addpath('etc/');
 addpath('data/');
 global im;
 im=1;
+mnames = {'halo3', 'halo5', 'gen1', 'gen2', 'halo3_1600', 'halo5_1600', 'halo3_30k', 'halo3_50k'};
 
-p_actual = [	14.467074  ;
-				7.4354783  ;
-				20.991296  ;
-				9.2340355  ;
-				33.655754  ;
-				8.0191336  ;
-				2.4001462  ;
-				2.5734037  ;
-			   0.11883542  ;
-			  0.076990272  ;
-			   0.35844400  ;
-			   0.25313549  ;
-			   0.22529346  ;
-			  0.048890239  ;
-			  0.024226458  ;
-			  0.046833900  ];
-p_actual = p_actual./100;
+max_seconds = 99999999999;
 
+mi = Mixture.load('gen1');
+sepr(mi.filename)
+mi.em(struct('max_seconds',max_seconds,'p0_eval','rand(num_models,1)'));
+mi.update_stats
+mi
+mi.save
+
+mi = Mixture.load('gen2');
+sepr(mi.filename)
+mi.em(struct('max_seconds',max_seconds,'p0_eval','rand(num_models,1)'));
+mi.update_stats
+mi
+mi.save
 
 
-mo = Model.generate(0.01,100,struct('path','data/modeldata3.dat','include_blanks',false,...
-	'normalize',true,'shift_data',false));
+mi = Mixture(struct(	'save_as','halo3',...
+						'model_path','data/modeldata3.dat',...
+						'obs_path','data/obsdata3_10000.dat',...
+						'pi_true', Mixture.get_pi_true(3),...
+						'graph',false));
 
-mo = Model.load('cache/models_3.mat');
-
-
-ob = Observed(struct('name','halo_3_10k','path','data/obsdata2_10000.dat','p_actual',p_actual));
-ob.model_number = 3;
-ob.point_count = 10;
-ob.x = ob.x + (0.1/2);
-ob.y = ob.y + (0.1/2);
-ob.load_models(mo);
-Observed.save(ob);
-
-ob = Observed(struct('name','halo_3_30k','path','data/obsdata2_30000.dat','p_actual',p_actual));
-ob.model_number = 3;
-ob.point_count = 30;
-ob.x = ob.x + (0.1/2);
-ob.y = ob.y + (0.1/2);
-ob.load_models(mo);
-Observed.save(ob);
-
-
-ob = Observed(struct('name','halo_3_50k','path','data/obsdata2_50000.dat','p_actual',p_actual));
-ob.model_number = 3;
-ob.point_count = 50;
-ob.x = ob.x + (0.1/2);
-ob.y = ob.y + (0.1/2);
-ob.load_models(mo);
-Observed.save(ob);
+mi.em(struct('max_seconds',max_seconds));
+mi.update_stats
+mi.save
+mi.save
 
 
 
-mo = Model.generate(0.01,100,struct('path','data/modeldata5.dat','include_blanks',false,...
-	'normalize',true,'shift_data',false));
+mi = Mixture(struct(	'save_as','halo3_1600',...
+						'model_path','data/modeldata3.dat',...
+						'obs_path','data/obsdata3_10000.dat',...
+						'pi_true', Mixture.get_pi_true(3),...
+						'graph',false));
 
-mo = Model.load('cache/models_5.mat');
+mi.em(struct('max_iters',1600,'ll_stop_lookback',1000000));
+mi.update_stats
+mi.save
 
-ob = Observed(struct('name','halo_5_30k','path','data/obsdata5_30000.dat','p_actual',NaN));
-ob.model_number = 5;
-ob.point_count = 30;
-ob.x = ob.x + (0.1/2);
-ob.y = ob.y + (0.1/2);
-ob.load_models(mo);
-Observed.save(ob);
+
+
+mi = Mixture(struct(	'save_as','halo5',...
+						'model_path','data/modeldata5.dat',...
+						'obs_path','data/obsdata5_30000.dat',...
+						'pi_true', Mixture.get_pi_true(5),...
+						'graph',false));
+
+mi.em(struct('max_seconds',max_seconds));
+mi.update_stats
+mi.save
+
+mi = Mixture(struct(	'save_as','halo5_1600',...
+						'model_path','data/modeldata5.dat',...
+						'obs_path','data/obsdata5_30000.dat',...
+						'pi_true', Mixture.get_pi_true(5),...
+						'graph',false));
+
+mi.em(struct('max_iters',1600,'ll_stop_lookback',1000000));
+mi.update_stats
+mi.save
+
+
+
+
+mi = Mixture(struct(	'save_as','halo3_30k',...
+						'model_path','data/modeldata3.dat',...
+						'obs_path','data/obsdata3_30000.dat',...
+						'pi_true', Mixture.get_pi_true(3),...
+						'graph',false));
+
+mi.em(struct('max_seconds',max_seconds));
+mi.update_stats
+mi.save
+
+
+mi = Mixture(struct(	'save_as','halo3_50k',...
+						'model_path','data/modeldata3.dat',...
+						'obs_path','data/obsdata3_50000.dat',...
+						'pi_true', Mixture.get_pi_true(3),...
+						'graph',false));
+
+mi.em(struct('max_seconds',max_seconds));
+mi.update_stats
+mi.save
+
+
+
+sepr
+sepr
+sepr
+sepr
+sepr
+sepr
+sepr
+sepr
+
+
+for i=1:length(mnames)
+	mi = Mixture.load(mnames{i})
+end
