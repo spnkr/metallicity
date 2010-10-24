@@ -14,27 +14,59 @@ im=1;
 
 
 mnames = {'halo3', 'halo5', 'gen1', 'gen2', 'halo3_1600', 'halo5_1600', 'halo3_30k', 'halo3_50k'};
-mi = Mixture.load(mnames{2})
+mi = Mixture.load(mnames{1});
 
 %% 
 clc
 mi = Mixture.load('halo3')
+mi.plot_covar
+mi.plot_stdev
+
+
+
+%% 
+figure(3)
+sc=mi.covar./range(range(mi.covar));
+sc=abs(log(sc));
+cl=sc;
+x=1:mi.num_models;
+y=x;
+plot(x,y,5,cl,'filled')
+flabel('j','j','Information based Covar \pi')
+
+%% 
 
 
 
 
 
 
+figure(9)
+[x,y]=meshgrid(1:mi.num_models,1:mi.num_models);
+tri = delaunay(x,y);
+z=[];
+for i=1:length(x)
+	for j=1:length(y)
+		z(i,j) = mi.pi_est(i) + mi.pi_est(j);
+	end
+end
+colormap hot
+surf(x,y,-1*ones(length(x),length(x)),'CData',1./max(z,0.05),'EdgeColor','none','FaceColor','flat')
 
 
 
 
+%% 
+figure(7)
+[x,y]=meshgrid(1:mi.num_models,1:mi.num_models);
+tri = delaunay(x,y);
+z = mi.covar;
+trimesh(tri,x,y,z)
 
 
-
-
-
-
+%% 
+figure(5)
+waterfall(mi.covar)
 
 
 %% 

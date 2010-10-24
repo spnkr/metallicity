@@ -230,6 +230,20 @@ classdef Mixture < handle
 		
 		
 		
+		%--plots
+		function plot_covar(mi)
+			plot_covar_dots(mi);
+		end
+		
+		function plot_stdev(mi)
+			fig
+			w=(100.*(mi.pi_est./range(mi.pi_est))).^1;
+			w=w./range(w);
+			scatter(1:mi.num_models,mi.stdev,400.*w,'r','filled')
+			flabel('j','\sigma_j','Information based standard deviation of \pi')
+		end
+		
+		
 		%--internal
 		%\llp &= \sumn \log \Big( \summ \pi_j \fab(x_i,y_i)  \Big)
 		function l = complete_log_like(mi,f,p,n,m)
