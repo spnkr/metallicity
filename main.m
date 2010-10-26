@@ -18,9 +18,24 @@ mi = Mixture.load(mnames{1});
 
 %% 
 clc
+im=1;
 mi = Mixture.load('halo3')
 mi.plot_covar
 mi.plot_stdev
+
+
+%% 
+clc
+zscore = (mi.pi_est-mi.pi_true)./mi.stdev
+vx=[mi.pi_est mi.pi_true mi.stdev].*100
+[(1:16)' vx zscore]
+
+
+
+%% 
+im=1;
+mi.plot_zscores
+
 
 
 

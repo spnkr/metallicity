@@ -49,7 +49,7 @@ function plot_covar_dots(mi)
 
 
 			hold off
-			flabel('\pi_j','\pi_j','Covar of \pi. Transparency=sum weights, size=covar, blue=+,green=-');
+			flabel('\pi_j','\pi_j','Covar of \pi. Transparency=sum weights, size=covar, blue=+,red=-');
 			daspect([1 1 1])
 			view(90,90)
 			axis([-1 17 -1 17 -2 5])

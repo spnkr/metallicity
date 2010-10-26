@@ -8,6 +8,7 @@
 \usepackage{color}
 \usepackage{natbib}
 
+
 \geometry{letterpaper}
 
 %\usepackage[T1]{fontenc}
@@ -267,11 +268,75 @@ The asymptotic covariance matrix of $\vp$ can be approximated by the inverse of 
 
 
 
+\begin{center}
+	\includegraphics[scale=0.42]{covar.pdf}
+\end{center}
+
+
+\begin{table}[h]\tiny
+\caption{Covariance, in percent, of $\vph$ overlaid on $\hat{\pi}_i + \hat{\pi}_j$. Larger dots are covariances; negative covariances are red.}
+	\begin{center}
+		\begin{tabular}{r r r r r r r r r r r r r r r r}
+			 0.0001   &     0.001    &       -  &        -  &   -0.0004   &   -0.0001   &        -  &        -   &   0.0001     &      -     &     -  &        -  &        -  &        -    &      -   &   0.0007         \\
+ -0.001   &   -0.0009    &       -  &   -0.0002   &    0.0015   &   -0.0004   &        -  &        -   &       -    &      -     &     -  &        -  &        -  &        -    &      -   &   -0.001         \\
+     -  &        -   &       -  &        -  &        -  &        -  &        -  &        -   &       -    &      -     &     -  &        -  &        -  &        -    &      -   &       -        \\
+-0.0002   &    0.0003    &       -  &        -  &        -  &        -  &        -  &        -   &       -    &      -     &     -  &        -  &        -  &        -    &      -   &       -        \\
+     -  &   -0.0001    &       -  &        -  &    0.0001   &        -  &        -  &        -   &       -    &      -     &     -  &        -  &        -  &        -    &      -   &       -        \\
+ 0.0003   &   -0.0001    &       -  &    0.0001   &   -0.0004   &    0.0002   &        -  &        -   &       -    &      -     &     -  &        -  &        -  &        -    &      -   &       -        \\
+-0.0001   &        -   &       -  &        -  &        -  &        -  &        -  &        -   &       -    &      -     &     -  &        -  &        -  &        -    &      -   &       -        \\
+     -  &        -   &       -  &        -  &        -  &        -  &        -  &        -   &       -    &      -     &     -  &        -  &        -  &        -    &      -   &       -        \\
+-0.0011   &   -0.0001    &       -  &   -0.0013   &    0.0053   &   -0.0021   &        -  &        -   &       -    &      -     &     -  &        -  &        -  &    0.0001     &      -   &    0.001         \\
+ 0.0023   &    0.0013    &  -0.0001   &    0.0008   &    -0.002   &        -  &   -0.0001   &    0.0001    &       -    &      -     &     -  &        -  &        -  &        -    &      -   &   0.0023         \\
+     -  &        -   &       -  &        -  &   -0.0001   &    0.0001   &        -  &        -   &       -    &      -     &     -  &        -  &        -  &        -    &      -   &       -        \\
+     -  &        -   &       -  &        -  &        -  &        -  &        -  &        -   &       -    &      -     &     -  &        -  &        -  &        -    &      -   &       -        \\
+ 0.0003   &   -0.0003    &       -  &        -  &   -0.0001   &    0.0001   &        -  &        -   &       -    &      -     &     -  &        -  &        -  &        -    &      -   &       -        \\
+-0.0058   &    0.0041    &   0.0001   &   -0.0019   &     0.003   &   -0.0011   &    0.0002   &    0.0001    &   0.0003     &      -     &     -  &   -0.0001   &   -0.0001   &   -0.0001     &      -   &  -0.0012         \\
+ 0.0076   &   -0.0053    &  -0.0001   &    0.0019   &   -0.0086   &    0.0045   &   -0.0003   &    0.0002    &  -0.0003     &      -     &     -  &        -  &        -  &   -0.0001     &      -   &  -0.0005         \\
+ 0.0025   &   -0.0001    &  -0.0001   &   -0.0005   &   -0.0018   &    0.0011   &   -0.0001   &    0.0003    &       -    &      -     &     -  &        -  &        -  &        -    &      -   &   0.0012         \\	
+		\end{tabular}
+	\end{center}
+\end{table}
+
+
+ 
+\begin{figure}
+  \centering
+  \subfloat[Larger dots represent more weight accounted for by that $\hat{\pi}_j$.]{ \raisebox{-40mm}{\includegraphics[scale=0.3]{stdev.pdf}}}                
+  \subfloat[]{\begin{tabular}{r| r| r| r| r|}
+		& $\hat{\pi}_j$ & $\pi_j$ & $\sigma_{\hat{\pi}_j}$ & Z-score	\\
+		\hline
+1	&	16.04  &		14.467   &	0.0898  &	17.509			\\
+2	&	 3.320 &		 7.435   &	0.3033  &  -13.564			\\
+3	&	21.392 &		20.991   &	0.0361  &	11.067			\\
+4	&	 8.846 &		 9.234   &	0.0608  &	-6.369			\\
+5	&	36.443 &		33.656   &	0.1094  &	25.479			\\
+6	&	 7.882 &		 8.019   &	0.1264  &	-1.080			\\
+7	&	 2.560 &		 2.400   &	0.0108  &	14.793			\\
+8	&	 2.239 &		 2.573   &	0.0047  &  -70.08 			\\
+9	&	 0	&    	 0.118   	&	0.0480  &	-2.474			\\
+10	&	 0	&    	 0.076   	&	0.0178  &	-4.317			\\
+11	&	 0.421   &	 0.358   	&	0.0009	&	65.245			\\
+12	&	 0.246   &	 0.253   	&	0.0021  &	-2.959			\\
+13	&	 0.485   &	 0.225   	&	0.0110  &	23.56 			\\
+14	&	 0.008 	& 	 0.048   	&	0.0954  &	-0.420	\\
+15	&	 0.030   &	 0.024	&		0.0362  &	 0.183	\\
+16	&	 0.083   &	 0.046	&		0.3494  &	 0.103	\\
+   		\end{tabular}}
+  \caption{Variance of $\vph$, true $\vp$, in percent, and z-scores.}
+\end{figure}
 
 
 
 
 
+
+\eqn{
+	\text{Z-score} = \frac{\hat{\pi}_j - \pi}{\sigma_{\hat{\pi}_j}}
+}
+               
+               
+               
+               
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \clearpage
@@ -299,6 +364,8 @@ Thus we accept $H_0$ when requiring 95\% or less confidence; there is only a 4.9
 
 
 
+
+\end{document}
 
 
 
@@ -386,8 +453,6 @@ k means classification for auto binning?
 11 mix analys of directional data
 
 13 hidden markov models
-
-\end{document}
 
 
 

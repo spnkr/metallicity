@@ -24,6 +24,7 @@ classdef Mixture < handle
 		yrange;
 		
 		pval_lrt;
+		zscores;
 		
 		info;
 		covar;
@@ -64,7 +65,7 @@ classdef Mixture < handle
 	
 	
 	methods
-		%loading
+		%--loading
 		function mi = Mixture(varargin)
 			load_args
 			
@@ -176,6 +177,8 @@ classdef Mixture < handle
 			mi.save();
 		end
 		
+		
+		%--processing
 		function [p,ll,P,LL] = em(mi,varargin)
 			load_args
 			car = cell2mat(varargin);
@@ -211,20 +214,25 @@ classdef Mixture < handle
 				mi.loglike_true = mi.complete_log_like(mi.f,mi.pi_true,length(mi.x),mi.num_models);
 			end
 			
-			mi.get_pval_lrt();
+			mi.pval_lrt = mi.get_pval_lrt();
 			
 			[I,S,V,stdev] = fisher_info(mi.pi_est,mi.f);
 			mi.info = I;
 			mi.covar = S;
 			mi.variance = V;
 			mi.stdev = stdev;
+			
+			mi.zscores = mi.get_zscores();
 		end
 		
+		
+		%--summaries
 		function text_summary(mi)
 			if isfinite(mi.pi_true)
-				pi_true_diff = 100.*[mi.pi_est mi.pi_true mi.pi_est-mi.pi_true]
+				'pi_est; pi_true; diff; zscore'
+				pi_summary = 100.*[mi.pi_est mi.pi_true mi.pi_est-mi.pi_true mi.zscores./100]
 			else
-				pi = mi.pi_est
+				pi_summary = mi.pi_est
 			end
 		end
 		
@@ -236,13 +244,42 @@ classdef Mixture < handle
 		end
 		
 		function plot_stdev(mi)
-			fig
+			
+			global im;
+			aa=figure(im);
+			im=im+1;
+			clf(aa)
+			clrs = ['r' 'g' 'b' 'c' 'm' 'y' 'k' 'r' 'g' 'b' 'c' 'm' 'y' 'k' ...
+						'r' 'g' 'b' 'c' 'm' 'y' 'k' 'r' 'g' 'b' 'c' 'm' 'y' 'k'];
+
+			hold on
 			w=(100.*(mi.pi_est./range(mi.pi_est))).^1;
-			w=w./range(w);
-			scatter(1:mi.num_models,mi.stdev,400.*w,'r','filled')
+			w=400.*w./range(w);
+			for i=1:mi.num_models
+				wi=max(w(i),10);
+				scatter(i,mi.stdev(i),wi,clrs(i),'filled')
+			end
 			flabel('j','\sigma_j','Information based standard deviation of \pi')
+			hold off
 		end
 		
+		function plot_zscores(mi)
+			global im;
+			aa=figure(im);
+			im=im+1;
+			clf(aa)
+			clrs = ['r' 'g' 'b' 'c' 'm' 'y' 'k' 'r' 'g' 'b' 'c' 'm' 'y' 'k' ...
+						'r' 'g' 'b' 'c' 'm' 'y' 'k' 'r' 'g' 'b' 'c' 'm' 'y' 'k'];
+
+			hold on
+			w = 1000.*(mi.pi_est);
+			for i=1:mi.num_models
+				wi=max(w(i),10);
+				scatter(i,mi.zscores(i),wi,clrs(i),'filled')
+			end
+			flabel('\pi_h','Z-score','Z-scores');
+			hold off
+		end
 		
 		%--internal
 		%\llp &= \sumn \log \Big( \summ \pi_j \fab(x_i,y_i)  \Big)
@@ -261,7 +298,10 @@ classdef Mixture < handle
 			chance_less_than_or_equal_to = 100*chi2cdf(t,df);
 			chance_more_extreme = 100-chance_less_than_or_equal_to;
 			p = chance_more_extreme;
-			mi.pval_lrt = p;
+		end
+		
+		function z = get_zscores(mi)
+			z = (mi.pi_est-mi.pi_true)./mi.stdev;
 		end
 	end
 	
