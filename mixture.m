@@ -30,6 +30,7 @@ classdef Mixture < handle
 		covar;
 		variance;
 		stdev;
+		correl;
 	end
 	
 	
@@ -216,11 +217,12 @@ classdef Mixture < handle
 			
 			mi.pval_lrt = mi.get_pval_lrt();
 			
-			[I,S,V,stdev] = fisher_info(mi.pi_est,mi.f);
+			[I,S,V,correl,stdev] = fisher_info(mi.pi_est,mi.f);
 			mi.info = I;
 			mi.covar = S;
 			mi.variance = V;
 			mi.stdev = stdev;
+			mi.correl = correl;
 			
 			mi.zscores = mi.get_zscores();
 		end
@@ -239,8 +241,8 @@ classdef Mixture < handle
 		
 		
 		%--plots
-		function plot_covar(mi)
-			plot_covar_dots(mi);
+		function plot_correl(mi)
+			plot_correl_dots(mi);
 		end
 		
 		function plot_stdev(mi)
@@ -272,12 +274,20 @@ classdef Mixture < handle
 						'r' 'g' 'b' 'c' 'm' 'y' 'k' 'r' 'g' 'b' 'c' 'm' 'y' 'k'];
 
 			hold on
+			plot([0 mi.num_models], [1.96 1.96], 'k:');
+			plot([0 mi.num_models], [-1.96 -1.96], 'k:');
+			plot([0 mi.num_models], 2.*[1.96 1.96], 'k--');
+			plot([0 mi.num_models], 2.*[-1.96 -1.96], 'k--');
+			plot([0 mi.num_models], 3.*[1.96 1.96], 'k-');
+			plot([0 mi.num_models], 3.*[-1.96 -1.96], 'k-');
+			
 			w = 1000.*(mi.pi_est);
 			for i=1:mi.num_models
 				wi=max(w(i),10);
 				scatter(i,mi.zscores(i),wi,clrs(i),'filled')
 			end
-			flabel('\pi_h','Z-score','Z-scores');
+			
+			flabel('\pi_h','Z-score','Z-scores \pm 1, 2, and 3 \sigma');
 			hold off
 		end
 		

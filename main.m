@@ -16,6 +16,23 @@ im=1;
 mnames = {'halo3', 'halo5', 'gen1', 'gen2', 'halo3_1600', 'halo5_1600', 'halo3_30k', 'halo3_50k'};
 mi = Mixture.load(mnames{1});
 
+
+
+%% 
+mi.update_stats
+
+im=1;
+mi.plot_correl
+mi.plot_stdev
+mi.plot_zscores
+
+
+
+
+
+
+
+
 %% 
 clc
 im=1;
