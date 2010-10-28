@@ -232,7 +232,8 @@ classdef Mixture < handle
 		function text_summary(mi)
 			if isfinite(mi.pi_true)
 				'pi_est; pi_true; diff; zscore'
-				pi_summary = 100.*[mi.pi_est mi.pi_true mi.pi_est-mi.pi_true mi.zscores./100]
+				pi_summary = 100.*[round(10000.*mi.pi_est)./10000 round(10000.*mi.pi_true)./10000 ...
+					round(10000.*mi.pi_est-mi.pi_true)./10000 round(1000.*mi.zscores)./(1000*100)]
 			else
 				pi_summary = mi.pi_est
 			end
@@ -241,8 +242,15 @@ classdef Mixture < handle
 		
 		
 		%--plots
-		function plot_correl(mi)
-			plot_correl_dots(mi);
+		function plot_correl(mi,varargin)
+			if length(varargin)==2
+				dot_scale = cell2mat(varargin(1));
+				overlay = cell2mat(varargin(2));
+			else
+				dot_scale = [50 3.3];
+				overlay = 0.05;
+			end
+			plot_correl_dots(mi,dot_scale,overlay);
 		end
 		
 		function plot_stdev(mi)
@@ -255,13 +263,12 @@ classdef Mixture < handle
 						'r' 'g' 'b' 'c' 'm' 'y' 'k' 'r' 'g' 'b' 'c' 'm' 'y' 'k'];
 
 			hold on
-			w=(100.*(mi.pi_est./range(mi.pi_est))).^1;
-			w=400.*w./range(w);
+			w = 10000.*(mi.pi_est);
 			for i=1:mi.num_models
 				wi=max(w(i),10);
 				scatter(i,mi.stdev(i),wi,clrs(i),'filled')
 			end
-			flabel('j','\sigma_j','Information based standard deviation of \pi')
+			flabel('\pi_j','\sigma_j','Information based standard deviation of \pi')
 			hold off
 		end
 		
@@ -278,16 +285,16 @@ classdef Mixture < handle
 			plot([0 mi.num_models], [-1.96 -1.96], 'k:');
 			plot([0 mi.num_models], 2.*[1.96 1.96], 'k--');
 			plot([0 mi.num_models], 2.*[-1.96 -1.96], 'k--');
-			plot([0 mi.num_models], 3.*[1.96 1.96], 'k-');
-			plot([0 mi.num_models], 3.*[-1.96 -1.96], 'k-');
+% 			plot([0 mi.num_models], 3.*[1.96 1.96], 'k-');
+% 			plot([0 mi.num_models], 3.*[-1.96 -1.96], 'k-');
 			
-			w = 1000.*(mi.pi_est);
+			w = 10000.*(mi.pi_est);
 			for i=1:mi.num_models
 				wi=max(w(i),10);
 				scatter(i,mi.zscores(i),wi,clrs(i),'filled')
 			end
 			
-			flabel('\pi_h','Z-score','Z-scores \pm 1, 2, and 3 \sigma');
+			flabel('\pi_h','Z-score','Z-scores for \pi, and \pm 1 and 2 \sigma');
 			hold off
 		end
 		

@@ -19,14 +19,13 @@ mi = Mixture.load(mnames{1});
 
 
 %% 
-mi.update_stats
-
 im=1;
 mi.plot_correl
 mi.plot_stdev
 mi.plot_zscores
 
 
+%% 
 
 
 
@@ -50,8 +49,9 @@ vx=[mi.pi_est mi.pi_true mi.stdev].*100
 
 
 %% 
+clc
 im=1;
-mi.plot_zscores
+plot_correl_dots2(mi,true,false)
 
 
 
@@ -204,42 +204,117 @@ p
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 %% 
 clc
 pi = [1 2 3]'
-f = [10 11 12 13;21 22 23 24;31 32 33 34]'
+f = [5.4 -1 12 13;6.4 22 -2.22 8.5;2.01 32 -12.7 1.34]'
 n=4;
 m=3;
 
-[I,S,V] = fisher_info(pi,f);
+[I,S,V,correl,stdev] = fisher_info(pi,f);
 I
 S
 V
 
+
 %% 
 
-I = observed_info(pi,f);
-S = observed_covar(I)
+denom = (f*pi).^2;
 
-s_3_1 = S(1,1)+S(2,1)
-s_3_2 = S(1,2)+S(2,2)
+i_1_1 = 0;
+for i=1:n
+	exx = ((f(i,1) - f(i,m))*(f(i,1) - f(i,m)))./denom(i);
+	i_1_1 = i_1_1 + exx;
+end
 
-s_1_3 = S(1,1)+S(1,2)
-s_2_3 = S(2,1)+S(2,2)
 
-s_3_3 = S(1,1)+S(1,2)+S(2,1)+S(2,2)
 
-SS=S;
-SS(3,1)=s_3_1;
-SS(3,2)=s_3_2;
-SS(3,3)=s_3_3;
-SS(1,3)=s_1_3;
-SS(2,3)=s_2_3;
 
-SS
+i_1_2 = 0;
+for i=1:n
+	exx = ((f(i,1) - f(i,m))*(f(i,2) - f(i,m)))./denom(i);
+	i_1_2 = i_1_2 + exx;
+end
 
-SS-S
-norm(SS-S)
+
+i_2_1 = 0;
+for i=1:n
+	exx = ((f(i,2) - f(i,m))*(f(i,1) - f(i,m)))./denom(i);
+	i_2_1 = i_2_1 + exx;
+end
+
+
+
+i_2_2 = 0;
+for i=1:n
+	exx = ((f(i,2) - f(i,m))*(f(i,2) - f(i,m)))./denom(i);
+	i_2_2 = i_2_2 + exx;
+end
+
+[i_1_1 i_1_2;i_2_1 i_2_2]
+
+
+
+
+
+s_m_1 = 0;
+
+for j=1:m-1
+	s_m_1 = s_m_1 + S(j,1);
+end
+s_m_1 = -s_m_1;
+
+s_m_2 = 0;
+for j=1:m-1
+	s_m_2 = s_m_2 + S(j,2);
+end
+s_m_2 = -s_m_2;
+
+
+s1m=0;
+for j=1:m-1
+	s1m = s1m + S(1,j);
+end
+s1m = -s1m;
+
+s2m=0;
+for j=1:m-1
+	s2m = s2m + S(2,j);
+end
+s2m = -s2m;
+
+
+
+[s_m_1;s_m_2]
+
+[s1m;s2m]
+
+
+smm=0;
+
+for j=1:m-1
+	for k=1:m-1
+		smm = smm + S(j,k);
+	end
+end
+
+smm
+
+
+
+
+
 %% 
 
 sepr

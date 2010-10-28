@@ -8,6 +8,9 @@
 \usepackage{color}
 \usepackage{natbib}
 
+\newenvironment{frcseries}{\fontfamily{frc}\selectfont}{}
+\newcommand{\textfrc}[1]{{\frcseries#1}}
+\newcommand{\mathfrc}[1]{\raisebox{-0.8mm}{\text{\textfrc{\small #1}}}\hspace{0.4mm}}
 
 \geometry{letterpaper}
 
@@ -60,7 +63,20 @@
         
         
         
-        
+        \newcommand{\img}[2]{
+	\begin{figure}
+		\centering
+		\includegraphics[width=\textwidth]{#1}
+		\caption{#2}
+	\end{figure}
+}
+
+\newcommand{\imgi}[1]{
+	\vspace{10mm}
+	\includegraphics[width=\textwidth]{#1}
+	\vspace{10mm}
+}
+
 
 % paper specific terms
 \newcommand{\vz}{\vect{z}}
@@ -73,8 +89,8 @@
 
 
 \newcommand{\fab}{f_j}
-\newcommand{\llp}{l(\vect{\pi})}
-\newcommand{\llpp}{l(\vect{\pi^\prime})}
+\newcommand{\llp}{\mathfrc{l}(\vect{\pi})}
+
 \newcommand{\pims}{1-\pi_1,\ldots,\pi_{m-1}}
 
 \newcommand{\hessll}[2]{\sumn \frac{f_{#1}}{(\summ \pi_j f_j)^2 f_{#2}}}
@@ -88,20 +104,11 @@
 \newcommand{\sumg}{\sum^g_{j=1}}
 \newcommand{\sumk}{\sum^m_{k=1}}
 
+\newcommand{\vpg}{\vp_{\times}}
+\newcommand{\vpgh}{\hat{\vp}_{\times}}
+\newcommand{\llpp}{\mathfrc{l}(\vpg)}
+\newcommand{\llpph}{\mathfrc{l}(\vpgh)}
 
-\newcommand{\img}[2]{
-	\begin{figure}
-		\centering
-		\includegraphics[width=\textwidth]{#1}
-		\caption{#2}
-	\end{figure}
-}
-
-\newcommand{\imgi}[1]{
-	\vspace{10mm}
-	\includegraphics[width=\textwidth]{#1}
-	\vspace{10mm}
-}
 
 %%% TITLE
 \title{Metallicity}
@@ -238,15 +245,19 @@ And in general,
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \clearpage
-\section{Covariance}
-The asymptotic covariance matrix of $\vph$ can be approximated by the inverse of the observed Fisher information matrix. Since there are only $m-1$ free parameters, let $\vp^\prime=(\pi_1,\ldots,\pi_{m-1})$. The likelihood can then be expressed as:
+\section{Covariance and correlation of $\vph$}
+The asymptotic covariance matrix of $\vph$ can be approximated by the inverse of the observed Fisher information matrix, $I$.
+
+As $\pi_m = 1-\sum_{j=1}^{m-1}\pi_j$, there are only $m-1$ free parameters. Thus let $\vpg=(\pi_1,\ldots,\pi_{m-1})$. Using $f_{ij} = f_j(x_i,y_i)$ for brevity, the likelihood can then be expressed as:
 \eqnl{llinfo}{
-	\llpp &= \sumn \log \Bigg\{ \Big( \summo \pi_j \fab \Big) + (\pims)f_m \Bigg\}	
+	\llpp &= \sumn \log \Bigg\{ \Big( \summo \pi_{j} f_{ij} \Big) + (\pims)f_{im} \Bigg\}	
 }
 
-The observed information matrix, $I(\vp^\prime|\vx,\vy)$, is given by the $m-1\times m-1$ negative hessian of \eqref{llinfo}:
 
-\mtx{I(\vp|\vx,\vy)=-\frac{\partial^2 \llpp}{\partial \vp^\prime \partial \vp^{\prime T}}}{-}{cccc}{
+
+The observed information matrix, $I$, is the $m-1\times m-1$ negative hessian of \eqref{llinfo}, evaluated at the observed data points:
+
+\mtx{I(\vpg|\vx,\vy)=-\frac{\partial^2 \llpp}{\partial \vp^\prime \partial \vp^{\prime T}}}{-}{cccc}{
 	\frac{\partial^2 \llpp}{\partial^2 \pi_1} & \hesslld{1}{2} & \ldots & \hesslld{1}{m-1}	\\
 	\vdots & \vdots & & \vdots	\\
 	\hesslld{m-1}{1} & \hesslld{m-1}{2} & \ldots & \frac{\partial^2 \llpp}{\partial^2 \pi_{m-1}}
@@ -256,8 +267,7 @@ The observed information matrix, $I(\vp^\prime|\vx,\vy)$, is given by the $m-1\t
 
 where
 \eqn{
-	\frac{\partial \llpp}{\partial \pi_k} &= \sumn \frac{f_k - f_m}{\summ \pi_j f_j}	\\
-	\frac{\partial^2 \llpp}{\partial \pi_k \partial \pi_r} &= -\sumn \frac{(f_k-f_m) (f_r-f_m)}{(\sumg \pi_j f_j)^2 f_r}
+	\frac{\partial \llpp}{\partial \pi_k} = \sumn \frac{f_{ik} - f_{im}}{\summ \pi_j f_{ij}}	\hspace{10mm}\text{and}\hspace{10mm}	\frac{\partial^2 \llpp}{\partial \pi_k \partial \pi_r} = -\sumn \frac{(f_{ik}-f_{im}) (f_{ir}-f_{im})}{(\sumg \pi_j f_{ij})^2}
 }
 
 
@@ -268,10 +278,10 @@ where
 %}
 
 
-The inverse of $I(\vp^\prime|\vx,\vy)$ provides estimates of the variance, covariance, and correlation of $\vph$ as
+The observed information derived covariance matrix of $\vpg$ yields the following estimates for covariance and correlation for all $m$ estimated weights in $\vph$:
 
 \eqnset{\text{Cov}(\hat{\pi}_p,\hat{\pi}_q)}{}{ll}{
-	\big[I^{-1}(\vph) \big]_{pq}				& p,q<m	\\
+	\big[I^{-1}(\vpgh) \big]_{pq}				& p,q<m	\\
 	-\sum\limits_{j=1}^{m-1} \text{Cov}(\hat{\pi}_j,\hat{\pi}_q)		& p=m,q<m	\\
 	\sum\limits_{j=1}^{m-1} \sum\limits_{k=1}^{m-1} \text{Cov}(\hat{\pi}_j,\hat{\pi}_q)		& p, q=m	\\
 }
@@ -284,76 +294,79 @@ The inverse of $I(\vp^\prime|\vx,\vy)$ provides estimates of the variance, covar
 	\text{Corr}(\hat{\pi}_p,\hat{\pi}_q) = \frac{\text{Cov}(\hat{\pi}_p,\hat{\pi}_q)}{\sqrt{\sigma^2_p \sigma^2_q}}
 }
 
+\eqn{
+	\text{Z-score} = \frac{\hat{\pi}_j - \pi}{\sigma_{\hat{\pi}_j}}
+}
 
 
-
-\begin{center}
-	\includegraphics[scale=0.42]{covar.pdf}
-\end{center}
+\begin{figure}
+	\caption{Left: correlation where size of sphere represents correlation value, and opacity of sphere represents $\pi_q+\pi_p$. Right: correlation where size of sphere represents $\pi_q+\pi_p$ and opacity represents correlation. Top plots ignore sign of correlation; bottom ones color negative correlation orange.}
+	\begin{center}
+		\includegraphics[scale=.75]{correlation_3.pdf}
+		\includegraphics[scale=.75]{correlation_colors_3.pdf}
+	\end{center}
+\end{figure}
 
 
 \begin{table}[h]\tiny
-\caption{Covariance, in percent, of $\vph$ overlaid on $\hat{\pi}_i + \hat{\pi}_j$. Larger dots are covariances; negative covariances are red.}
+\caption{Correlation matrix}
 	\begin{center}
 		\begin{tabular}{r r r r r r r r r r r r r r r r}
-			 0.0001   &     0.001    &       -  &        -  &   -0.0004   &   -0.0001   &        -  &        -   &   0.0001     &      -     &     -  &        -  &        -  &        -    &      -   &   0.0007         \\
- -0.001   &   -0.0009    &       -  &   -0.0002   &    0.0015   &   -0.0004   &        -  &        -   &       -    &      -     &     -  &        -  &        -  &        -    &      -   &   -0.001         \\
-     -  &        -   &       -  &        -  &        -  &        -  &        -  &        -   &       -    &      -     &     -  &        -  &        -  &        -    &      -   &       -        \\
--0.0002   &    0.0003    &       -  &        -  &        -  &        -  &        -  &        -   &       -    &      -     &     -  &        -  &        -  &        -    &      -   &       -        \\
-     -  &   -0.0001    &       -  &        -  &    0.0001   &        -  &        -  &        -   &       -    &      -     &     -  &        -  &        -  &        -    &      -   &       -        \\
- 0.0003   &   -0.0001    &       -  &    0.0001   &   -0.0004   &    0.0002   &        -  &        -   &       -    &      -     &     -  &        -  &        -  &        -    &      -   &       -        \\
--0.0001   &        -   &       -  &        -  &        -  &        -  &        -  &        -   &       -    &      -     &     -  &        -  &        -  &        -    &      -   &       -        \\
-     -  &        -   &       -  &        -  &        -  &        -  &        -  &        -   &       -    &      -     &     -  &        -  &        -  &        -    &      -   &       -        \\
--0.0011   &   -0.0001    &       -  &   -0.0013   &    0.0053   &   -0.0021   &        -  &        -   &       -    &      -     &     -  &        -  &        -  &    0.0001     &      -   &    0.001         \\
- 0.0023   &    0.0013    &  -0.0001   &    0.0008   &    -0.002   &        -  &   -0.0001   &    0.0001    &       -    &      -     &     -  &        -  &        -  &        -    &      -   &   0.0023         \\
-     -  &        -   &       -  &        -  &   -0.0001   &    0.0001   &        -  &        -   &       -    &      -     &     -  &        -  &        -  &        -    &      -   &       -        \\
-     -  &        -   &       -  &        -  &        -  &        -  &        -  &        -   &       -    &      -     &     -  &        -  &        -  &        -    &      -   &       -        \\
- 0.0003   &   -0.0003    &       -  &        -  &   -0.0001   &    0.0001   &        -  &        -   &       -    &      -     &     -  &        -  &        -  &        -    &      -   &       -        \\
--0.0058   &    0.0041    &   0.0001   &   -0.0019   &     0.003   &   -0.0011   &    0.0002   &    0.0001    &   0.0003     &      -     &     -  &   -0.0001   &   -0.0001   &   -0.0001     &      -   &  -0.0012         \\
- 0.0076   &   -0.0053    &  -0.0001   &    0.0019   &   -0.0086   &    0.0045   &   -0.0003   &    0.0002    &  -0.0003     &      -     &     -  &        -  &        -  &   -0.0001     &      -   &  -0.0005         \\
- 0.0025   &   -0.0001    &  -0.0001   &   -0.0005   &   -0.0018   &    0.0011   &   -0.0001   &    0.0003    &       -    &      -     &     -  &        -  &        -  &        -    &      -   &   0.0012         \\	
+			             1   &    -0.592   &    -0.026   &    -0.219   &     0.274   &    -0.101   &     0.005   &    -0.008   &     0.007   &    -0.004   &    -0.003   &    -0.006   &     0.003   &     0.008   &    -0.001   &    -0.002     \\
+-0.592   &         1   &    -0.436   &     0.385   &    -0.685   &     0.378   &     -0.03   &    -0.006   &    -0.026   &    -0.003   &     0.002   &     0.002   &     0.003   &    -0.029   &    -0.004   &     0.006     \\
+-0.026   &    -0.436   &         1   &     0.074   &    -0.008   &    -0.141   &    -0.036   &     0.008   &    -0.006   &     0.004   &    -0.006   &     0.004   &    -0.008   &     0.025   &     0.002   &    -0.009     \\
+-0.219   &     0.385   &     0.074   &         1   &    -0.706   &     0.368   &    -0.173   &    -0.021   &    -0.045   &     0.013   &    -0.012   &     0.051   &    -0.022   &     -0.01   &     0.002   &    -0.003     \\
+ 0.274   &    -0.685   &    -0.008   &    -0.706   &         1   &    -0.757   &     0.057   &     0.008   &     0.083   &    -0.002   &         0   &    -0.018   &    -0.006   &     0.051   &     0.002   &    -0.001     \\
+-0.101   &     0.378   &    -0.141   &     0.368   &    -0.757   &         1   &    -0.012   &     -0.07   &    -0.264   &    -0.007   &     -0.01   &     0.027   &      0.02   &    -0.028   &    -0.009   &      0.01     \\
+ 0.005   &     -0.03   &    -0.036   &    -0.173   &     0.057   &    -0.012   &         1   &    -0.602   &     0.129   &    -0.013   &    -0.065   &    -0.023   &     0.025   &    -0.109   &     0.021   &    -0.002     \\
+-0.008   &    -0.006   &     0.008   &    -0.021   &     0.008   &     -0.07   &    -0.602   &         1   &     -0.29   &    -0.125   &     0.226   &    -0.381   &     0.173   &     0.232   &    -0.082   &     0.049     \\
+ 0.007   &    -0.026   &    -0.006   &    -0.045   &     0.083   &    -0.264   &     0.129   &     -0.29   &         1   &     0.112   &    -0.072   &     0.111   &    -0.211   &    -0.751   &     0.095   &    -0.048     \\
+-0.004   &    -0.003   &     0.004   &     0.013   &    -0.002   &    -0.007   &    -0.013   &    -0.125   &     0.112   &         1   &    -0.665   &     0.488   &    -0.567   &     0.091   &     0.439   &     -0.54     \\
+-0.003   &     0.002   &    -0.006   &    -0.012   &         0   &     -0.01   &    -0.065   &     0.226   &    -0.072   &    -0.665   &         1   &     -0.62   &     0.502   &    -0.044   &    -0.542   &     0.326     \\
+-0.006   &     0.002   &     0.004   &     0.051   &    -0.018   &     0.027   &    -0.023   &    -0.381   &     0.111   &     0.488   &     -0.62   &         1   &    -0.748   &    -0.006   &     0.376   &    -0.156     \\
+ 0.003   &     0.003   &    -0.008   &    -0.022   &    -0.006   &      0.02   &     0.025   &     0.173   &    -0.211   &    -0.567   &     0.502   &    -0.748   &         1   &     0.015   &    -0.599   &     0.218     \\
+ 0.008   &    -0.029   &     0.025   &     -0.01   &     0.051   &    -0.028   &    -0.109   &     0.232   &    -0.751   &     0.091   &    -0.044   &    -0.006   &     0.015   &         1   &     0.008   &    -0.248     \\
+-0.001   &    -0.004   &     0.002   &     0.002   &     0.002   &    -0.009   &     0.021   &    -0.082   &     0.095   &     0.439   &    -0.542   &     0.376   &    -0.599   &     0.008   &         1   &    -0.382     \\
+-0.002   &     0.006   &    -0.009   &    -0.003   &    -0.001   &      0.01   &    -0.002   &     0.049   &    -0.048   &     -0.54   &     0.326   &    -0.156   &     0.218   &    -0.248   &    -0.382   &         1     \\
 		\end{tabular}
 	\end{center}
 \end{table}
 
-
- 
 \begin{figure}
-  \centering
-  \subfloat[Larger dots represent more weight accounted for by that $\hat{\pi}_j$.]{ \raisebox{-40mm}{\includegraphics[scale=0.3]{stdev.pdf}}}                
-  \subfloat[]{\begin{tabular}{r| r| r| r| r|}
+	\caption{Left: standard deviation of each $\pi_j$. Right: Z-score, with 1 and 2 standard deviations marked as dotted lines. Colors are same as EM diagnostic plots. Size represents the value of $\pi_j$.}
+	\begin{center}
+		\includegraphics[scale=0.35]{zsc.pdf}
+	\end{center}
+\end{figure}
+
+
+\begin{figure}
+\caption{Model 3 EM results}
+\begin{tabular}{r| r| r| r| r|}
 		& $\hat{\pi}_j$ & $\pi_j$ & $\sigma_{\hat{\pi}_j}$ & Z-score	\\
 		\hline
-1	&	16.04  &		14.467   &	0.0898  &	17.509			\\
-2	&	 3.320 &		 7.435   &	0.3033  &  -13.564			\\
-3	&	21.392 &		20.991   &	0.0361  &	11.067			\\
-4	&	 8.846 &		 9.234   &	0.0608  &	-6.369			\\
-5	&	36.443 &		33.656   &	0.1094  &	25.479			\\
-6	&	 7.882 &		 8.019   &	0.1264  &	-1.080			\\
-7	&	 2.560 &		 2.400   &	0.0108  &	14.793			\\
-8	&	 2.239 &		 2.573   &	0.0047  &  -70.08 			\\
-9	&	 0	&    	 0.118   	&	0.0480  &	-2.474			\\
-10	&	 0	&    	 0.076   	&	0.0178  &	-4.317			\\
-11	&	 0.421   &	 0.358   	&	0.0009	&	65.245			\\
-12	&	 0.246   &	 0.253   	&	0.0021  &	-2.959			\\
-13	&	 0.485   &	 0.225   	&	0.0110  &	23.56 			\\
-14	&	 0.008 	& 	 0.048   	&	0.0954  &	-0.420	\\
-15	&	 0.030   &	 0.024	&		0.0362  &	 0.183	\\
-16	&	 0.083   &	 0.046	&		0.3494  &	 0.103	\\
-   		\end{tabular}}
-  \caption{Variance of $\vph$, true $\vp$, in percent, and z-scores.}
+1	& 16.04   &     14.47   &     16.04    &    1.965      \\
+2	&  3.32   &      7.44   &      3.32    &   -1.995      \\
+3	& 21.39   &     20.99   &     21.39    &    0.363      \\
+4	&  8.85   &      9.23   &      8.85    &   -0.439      \\
+5	& 36.44   &     33.66   &     36.44    &     0.96      \\
+6	&  7.88   &      8.02   &      7.88    &   -0.088      \\
+7	&  2.56   &       2.4   &      2.56    &    0.428      \\
+8	&  2.24   &      2.57   &      2.24    &   -0.655      \\
+9	&     0   &      0.12   &         0    &   -0.174      \\
+10	&     0   &      0.08   &         0    &   -0.706      \\
+11	&  0.42   &      0.36   &      0.42    &    0.367      \\
+12	&  0.25   &      0.25   &      0.25    &   -0.016      \\
+13	&  0.49   &      0.23   &      0.49    &    0.694      \\
+14	&  0.01   &      0.05   &      0.01    &   -0.103      \\
+15	&  0.03   &      0.02   &      0.03    &    0.044      \\
+16	&  0.08   &      0.05   &      0.08    &     0.27      \\   		\end{tabular}
 \end{figure}
 
 
 
 
 
-
-\eqn{
-	\text{Z-score} = \frac{\hat{\pi}_j - \pi}{\sigma_{\hat{\pi}_j}}
-}
-               
-               
                
                
 

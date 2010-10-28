@@ -1,17 +1,22 @@
 function [I,S,V,correl,stdev] = fisher_info(pi,f)
 	m = length(pi);
 	g = m-1;
-	
 	I = zeros(g,g);
-	
+
 	denom = (f*pi).^2;
 	
 	for k=1:g
 		for r=1:g
-			kk = ((f(:,k)-f(:,m)).*(f(:,r)-f(:,m)))./(denom.*f(:,r));
+			kk = ((f(:,k)-f(:,m)).*(f(:,r)-f(:,m)))./denom;
 			I(k,r) = sum(kk(isfinite(kk)));
 		end
 	end
+	
+	
+	
+	
+	
+	
 	
 	
 	S = inv(I);
@@ -52,5 +57,40 @@ function [I,S,V,correl,stdev] = fisher_info(pi,f)
 	
 
 	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+%	n = size(f,1);	
+% 	denom = zeros(n,1);
+% 	for i=1:n
+% 		for j=1:m
+% 			denom(i) = denom(i) + (pi(j).*f(i,j));
+% 		end
+% 	end
+% 	denom = denom.^2;
+
+% 	for i=1:n
+% 		for k=1:g
+% 			for r=1:g
+% 				%at i, d2l/dkdr
+% 				numer = (f(i,k)-f(i,m))*(f(i,r)-f(i,m));
+% 				I(k,r) = I(k,r) + numer/denom(i);
+% 			end
+% 		end
+% 	end
+% 	I
 	
 	
