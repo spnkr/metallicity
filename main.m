@@ -19,7 +19,7 @@ im=1;
 %5 lsat
 %6 nsat  
 
-load('cache/large/mo_40k.mat','mo')
+load('cache/mo_20k.mat','mo')
 
 
 %% 
