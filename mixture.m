@@ -242,15 +242,8 @@ classdef Mixture < handle
 		
 		
 		%--plots
-		function plot_correl(mi,varargin)
-			if length(varargin)==2
-				dot_scale = cell2mat(varargin(1));
-				overlay = cell2mat(varargin(2));
-			else
-				dot_scale = [50 3.3];
-				overlay = 0.05;
-			end
-			plot_correl_dots(mi,dot_scale,overlay);
+		function plot_correl(mi,size_is_correl,color_neg)
+			plot_correl_dots2(mi,size_is_correl,color_neg);
 		end
 		
 		function plot_stdev(mi)

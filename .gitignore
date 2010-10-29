@@ -10,3 +10,5 @@ Tex/images/*
 *.psd
 *.ai
 media/old/*
+data/large/*
+cache/large/*
