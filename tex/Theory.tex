@@ -8,6 +8,9 @@
 \usepackage{color}
 \usepackage{natbib}
 
+\usepackage{blindtext}
+\usepackage{tabularx}
+
 \newenvironment{frcseries}{\fontfamily{frc}\selectfont}{}
 \newcommand{\textfrc}[1]{{\frcseries#1}}
 \newcommand{\mathfrc}[1]{\raisebox{-0.8mm}{\text{\textfrc{\small #1}}}\hspace{0.4mm}}
@@ -104,8 +107,8 @@
 \newcommand{\sumg}{\sum^g_{j=1}}
 \newcommand{\sumk}{\sum^m_{k=1}}
 
-\newcommand{\vpg}{\vp_{\times}}
-\newcommand{\vpgh}{\hat{\vp}_{\times}}
+\newcommand{\vpg}{\vp^{\prime}}
+\newcommand{\vpgh}{\hat{\vp}^{\prime}}
 \newcommand{\llpp}{\mathfrc{l}(\vpg)}
 \newcommand{\llpph}{\mathfrc{l}(\vpgh)}
 
@@ -176,7 +179,7 @@ One way to estimate $\vp$ is to use a maximum likelihood estimate, $\vph$, compu
 \subsection{Expectation step}
 First we find the expected value of the log likelihood, \eqref{loglike}, conditional on the data. Note that since $z_{ij}$ is an indicator function, its expected value is equal to the probability that data point $i$ comes from model $j$.
 
-\eqn{
+\eqnl{estep}{
 	\text{E}_{\vp}\Big[\llp \big| \vx,\vy \Big] &= \sumn \summ \text{E}_{\vp}\big[z_{ij}|x_i,y_i\big] \bl \log \fab(x_i,y_i) + \log \pi_j  \br
 }
 
@@ -202,29 +205,35 @@ To iteratively evaluate this expectation, we let $w^{(t)}_{ij}$ be \eqref{expste
 
 Since $\vp$ is not defined for the first evaluation, we use a random initialization to generate $\vect{w}_{j}^{(0)}$. Convergence is not sensitive to the choice of values in this case, but may be if the likelihood is riddled with local maxima.
 
-\subsection{Maximizing with respect to $\vp$}
-\eqn{
-	0 &= \frac{\partial}{\partial \pi_k} \text{E}_{\vect{\pi}}\Big[\llp \big| \vect{x},\vect{y}\Big]    \\
-	& =      \sumn \Bl  w^{(0)}_{ij} \frac{1}{\pi_k} - w^{(0)}_{im} \frac{1}{1-\pi_1-\ldots-\pi_{m-1}}   \Br, k=1,\ldots,m-1
+\subsection{Maximization step}
+We now have an explicit formulation for the expected log likelihood \eqref{expstep} given a single parameter $\vp$, plus the data. The argument of the maximum of \eqref{expstep} at each iteration $t$ provides an estimate that approaches the MLE of $\vp$, and is given by:
+
+\eqnl{argmaxpi}{
+	\vph^{(t)} &= \argmax_{\vp} \text{E}\Big[\llp \big| \vx,\vy,\vph^{(t-1)} \Big]   
 }
 
-as $\pi_m = 1 - \pi_1 - \ldots - \pi_{m-1}$.
-
-
-\eqn{
-	\frac{1}{\pi_1} \sumn w^{(0)}_{i1} &= \ldots = \frac{1}{\pi_{m-1}} \sumn w^{(0)}_{i,m-1} = c	\\
-	\hat{\pi}_k &= \frac{\sumn w^{(0)}_{ik}}{c}		\\
-	\pi^{(1)}_j &= \frac{\sumn w^{(0)}_{ij}}{n}
-}
-
-And in general,
-
+Accounting for the $m-1$ free parameters of $\vp$, differentiation of \eqref{expstep} proceeds, for $k=1,\ldots,m-1$, as:
 
 \eqn{
-	\pi^{(t+1)}_j = \frac{\sumn w^{(t)}_{ij}}{n}
+	\frac{\partial}{\partial \pi_k} \text{E}\Big[\llp \big| \vect{x},\vect{y}\Big]   &=      \sumn \Bl  w^{(t-1)}_{ik} \frac{1}{\pi_k} - w^{(t-1)}_{im} \frac{1}{1-\pi_1-\ldots-\pi_{m-1}}   \Br
+}
+\eqn{
+	\frac{1}{\pi_k} \sumn w_{ik}^{(t-1)} &= \frac{1}{1-\pi_1-\ldots-\pi_{m-1}} \sumn w_{im}^{(t-1)}
 }
 
+Consequently, using some constant, $c$, we must have
+\eqn{
+	\frac{1}{\pi_k} \sumn w^{(t-1)}_{ik} &= \ldots = \frac{1}{\pi_{m-1}} \sumn w^{(t-1)}_{i,m-1} = c	\\
+	\hat{\pi}_k^{(t)} &= \frac{\sumn w^{(t-1)}_{ik}}{c}
+}
 
+The unknown constant $c$ appears problematic, but, because $\summ \pi_j = 1$, algebraic manipulation reveals that $c=n$, yielding a final solution that can be numerically evaluated:
+\eqn{
+	\hat{\pi}^{(t)}_k &= \frac{\sumn w^{(t-1)}_{ij}}{n}	\\
+	\hat{\pi}^{(t)}_m &= 1-\pi_1-\ldots-\pi_{m-1}
+}
+
+In our case, computation of $\vph$ converges relatively quickly for all starting values: on the order of 600 iterations, or half a minute, for our stopping criteria. Large $\pi_k$ values typically emerge after two or three iterations, and most change, absolutely speaking, occurs in the first fifty to one hundred iterations.
 
 
 
@@ -300,88 +309,101 @@ The observed information derived covariance matrix of $\vpg$ yields the followin
 
 
 \begin{figure}
-	\caption{Left: correlation where size of sphere represents correlation value, and opacity of sphere represents $\pi_q+\pi_p$. Right: correlation where size of sphere represents $\pi_q+\pi_p$ and opacity represents correlation. Top plots ignore sign of correlation; bottom ones color negative correlation orange.}
+	
 	\begin{center}
-		\includegraphics[scale=.75]{correlation_3.pdf}
-		\includegraphics[scale=.75]{correlation_colors_3.pdf}
+		\includegraphics[scale=.75]{correlation_3.png}
 	\end{center}
+	\caption{Left: correlation where size of sphere represents correlation value, and opacity of sphere represents $\pi_q+\pi_p$. Orange bubbles represent negative correlation, and blue positive. Right: Same graph, but without transparency.}
 \end{figure}
+
+
 
 
 \begin{table}[h]\tiny
 \caption{Correlation matrix}
 	\begin{center}
-		\begin{tabular}{r r r r r r r r r r r r r r r r}
-			             1   &    -0.592   &    -0.026   &    -0.219   &     0.274   &    -0.101   &     0.005   &    -0.008   &     0.007   &    -0.004   &    -0.003   &    -0.006   &     0.003   &     0.008   &    -0.001   &    -0.002     \\
--0.592   &         1   &    -0.436   &     0.385   &    -0.685   &     0.378   &     -0.03   &    -0.006   &    -0.026   &    -0.003   &     0.002   &     0.002   &     0.003   &    -0.029   &    -0.004   &     0.006     \\
--0.026   &    -0.436   &         1   &     0.074   &    -0.008   &    -0.141   &    -0.036   &     0.008   &    -0.006   &     0.004   &    -0.006   &     0.004   &    -0.008   &     0.025   &     0.002   &    -0.009     \\
--0.219   &     0.385   &     0.074   &         1   &    -0.706   &     0.368   &    -0.173   &    -0.021   &    -0.045   &     0.013   &    -0.012   &     0.051   &    -0.022   &     -0.01   &     0.002   &    -0.003     \\
- 0.274   &    -0.685   &    -0.008   &    -0.706   &         1   &    -0.757   &     0.057   &     0.008   &     0.083   &    -0.002   &         0   &    -0.018   &    -0.006   &     0.051   &     0.002   &    -0.001     \\
--0.101   &     0.378   &    -0.141   &     0.368   &    -0.757   &         1   &    -0.012   &     -0.07   &    -0.264   &    -0.007   &     -0.01   &     0.027   &      0.02   &    -0.028   &    -0.009   &      0.01     \\
- 0.005   &     -0.03   &    -0.036   &    -0.173   &     0.057   &    -0.012   &         1   &    -0.602   &     0.129   &    -0.013   &    -0.065   &    -0.023   &     0.025   &    -0.109   &     0.021   &    -0.002     \\
--0.008   &    -0.006   &     0.008   &    -0.021   &     0.008   &     -0.07   &    -0.602   &         1   &     -0.29   &    -0.125   &     0.226   &    -0.381   &     0.173   &     0.232   &    -0.082   &     0.049     \\
- 0.007   &    -0.026   &    -0.006   &    -0.045   &     0.083   &    -0.264   &     0.129   &     -0.29   &         1   &     0.112   &    -0.072   &     0.111   &    -0.211   &    -0.751   &     0.095   &    -0.048     \\
--0.004   &    -0.003   &     0.004   &     0.013   &    -0.002   &    -0.007   &    -0.013   &    -0.125   &     0.112   &         1   &    -0.665   &     0.488   &    -0.567   &     0.091   &     0.439   &     -0.54     \\
--0.003   &     0.002   &    -0.006   &    -0.012   &         0   &     -0.01   &    -0.065   &     0.226   &    -0.072   &    -0.665   &         1   &     -0.62   &     0.502   &    -0.044   &    -0.542   &     0.326     \\
--0.006   &     0.002   &     0.004   &     0.051   &    -0.018   &     0.027   &    -0.023   &    -0.381   &     0.111   &     0.488   &     -0.62   &         1   &    -0.748   &    -0.006   &     0.376   &    -0.156     \\
- 0.003   &     0.003   &    -0.008   &    -0.022   &    -0.006   &      0.02   &     0.025   &     0.173   &    -0.211   &    -0.567   &     0.502   &    -0.748   &         1   &     0.015   &    -0.599   &     0.218     \\
- 0.008   &    -0.029   &     0.025   &     -0.01   &     0.051   &    -0.028   &    -0.109   &     0.232   &    -0.751   &     0.091   &    -0.044   &    -0.006   &     0.015   &         1   &     0.008   &    -0.248     \\
--0.001   &    -0.004   &     0.002   &     0.002   &     0.002   &    -0.009   &     0.021   &    -0.082   &     0.095   &     0.439   &    -0.542   &     0.376   &    -0.599   &     0.008   &         1   &    -0.382     \\
--0.002   &     0.006   &    -0.009   &    -0.003   &    -0.001   &      0.01   &    -0.002   &     0.049   &    -0.048   &     -0.54   &     0.326   &    -0.156   &     0.218   &    -0.248   &    -0.382   &         1     \\
-		\end{tabular}
+		\noindent\makebox[\textwidth]{%
+\begin{tabularx}{1.3\textwidth}{r| r r r r r r r r r r r r r r r r}
+& 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 & 11 & 12 & 13 & 14 & 15 & 16	\\
+\hline
+   1   &    			             1   &    -0.592   &    -0.026   &    -0.219   &     0.274   &    -0.101   &     0.005   &    -0.008   &     0.007   &    -0.004   &    -0.003   &    -0.006   &     0.003   &     0.008   &    -0.001   &    -0.002     \\
+   2   &    -0.592   &         1   &    -0.436   &     0.385   &    -0.685   &     0.378   &     -0.03   &    -0.006   &    -0.026   &    -0.003   &     0.002   &     0.002   &     0.003   &    -0.029   &    -0.004   &     0.006     \\
+   3   &    -0.026   &    -0.436   &         1   &     0.074   &    -0.008   &    -0.141   &    -0.036   &     0.008   &    -0.006   &     0.004   &    -0.006   &     0.004   &    -0.008   &     0.025   &     0.002   &    -0.009     \\
+   4   &    -0.219   &     0.385   &     0.074   &         1   &    -0.706   &     0.368   &    -0.173   &    -0.021   &    -0.045   &     0.013   &    -0.012   &     0.051   &    -0.022   &     -0.01   &     0.002   &    -0.003     \\
+   5   &     0.274   &    -0.685   &    -0.008   &    -0.706   &         1   &    -0.757   &     0.057   &     0.008   &     0.083   &    -0.002   &         0   &    -0.018   &    -0.006   &     0.051   &     0.002   &    -0.001     \\
+   6   &    -0.101   &     0.378   &    -0.141   &     0.368   &    -0.757   &         1   &    -0.012   &     -0.07   &    -0.264   &    -0.007   &     -0.01   &     0.027   &      0.02   &    -0.028   &    -0.009   &      0.01     \\
+   7   &     0.005   &     -0.03   &    -0.036   &    -0.173   &     0.057   &    -0.012   &         1   &    -0.602   &     0.129   &    -0.013   &    -0.065   &    -0.023   &     0.025   &    -0.109   &     0.021   &    -0.002     \\
+   8   &    -0.008   &    -0.006   &     0.008   &    -0.021   &     0.008   &     -0.07   &    -0.602   &         1   &     -0.29   &    -0.125   &     0.226   &    -0.381   &     0.173   &     0.232   &    -0.082   &     0.049     \\
+   9   &     0.007   &    -0.026   &    -0.006   &    -0.045   &     0.083   &    -0.264   &     0.129   &     -0.29   &         1   &     0.112   &    -0.072   &     0.111   &    -0.211   &    -0.751   &     0.095   &    -0.048     \\
+   10   &    -0.004   &    -0.003   &     0.004   &     0.013   &    -0.002   &    -0.007   &    -0.013   &    -0.125   &     0.112   &         1   &    -0.665   &     0.488   &    -0.567   &     0.091   &     0.439   &     -0.54     \\
+   11   &    -0.003   &     0.002   &    -0.006   &    -0.012   &         0   &     -0.01   &    -0.065   &     0.226   &    -0.072   &    -0.665   &         1   &     -0.62   &     0.502   &    -0.044   &    -0.542   &     0.326     \\
+   12   &    -0.006   &     0.002   &     0.004   &     0.051   &    -0.018   &     0.027   &    -0.023   &    -0.381   &     0.111   &     0.488   &     -0.62   &         1   &    -0.748   &    -0.006   &     0.376   &    -0.156     \\
+   13   &     0.003   &     0.003   &    -0.008   &    -0.022   &    -0.006   &      0.02   &     0.025   &     0.173   &    -0.211   &    -0.567   &     0.502   &    -0.748   &         1   &     0.015   &    -0.599   &     0.218     \\
+   14   &     0.008   &    -0.029   &     0.025   &     -0.01   &     0.051   &    -0.028   &    -0.109   &     0.232   &    -0.751   &     0.091   &    -0.044   &    -0.006   &     0.015   &         1   &     0.008   &    -0.248     \\
+   15   &    -0.001   &    -0.004   &     0.002   &     0.002   &     0.002   &    -0.009   &     0.021   &    -0.082   &     0.095   &     0.439   &    -0.542   &     0.376   &    -0.599   &     0.008   &         1   &    -0.382     \\
+   16   &    -0.002   &     0.006   &    -0.009   &    -0.003   &    -0.001   &      0.01   &    -0.002   &     0.049   &    -0.048   &     -0.54   &     0.326   &    -0.156   &     0.218   &    -0.248   &    -0.382   &         1     \\
+
+\end{tabularx}}
 	\end{center}
 \end{table}
 
 \begin{figure}
-	\caption{Left: standard deviation of each $\pi_j$. Right: Z-score, with 1 and 2 standard deviations marked as dotted lines. Colors are same as EM diagnostic plots. Size represents the value of $\pi_j$.}
+	
 	\begin{center}
-		\includegraphics[scale=0.35]{zsc.pdf}
+		\includegraphics[scale=0.5]{zsc.pdf}
 	\end{center}
+	\caption{Left: standard deviation of each $\pi_j$. Right: Z-score, with 1 and 2 standard deviations marked as dotted lines. Colors are same as EM diagnostic plots. Size represents the value of $\pi_j$.}
 \end{figure}
 
 
 \begin{figure}
-\caption{Model 3 EM results}
-\begin{tabular}{r| r| r| r| r|}
-		& $\hat{\pi}_j$ & $\pi_j$ & $\sigma_{\hat{\pi}_j}$ & Z-score	\\
-		\hline
-1	& 16.04   &     14.47   &     16.04    &    1.965      \\
-2	&  3.32   &      7.44   &      3.32    &   -1.995      \\
-3	& 21.39   &     20.99   &     21.39    &    0.363      \\
-4	&  8.85   &      9.23   &      8.85    &   -0.439      \\
-5	& 36.44   &     33.66   &     36.44    &     0.96      \\
-6	&  7.88   &      8.02   &      7.88    &   -0.088      \\
-7	&  2.56   &       2.4   &      2.56    &    0.428      \\
-8	&  2.24   &      2.57   &      2.24    &   -0.655      \\
-9	&     0   &      0.12   &         0    &   -0.174      \\
-10	&     0   &      0.08   &         0    &   -0.706      \\
-11	&  0.42   &      0.36   &      0.42    &    0.367      \\
-12	&  0.25   &      0.25   &      0.25    &   -0.016      \\
-13	&  0.49   &      0.23   &      0.49    &    0.694      \\
-14	&  0.01   &      0.05   &      0.01    &   -0.103      \\
-15	&  0.03   &      0.02   &      0.03    &    0.044      \\
-16	&  0.08   &      0.05   &      0.08    &     0.27      \\   		\end{tabular}
+	
+	\begin{center}
+		\includegraphics[scale=0.6]{info_error_bars.pdf}
+	\end{center}
+	\caption{$\vp$ plus information based error bars for $\pm \sigma$ (black), $\pm 2\sigma$ (green), and $\pm 3\sigma$ (cyan). A red $\times$ represents the true value, and a black dot represents the estimated values, $\vph$.}
 \end{figure}
 
+\begin{figure}
 
-
-
-
-               
+\begin{tabular}{r| r| r| r| r|}
+		& $\hat{\pi}_j$ & $\pi_j$ & Std. dev. & Z-score	\\
+		\hline
+1	& 16.04   &     14.47   &         0.0080    &    1.965      \\
+2	&  3.32   &      7.44   &         0.0206   &   -1.995      \\
+3	& 21.39   &     20.99   &         0.0110   &    0.363      \\
+4	&  8.85   &      9.23   &         0.0088    &   -0.439      \\
+5	& 36.44   &     33.66   &         0.0290   &     0.96      \\
+6	&  7.88   &      8.02   &         0.0154   &   -0.088      \\
+7	&  2.56   &       2.4   &         0.0037    &    0.428      \\
+8	&  2.24   &      2.57   &         0.0051    &   -0.655      \\
+9	&     0   &      0.12   &         0.0068    &   -0.174      \\
+10	&     0   &      0.08   &         0.0010    &   -0.706      \\
+11	&  0.42   &      0.36   &         0.0017   &    0.367      \\
+12	&  0.25   &      0.25   &         0.0038    &   -0.016      \\
+13	&  0.49   &      0.23   &         0.0037    &    0.694      \\
+14	&  0.01   &      0.05   &         0.0039    &   -0.103      \\
+15	&  0.03   &      0.02   &         0.0015    &    0.044      \\
+16	&  0.08   &      0.05   &         0.0013    &     0.27      \\   		\end{tabular}
+\caption{Model 3 EM results}
+\end{figure}
                
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \clearpage
 \section{Likelihood ratio test}
-Given certain conditions
+Given certain regularity conditions, let
 \eqn{
 	H_0: \vp = \vp_\text{true}	\\
 	H_1: \vp \neq \vp_\text{true}
 }
 
+The likelihood ratio test is then
 \eqn{
 	\Lambda = -2 \log \frac{ \sup_{\vp=\vp_\text{true}} \llp}{ \sup_{\vp} \llp }  = -2\bl l(\vp_\text{true}) - l(\vph) \br \sim \chi^2_{m-1}	\\
 }
+
+For halo 3,
 \eqn{
 	\Lambda_\text{Halo 3} &= 25.025 \sim \chi^2_{15}	\\
 	\text{p-value 10k} &= 4.961\%\\
@@ -390,7 +412,6 @@ Given certain conditions
 }
 
 Thus we accept $H_0$ when requiring 95\% or less confidence; there is only a 4.961\% chance we would see a value this extreme or more given $H_0$ is true. This holds for 400 to 1600 EM iterations.
-
 
 
 

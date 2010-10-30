@@ -2,6 +2,7 @@ classdef Mixture < handle
 	
 	properties
 		filename;
+		model_path;
 		
 		x;
 		f;
@@ -18,6 +19,7 @@ classdef Mixture < handle
 		em_init_p;
 		
 		models;
+		models_sparse;
 		num_models=0;
 		bin_step=0.1;
 		xrange;
@@ -74,7 +76,7 @@ classdef Mixture < handle
 			obs_path = arg('obs_path',NaN);
 			model_path = arg('model_path',NaN);
 			mi.f = arg('f',NaN);
-			mi.x = arg('x',NaN);
+			x = arg('x',NaN);
 			mi.pi_true = arg('pi_true',NaN);
 			mi.bin_step = arg('bin_step',mi.bin_step);
 			graph = arg('graph',false);
@@ -82,30 +84,42 @@ classdef Mixture < handle
 				fig
 			end
 			
-			if ~isfinite(mi.x)
+			if ~isfinite(x)
 				x = load(obs_path);
 				x = x(x(:,1)>-3,[1 2]);
-				mi.x=x;
 			end
+			mi.x=x;
+			
 			
  			if isfinite(mi.f)
 				mi.num_models = size(mi.f,2);
 			else
  				models = load(model_path);
+				mi.model_path = model_path;
 				
 				xbin = models(:,4);
 				ybin = models(:,5);
 				x_bin_num = max(xbin)+1;
 				y_bin_num = max(ybin)+1;
+				num_models=0;
+				models_sparse=[];
 				
 				for i=0:x_bin_num-1
 					for j=0:y_bin_num-1
 						ndx = models(:,4)==i & models(:,5)==j;
 						if sum(models(ndx,3))>0
-							mi.num_models = mi.num_models + 1;
+							num_models = num_models + 1;
+							nd = models(ndx,1:3);
+% 							nd = nd(nd(:,3)>0,:);
+							a = size(models_sparse,1);
+							b = a + size(nd,1);
+							models_sparse(a+1:b,1:4) = [nd num_models.*ones(size(nd,1),1)];
 						end
 					end
 				end
+				
+				mi.num_models = num_models;
+				mi.models_sparse = models_sparse;
 				
 				xrange = min(models(:,1)):mi.bin_step:max(models(:,1));
 				yrange = min(models(:,2)):mi.bin_step:max(models(:,2));
@@ -179,6 +193,10 @@ classdef Mixture < handle
 		end
 		
 		
+		
+		
+		
+		
 		%--processing
 		function [p,ll,P,LL] = em(mi,varargin)
 			load_args
@@ -199,7 +217,9 @@ classdef Mixture < handle
 			
 			global im;
 			[p,ll,P,LL,init_p,counter,tmr] = em(mi.x,mi.f,car);
-			im=im+1;
+			if im>0
+				im=im+1;
+			end
 			
 			mi.pi_est = p;
 			mi.loglike_est = ll;
@@ -228,6 +248,10 @@ classdef Mixture < handle
 		end
 		
 		
+		
+		
+		
+		
 		%--summaries
 		function text_summary(mi)
 			if isfinite(mi.pi_true)
@@ -238,6 +262,9 @@ classdef Mixture < handle
 				pi_summary = mi.pi_est
 			end
 		end
+		
+		
+		
 		
 		
 		
@@ -290,6 +317,12 @@ classdef Mixture < handle
 			flabel('\pi_h','Z-score','Z-scores for \pi, and \pm 1 and 2 \sigma');
 			hold off
 		end
+		
+		
+		
+		
+		
+		
 		
 		%--internal
 		%\llp &= \sumn \log \Big( \summ \pi_j \fab(x_i,y_i)  \Big)

@@ -49,7 +49,7 @@ function [p,ll,P,LL,init_p,counter,tmr] = em(x,f,varargin)
 	P = zeros(num_models,1);
 
 	global im;
-	if interactive
+	if interactive && im>0
 		tfgr = figure(im);
 		clf(tfgr);
 	end
@@ -126,6 +126,9 @@ end
 	
 	function plot_progress(norms,ll,P,p,n,m,counter,tmr,im,init_p,baseline_p,true_loglike,...
 		num_models,p_actual,quick_print)
+		if im<=0
+			return
+		end
 		figure(im);
 		spr=3;spc=3;
 		pi_colors = [11.139; 19.786; 18.486; 10.506; 14.662; 13.257; 16.302; 12.303; 15.799; 16.032; 15.999; 14.484; 10.354; 15.138; 14.077;  11.08; 16.032; 15.999; 14.484; 10.354; 15.138; 14.077;  11.08];
