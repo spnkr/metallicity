@@ -137,8 +137,8 @@ flabel('j','\pi',['Info error bars. black=1x, green=2x, cyan=3x. x=true, .=est']
 
 
 %% 
-MB=1000;
-base_mb=134;
+MB=5000;
+base_mb=4059;
 
 'starting with size'
 size(pistar)
@@ -152,7 +152,7 @@ bootstrap_generate(base_mb,mi,MB,10000,struct('XXmax_iters',2,'quick_print',9999
 
 %% 
 pistar = [];
-for i=1:134
+for i=1:4059
 	mi = Mixture.load(strcat(['temp/halo3_boot_10000_' num2str(i)]));
 	pistar(:,size(pistar,2)+1) = mi.pi_est;
 end
@@ -172,6 +172,7 @@ size(pistar)
 
 
 %% 
+im=10;
 clrs = ['r' 'g' 'b' 'c' 'm' 'y' 'k' 'r' 'g' 'b' 'c' 'm' 'y' 'k' ...
 			'r' 'g' 'b' 'c' 'm' 'y' 'k' 'r' 'g' 'b' 'c' 'm' 'y' 'k'];
 fg=figure(im);clf(fg);im=im+1;
