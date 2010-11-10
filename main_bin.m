@@ -14,6 +14,8 @@ im=1;
 
 
 load('cache/pistar.mat')
+load('cache/pistar2.mat')
+
 
 mnames = {'halo3', 'halo5', 'gen1', 'gen2', 'halo3_1600', 'halo5_1600', 'halo3_30k', 'halo3_50k'};
 mi = Mixture.load(mnames{1});
@@ -38,7 +40,7 @@ mi.bootstrap_plot_bars(pistar);
 im=8;
 mi.plot_info_error_bars(2);
 
-
+%% 
 
 
 
@@ -46,45 +48,57 @@ mi.plot_info_error_bars(2);
 MB=1000;
 base_mb=0;
 
-'starting with size'
+'doing para'
 size(pistar)
 
 im=-1;
-bootstrap_generate(base_mb,mi,MB,10000,struct('XXmax_iters',2,'quick_print',999999,...
-											'interactive',false));
+bootstrap_generate(base_mb,mi,MB,10000,struct('Xmax_iters',2,'quick_print',999999,...
+											'interactive',false,'do_m_n',true));
 
-'done with bootstrap_covar'
+'done with para'
+
+
+
+'doing NONpara'
+size(pistar)
+
+im=-1;
+bootstrap_generate(base_mb,mi,MB,10000,struct('Xmax_iters',2,'quick_print',999999,...
+											'interactive',false,'do_m_n',false));
+
+'done with NONpara'
 
 
 %% 
-pistar = [];
-for i=1:4059
-	mi = Mixture.load(strcat(['temp/halo3_boot_10000_' num2str(i)]));
-	pistar(:,size(pistar,2)+1) = mi.pi_est;
+pistar2 = [];
+for i=1:2
+	mi = Mixture.load(strcat(['temp/halo3_ni_boot_10000_' num2str(i)]));
+	pistar2(:,size(pistar2,2)+1) = mi.pi_est;
 end
 
-size(pistar)
+size(pistar2)
 
-save('cache/pistar.mat','pistar')
+save('cache/pistar2.mat','pistar2')
 
 'finished'
 clear
 clc
 
-load('cache/pistar.mat')
+load('cache/pistar2.mat')
 'final is'
-size(pistar)
+size(pistar2)
 
 
 
 
 %% 
+pistarU = pistar2;
 im=10;
 clrs = ['r' 'g' 'b' 'c' 'm' 'y' 'k' 'r' 'g' 'b' 'c' 'm' 'y' 'k' ...
 			'r' 'g' 'b' 'c' 'm' 'y' 'k' 'r' 'g' 'b' 'c' 'm' 'y' 'k'];
 fg=figure(im);clf(fg);im=im+1;
-hold on;for i=1:size(pistar,1)
-	plot(1:size(pistar(i,:),2),pistar(i,:),strcat([clrs(i) '.-']))
+hold on;for i=1:size(pistarU,1)
+	plot(1:size(pistarU(i,:),2),pistarU(i,:),strcat([clrs(i) '.-']))
 end
 hold off
 flabel('bs trial num','\pi_j','Estimated pi over bootstrap trials')
