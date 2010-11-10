@@ -5,7 +5,8 @@ function [data] = bootstrap_generate_one(mi, n, varargin)
 
 	models = mi.models_sparse;
 	m = size(models,1);
-	P = mi.pi_true;
+% 	P = mi.pi_true;
+	P = mi.pi_est;
 	M=size(P,1);
 	grid_size = mi.bin_step;
 
