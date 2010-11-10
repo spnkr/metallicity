@@ -91,7 +91,7 @@ for i=1:mi.num_models
 end
 
 
-
+%% 
 fg=figure(6)
 clf(fg)
 conf = zeros(mi.num_models,3);
@@ -120,7 +120,7 @@ hold off
 flabel('j','\pi',[num2str(clev*100) '% Boostrap error bars (n=' num2str(size(pistar,2)) '). x=true, .=est'])
 
 
-
+%% 
 fg=figure(7)
 clf(fg)
 
