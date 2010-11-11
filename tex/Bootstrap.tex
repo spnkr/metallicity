@@ -7,6 +7,7 @@
 \usepackage[table]{xcolor}
 \usepackage{color}
 \usepackage{natbib}
+\usepackage{wrapfig}
 
 \usepackage{blindtext}
 \usepackage{tabularx}
@@ -122,44 +123,143 @@
 
 \maketitle
 
+\section{Bootstrapping}
+Another way to analyze the behavior of $\vph$ is to resample the data via the bootstrap. Using either parametric or non-parametric approaches, we generate $B$ bootstrap samples of $\bl (x^*_i,y^*_i) \br^n_{i=1}$, which can be run through the expectation maximization algorithm to produce $B$ bootstrapped estimates, $\vph^*_1,\ldots,\vph^*_B$.
+
+\subsection{Parametric data generation}
+\begin{wrapfigure}{r}{0.5\textwidth}
+  \begin{center}
+    \includegraphics[width=0.4\textwidth]{boot_gen_data.pdf}
+  \end{center}
+  \caption{Generated parametrically}
+\end{wrapfigure}
+
+Given a $\vph$ from the EM algorithm, we can construct $B$ bootstrapped samples by plugging-in $\vph$ into our mixture model. Using uniform random numbers we first pick the $\pi_j$ from which to sample from, and then, from that $\pi_j$, we use another random number generator to pick a point on the CDF of the model data for the $\pi_j$. We then add noise so as to uniformly randomly distribute the pick over the grid specified in the model data.
 
 
 
 
+\subsection{Non-Parametric data generation}
+An alternate approach is to resample the given dataset directly, without relying on a mixture model. We sample, with replacement, $n$ data points from our original $n$ data points, where each data point is equally likely to be picked.
+
+
+
+
+
+\subsection{Confidence intervals for $\vph$}
+
+Given $B$ bootstrap estimates, $\vph^*_1,\ldots,\vph^*_B$, confidence intervals for each $\pi_j$ can be constructed based on $\hat{\pi}^*_j \xrightarrow{d} \hat{\pi}_j$. Instead we use a centered and scaled approach based on the central limit theorem:
+\eqn{
+	\sqrt{n}(\hat{\pi}_j - \pi_j) \xrightarrow{d} \script{N}(0,\sigma_j)
+}
+
+Thus the $1-\alpha$ confidence interval is bounded by $q_{\alpha/2}$ and $q_{1-\alpha/2}$ such that
+
+\eqn{
+	P\bl q_{\alpha/2} \leq \sqrt{n}(\hat{\pi}_j - \pi_j) \leq q_{1-\alpha/2} \br &= 1-\alpha	
+}
+
+
+and since
+
+\eqn{
+	\sqrt{n}(\hat{\pi}_j - \pi_j) \approx \sqrt{n}(\hat{\pi}^*_j - \hat{\pi}_j)
+}
+
+The $1-\alpha$ bootstrapped confidence interval is bounded by $q^*_{\alpha/2}$ and $q^*_{1-\alpha/2}$ such that
+
+\eqn{
+	P\bl q^*_{\alpha/2} \leq \sqrt{n}(\hat{\pi}^*_j - \hat{\pi}_j) \leq q^*_{1-\alpha/2} \br & \approx 1-\alpha	
+}
+
+Therefore confidence intervals can be computed as
+\eqnl{sccib}{
+	\hat{\pi}_j - \frac{q^*_{1-\alpha/2}}{\sqrt{n}} \leq \pi_j \leq \hat{\pi}_j - \frac{q^*_{\alpha/2}}{\sqrt{n}}
+}
+
+\subsection{Covariance, correlation, and standard deviation}
+The covariance matrix of the bootstrap estimates can be approximated by the sample covariance:
+
+\eqnl{scvmn}{
+	\text{Covar}^*(\hat{\pi}_i,\hat{\pi}_j) = \frac{1}{B-1} \sum^B_{b=1} (\hat{\pi}_{bi}^*-\bar{\pi}_i)(\hat{\pi}_{bj}^*-\bar{\pi}_j)
+}
+where
+\eqn{
+	\bar{\pi}_i = \frac{1}{B}\sum_{b=1}^B \hat{\pi}^*_i
+}
+
+
+With a standard deviation of
+\eqn{
+	\hat{\sigma}^*_i &= | \text{Covar}^*(\hat{\pi}^*_i,\hat{\pi}^*_i)|	\\
+}
+
+the sample correlation matrix is given by
+\eqnl{scmb}{
+	\rho^*(\pi_i,\pi_j) &= \frac{\text{Covar}^*(\hat{\pi}_i,\hat{\pi}_j)}{\hat{\sigma}^*_i \hat{\sigma}^*_j}
+}
+
+
+\begin{figure}[h!]
+  \centering
+    \includegraphics[width=1.1\textwidth]{mn_bootstrap.pdf}
+    \caption{95\% bootstrapped confidence interval for n-out-of-n non-parametric resampling. Comparisons with information based confidence intervals below.}
+\end{figure}
+
+
+\begin{figure}[h!]
+  \centering
+    \includegraphics[width=1.1\textwidth]{g_bootstrap.pdf}
+    \caption{95\% bootstrapped confidence interval for generated parametric resampling. Green bars are centered, red bars are non-centered. Comparisons with information based confidence intervals below.}
+\end{figure}
 
 
 \begin{figure}
 	
 	\begin{center}
-		\includegraphics[scale=0.6]{info_error_bars.pdf}
+		\includegraphics[scale=.75]{correlation_bmn_3.png}
 	\end{center}
-	\caption{$\vp$ plus information based error bars for $\pm \sigma$ (black), $\pm 2\sigma$ (green), and $\pm 3\sigma$ (cyan). A red $\times$ represents the true value, and a black dot represents the estimated values, $\vph$.}
+	\caption{Left: correlation where size of sphere represents correlation value, and opacity of sphere represents $\pi_q+\pi_p$. Orange bubbles represent negative correlation, and blue positive. Right: Same graph, but without transparency.}
 \end{figure}
+
 
 \begin{figure}
-
-\begin{tabular}{r| r| r| r| r|}
-		& $\hat{\pi}_j$ & $\pi_j$ & Std. dev. & Z-score	\\
-		\hline
-1	& 16.04   &     14.47   &         0.0080    &    1.965      \\
-2	&  3.32   &      7.44   &         0.0206   &   -1.995      \\
-3	& 21.39   &     20.99   &         0.0110   &    0.363      \\
-4	&  8.85   &      9.23   &         0.0088    &   -0.439      \\
-5	& 36.44   &     33.66   &         0.0290   &     0.96      \\
-6	&  7.88   &      8.02   &         0.0154   &   -0.088      \\
-7	&  2.56   &       2.4   &         0.0037    &    0.428      \\
-8	&  2.24   &      2.57   &         0.0051    &   -0.655      \\
-9	&     0   &      0.12   &         0.0068    &   -0.174      \\
-10	&     0   &      0.08   &         0.0010    &   -0.706      \\
-11	&  0.42   &      0.36   &         0.0017   &    0.367      \\
-12	&  0.25   &      0.25   &         0.0038    &   -0.016      \\
-13	&  0.49   &      0.23   &         0.0037    &    0.694      \\
-14	&  0.01   &      0.05   &         0.0039    &   -0.103      \\
-15	&  0.03   &      0.02   &         0.0015    &    0.044      \\
-16	&  0.08   &      0.05   &         0.0013    &     0.27      \\   		\end{tabular}
-\caption{Model 3 EM results}
+	
+	\begin{center}
+		\includegraphics[scale=0.5]{boot_mn_stdev.pdf}
+	\end{center}
+	\caption{95\% n-out-of-n bootstrap standard deviation of each $\pi_j$.}
 \end{figure}
-               
+
+
+
+\clearpage
+\begin{table}[h]\tiny
+\caption{95\% bootstrap correlation matrix}
+	\begin{center}
+		\noindent\makebox[\textwidth]{%
+\begin{tabularx}{1.3\textwidth}{r| r r r r r r r r r r r r r r r r}
+& 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 & 11 & 12 & 13 & 14 & 15 & 16	\\
+\hline
+   1   &         1   &    -0.582   &    -0.058   &    -0.174   &     0.258   &    -0.087    &     0.01    &   -0.054   &     0.005   &    -0.058   &     0.009   &    -0.027   &     0.027    &    0.003   &         0   &    -0.029      \\
+   2   &    -0.582   &         1   &    -0.396   &     0.248   &     -0.62   &     0.314    &   -0.004    &    0.013   &     0.018   &     0.007   &     0.028   &     0.013   &    -0.036    &   -0.029   &    -0.043   &     0.017      \\
+   3   &    -0.058   &    -0.396   &         1   &     0.142   &    -0.101   &    -0.129    &    -0.03    &    0.004   &     0.007   &     0.061   &    -0.075   &     0.023   &    -0.005    &    -0.01   &     0.071   &    -0.029      \\
+   4   &    -0.174   &     0.248   &     0.142   &         1   &    -0.658   &      0.31    &   -0.159    &   -0.022   &    -0.022   &     0.054   &     0.015   &     0.014   &     0.008    &   -0.028   &    -0.013   &    -0.013      \\
+   5   &     0.258   &     -0.62   &    -0.101   &    -0.658   &         1   &    -0.731    &    0.038    &    0.018   &    -0.023   &     -0.03   &    -0.021   &    -0.004   &     0.016    &    0.087   &     0.015   &     0.025      \\
+   6   &    -0.087   &     0.314   &    -0.129   &      0.31   &    -0.731   &         1    &    0.001    &   -0.147   &     0.019   &     0.019   &     0.011   &     0.006   &    -0.045    &   -0.207   &     -0.02   &    -0.064      \\
+   7   &      0.01   &    -0.004   &     -0.03   &    -0.159   &     0.038   &     0.001    &        1    &   -0.627   &     0.057   &    -0.036   &    -0.051   &     -0.07   &     0.084    &   -0.032   &    -0.007   &     0.029      \\
+   8   &    -0.054   &     0.013   &     0.004   &    -0.022   &     0.018   &    -0.147    &   -0.627    &        1   &    -0.032   &    -0.024   &     0.125   &    -0.261   &    -0.037    &     0.08   &     0.035   &     0.005      \\
+   9   &     0.005   &     0.018   &     0.007   &    -0.022   &    -0.023   &     0.019    &    0.057    &   -0.032   &         1   &    -0.001   &    -0.053   &     0.014   &    -0.001    &   -0.021   &     0.038   &     -0.03      \\
+   10   &   -0.058   &     0.007   &     0.061   &     0.054   &     -0.03   &     0.019    &   -0.036    &   -0.024   &    -0.001   &         1   &    -0.156   &     0.125   &    -0.176    &    -0.01   &     0.051   &    -0.055      \\
+   11   &    0.009   &     0.028   &    -0.075   &     0.015   &    -0.021   &     0.011    &   -0.051    &    0.125   &    -0.053   &    -0.156   &         1   &    -0.373   &     0.046    &    0.056   &    -0.173   &    -0.048      \\
+   12   &   -0.027   &     0.013   &     0.023   &     0.014   &    -0.004   &     0.006    &    -0.07    &   -0.261   &     0.014   &     0.125   &    -0.373   &         1   &     -0.54    &   -0.013   &      0.04   &     0.089      \\
+   13   &    0.027   &    -0.036   &    -0.005   &     0.008   &     0.016   &    -0.045    &    0.084    &   -0.037   &    -0.001   &    -0.176   &     0.046   &     -0.54   &         1    &   -0.064   &    -0.327   &    -0.107      \\
+   14   &    0.003   &    -0.029   &     -0.01   &    -0.028   &     0.087   &    -0.207    &   -0.032    &     0.08   &    -0.021   &     -0.01   &     0.056   &    -0.013   &    -0.064    &        1   &    -0.063   &    -0.132      \\
+   15   &        0   &    -0.043   &     0.071   &    -0.013   &     0.015   &     -0.02    &   -0.007    &    0.035   &     0.038   &     0.051   &    -0.173   &      0.04   &    -0.327    &   -0.063   &         1   &    -0.087      \\
+   16   &   -0.029   &     0.017   &    -0.029   &    -0.013   &     0.025   &    -0.064    &    0.029    &    0.005   &     -0.03   &    -0.055   &    -0.048   &     0.089   &    -0.107    &   -0.132   &    -0.087   &         1      \\
+\end{tabularx}}
+	\end{center}
+\end{table}
 
 
 

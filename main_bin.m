@@ -12,9 +12,9 @@ addpath('data/');
 global im;
 im=1;
 
-
+load('cache/pistar_orig.mat')
 load('cache/pistar.mat')
-load('cache/pistar2.mat')
+load('cache/pistar_mn.mat')
 
 
 mnames = {'halo3', 'halo5', 'gen1', 'gen2', 'halo3_1600', 'halo5_1600', 'halo3_30k', 'halo3_50k'};
@@ -24,41 +24,31 @@ mi = Mixture.load(mnames{1});
 
 %% 
 im=1;
-[S,V,correl,stdev] = mi.bootstrap_covariance(pistar);
-mi.plot_bootstrap_covar(S,V,correl,stdev,pistar);
+[S,V,correl,stdev] = mi.bootstrap_covariance(pistar_mn);
+mi.plot_bootstrap_covar(S,V,correl,stdev,pistar_mn);
 
 %% 
-im=6;
-mi.bootstrap_plot_bars_both(pistar);
+im=8;
+mi.bootstrap_plot_bars_both(pistar_mn);
 
 %% 
-im=7;
-mi.bootstrap_plot_bars(pistar);
+im=8;
+mi.bootstrap_plot_bars(pistar_mn);
 
 
 %% 
 im=8;
 mi.plot_info_error_bars(2);
 
-%% 
+
+
+
 
 
 
 %% 
-MB=1000;
-base_mb=0;
-
-'doing para'
-size(pistar)
-
-im=-1;
-bootstrap_generate(base_mb,mi,MB,10000,struct('Xmax_iters',2,'quick_print',999999,...
-											'interactive',false,'do_m_n',true));
-
-'done with para'
-
-
-
+MB=2000-586;
+base_mb=586;
 'doing NONpara'
 size(pistar)
 
@@ -70,29 +60,49 @@ bootstrap_generate(base_mb,mi,MB,10000,struct('Xmax_iters',2,'quick_print',99999
 
 
 %% 
-pistar2 = [];
-for i=1:2
-	mi = Mixture.load(strcat(['temp/halo3_ni_boot_10000_' num2str(i)]));
-	pistar2(:,size(pistar2,2)+1) = mi.pi_est;
+pistar = [];
+for i=1:586
+	mi = Mixture.load(strcat(['temp/halo3_new_boot_10000_' num2str(i)]));
+	pistar(:,size(pistar,2)+1) = mi.pi_est;
 end
 
-size(pistar2)
+size(pistar)
 
-save('cache/pistar2.mat','pistar2')
+save('cache/pistar.mat','pistar')
 
 'finished'
 clear
 clc
 
-load('cache/pistar2.mat')
+load('cache/pistar.mat')
 'final is'
+size(pistar)
+
+
+%% 
+pistar_mn = [];
+for i=1:1000
+	mi = Mixture.load(strcat(['temp/halo3_new_mn_boot_10000_' num2str(i)]));
+	pistar_mn(:,size(pistar_mn,2)+1) = mi.pi_est;
+end
+
 size(pistar2)
+
+save('cache/pistar_mn.mat','pistar_mn')
+
+'finished'
+clear
+clc
+
+load('cache/pistar_mn.mat')
+'final is'
+size(pistar_mn)
 
 
 
 
 %% 
-pistarU = pistar2;
+pistarU = pistar_mn;
 im=10;
 clrs = ['r' 'g' 'b' 'c' 'm' 'y' 'k' 'r' 'g' 'b' 'c' 'm' 'y' 'k' ...
 			'r' 'g' 'b' 'c' 'm' 'y' 'k' 'r' 'g' 'b' 'c' 'm' 'y' 'k'];
@@ -109,7 +119,13 @@ flabel('bs trial num','\pi_j','Estimated pi over bootstrap trials')
 
 
 
-
+%% 
+im=1;
+[S,V,correl,stdev] = mi.bootstrap_covariance(pistar_mn);
+mi.correl = correl;
+mi.variance = V;
+mi.stdev=stdev;
+mi.covar=S;
 
 
 

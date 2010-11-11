@@ -272,7 +272,7 @@ classdef Mixture < handle
 		
 		%--plots
 		function plot_correl(mi,size_is_correl,color_neg)
-			plot_correl_dots2(mi,size_is_correl,color_neg);
+			plot_correl_dots(mi,mi.correl,size_is_correl,color_neg);
 		end
 		
 		function plot_stdev(mi)
@@ -410,7 +410,7 @@ classdef Mixture < handle
 			hold on
 
 			for i=1:m
-				plot(i.*ones(1,2), conf(i,[2 3]), 'g.-');
+				plot(i.*ones(1,2), conf(i,[2 3]), 'c.-');
 			end
 
 			plot(mi.pi_est,'k.')

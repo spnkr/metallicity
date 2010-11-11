@@ -1,36 +1,78 @@
-function plot_correl_dots(mi,dot_scale,overlay)
+function sss=plot_correl_dots(mi,correl,size_is_correl,color_neg)
 			global im;
 			sss=figure(im);
 			im=im+1;
 			clf(sss);
+			
+			adjust_to_baseline=false;
+			overlay=false;
+			
+			cor = abs(correl);
+			for i=1:mi.num_models
+				for j=1:mi.num_models
+					if i==j
+						cor(i,j) = 0;
+					end
+				end
+			end
 
+			
+			if adjust_to_baseline
+			baseline = 1-max(max(cor));
+			cor = cor + baseline;
+			
+			for i=1:mi.num_models
+				for j=1:mi.num_models
+					if i==j
+						cor(i,j) = 0;
+					end
+				end
+			end
+			end
+			
 			hold on
-			cv = mi.correl;
-			cv=50.*cv./range(range(cv));
 			for i=1:mi.num_models
 				for j=1:mi.num_models
 					[x,y,z] = sphere(20);
-					fact=cv(i,j);
-					if fact<0
-						fc=[223/255 128/255 0/255];
+					
+					if size_is_correl
+						pltitle = 'Correl of \pi. Size of sphere = correlation; opacity = \pi_p+\pi_q';
+						sz = cor(i,j);
+						sz = min(max(sz,0.1),1);
+						if i==j
+							sz=0.00001;
+						end
+
+
+						if correl(i,j)<0 && color_neg
+							clr=[191/255 48/255 0/255];
+						else
+							clr=[0/255 98/255 223/255];
+						end
+						
+						opac=mi.pi_est(i)+mi.pi_est(j);
 					else
-						fc=[39/255 127/255 0/255];
+						pltitle = 'Correl of \pi. Size of sphere = \pi_p+\pi_q; opacity = correlation';
+						sz = mi.pi_est(i)+mi.pi_est(j);
+						sz = min(max(sz,0.1),1);
+						if i==j
+							sz=0.00001;
+						end
+
+
+						if correl(i,j)<0 && color_neg
+							clr=[191/255 48/255 0/255];
+						else
+							clr=[0/255 98/255 223/255];
+						end
+						
+						opac=cor(i,j);
 					end
-					fact=max(abs(fact),2);
-					fact = fact/dot_scale(1);
 					
-					fact = max(fact,.1);
-					fact = fact./dot_scale(2);
+					eopac = max(opac./2,0);
+					eclr=min(clr.*1.5,1);
 					
-					if i==j
-						fact=0.00001;
-					end
-					
-					ad = mi.pi_est(i)+mi.pi_est(j);
-					ad = min(max(ad,0.1),1);
-					ead = max(ad-.2,0);
-					eclr=min(fc.*1.5,1);
-					surf(fact*x+1*i,fact*y+1*j,fact*z,'FaceColor',fc,'EdgeColor',eclr,'FaceAlpha',ad,'EdgeAlpha',ead)
+					surf(sz*x+1*i,sz*y+1*j,sz.*z,'FaceColor',clr,'EdgeColor',eclr,'FaceAlpha',opac,'EdgeAlpha',eopac)
 				end
 			end
 
@@ -59,7 +101,7 @@ function plot_correl_dots(mi,dot_scale,overlay)
 			end
 
 			hold off
-			flabel('\pi_p','\pi_q','Correl of \pi = area of dot; darker background = more \pi_p+\pi_q');
+			flabel('\pi_p','\pi_q',pltitle);
 			daspect([1 1 1])
 			view(90,90)
 			axis([-1 17 -1 17 -2 5])
