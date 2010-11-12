@@ -1,4 +1,3 @@
-
 %% load data etc
 clear
 clc
@@ -7,9 +6,97 @@ addpath('etc/');
 addpath('data/');
 global im;
 im=1;
-mnames = {'halo3', 'halo5', 'gen1', 'gen2', 'halo3_1600', 'halo5_1600', 'halo3_30k', 'halo3_50k'};
 
-max_seconds = 99999999999;
+%% 
+
+im=1;
+mi = Mixture(struct(	'save_as',strcat(['halo3']),...
+						'model_path','data/modeldata3.dat',...
+						'obs_path',strcat(['data/obsdata3_10000.dat']),...
+						'pi_true', NaN,...
+						'graph',false));
+
+
+mi.em(struct('max_iters',50,'p0_eval','rand(num_models,1)','quick_print',9999999999,'interactive',false));
+h = figure(1);
+saveas(h,strcat(['media/diag_' mi.filename '.pdf']),'pdf');
+
+mi.update_stats
+mi.save
+
+
+mi.plot_info_error_bars(2)
+h = figure(2);
+saveas(h,strcat(['media/errorbar_' mi.filename '.pdf']),'pdf');
+
+
+mi.plot_correl(true,true);
+h = figure(3);
+saveas(h,strcat(['media/correl_' mi.filename '.pdf']),'pdf');
+
+
+
+plot_formation_history(mi);
+h = figure(4);
+saveas(h,strcat(['media/fhist_' mi.filename '.pdf']),'pdf');
+	
+	
+hls = [2 5 7 8 9 10 12 14 15 17 20];
+for ii=1:length(hls)
+	im=1;
+	mi = Mixture(struct(	'save_as',strcat(['halo' num2str(hls(ii))]),...
+							'model_path','data/mastertemp.dat',...
+							'obs_path',strcat(['data/obsdata' num2str(hls(ii)) '.dat']),...
+							'pi_true', NaN,...
+							'graph',false));
+
+
+	mi.em(struct('max_iters',50,'p0_eval','rand(num_models,1)','quick_print',9999999999,'interactive',false));
+	h = figure(1);
+	saveas(h,strcat(['media/diag_' mi.filename '.pdf']),'pdf');
+
+	mi.update_stats
+	mi.save
+
+
+	mi.plot_info_error_bars(2)
+	h = figure(2);
+	saveas(h,strcat(['media/errorbar_' mi.filename '.pdf']),'pdf');
+
+
+	mi.plot_correl(true,true);
+	h = figure(3);
+	saveas(h,strcat(['media/correl_' mi.filename '.pdf']),'pdf');
+
+
+
+	plot_formation_history(mi);
+	h = figure(4);
+	saveas(h,strcat(['media/fhist_' mi.filename '.pdf']),'pdf');
+end
+
+
+
+%% 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+%% 
+%ignore below
+error('ignore');
 
 mi = Mixture.load('gen1');
 sepr(mi.filename)

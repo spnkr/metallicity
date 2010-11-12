@@ -17,7 +17,7 @@ load('cache/pistar.mat')
 load('cache/pistar_mn.mat')
 
 
-mnames = {'halo3', 'halo5', 'gen1', 'gen2', 'halo3_1600', 'halo5_1600', 'halo3_30k', 'halo3_50k'};
+mnames = {'halo2', 'halo5', 'gen1', 'gen2', 'halo3_1600', 'halo5_1600', 'halo3_30k', 'halo3_50k'};
 mi = Mixture.load(mnames{1});
 
 
@@ -155,26 +155,12 @@ mi.plot_zscores
 
 
 
-%% 
-mi2 = Mixture(struct(	'save_as','halo3X',...
-						'model_path','data/modeldata3.dat',...
-						'obs_path','data/obsdata3_10000.dat',...
-						'pi_true', Mixture.get_pi_true(3),...
-						'graph',false));
-
-%% 
-mi.models_sparse=mi2.models_sparse;
 
 
 
-
-
-
-
-
-
-
-
+%%
+figure(10)
+plot(1,2)
 
 %% 
 im=1;

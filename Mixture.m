@@ -3,6 +3,7 @@ classdef Mixture < handle
 	properties
 		filename;
 		model_path;
+		model_skip_ndx=[];
 		
 		x;
 		f;
@@ -103,6 +104,19 @@ classdef Mixture < handle
 				y_bin_num = max(ybin)+1;
 				num_models=0;
 				models_sparse=[];
+				
+				kk=1;
+				for i=0:x_bin_num-1
+					for j=0:y_bin_num-1
+						ndx = models(:,4)==i & models(:,5)==j;
+						if sum(models(ndx,3)) == 0
+							mi.model_skip_ndx(kk) = 0;
+						else
+							mi.model_skip_ndx(kk) = 1;
+						end
+						kk=kk+1;
+					end
+				end
 				
 				for i=0:x_bin_num-1
 					for j=0:y_bin_num-1
@@ -499,8 +513,9 @@ classdef Mixture < handle
 			end
 			
 			plot(mi.pi_true,'rx')
+			plot(mi.pi_est,'k.')
 			hold off
-			flabel('j','\pi',['Info error bars. x=true, .=est'])
+			flabel('j','\pi',['Information based error bars \pm' num2str(nstdevs) '\sigma'])
 		end
 		
 		
@@ -529,7 +544,11 @@ classdef Mixture < handle
 		end
 		
 		function z = get_zscores(mi)
-			z = (mi.pi_est-mi.pi_true)./mi.stdev;
+			if ~isfinite(mi.pi_true)
+				z=[];
+			else
+				z = (mi.pi_est-mi.pi_true)./mi.stdev;
+			end
 		end
 	end
 	
