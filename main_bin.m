@@ -23,6 +23,9 @@ mi = Mixture.load(mnames{1});
 
 
 
+
+
+
 %% 
 im=1;
 [S,V,correl,stdev] = mi.bootstrap_covariance(pistar_mn);

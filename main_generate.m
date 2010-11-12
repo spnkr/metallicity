@@ -10,14 +10,14 @@ im=1;
 %% 
 tic
 im=1;
-mi = Mixture(struct(	'save_as',strcat(['halo3']),...
+mi = Mixture(struct(	'save_as',strcat(['halo3_r2']),...
 						'model_path','data/modeldata3.dat',...
 						'obs_path',strcat(['data/obsdata3_10000.dat']),...
 						'pi_true', Mixture.get_pi_true(3),...
 						'graph',false));
 
 
-mi.em(struct('Xmax_iters',100,'p0_eval','rand(num_models,1)','quick_print',999999999,'interactive',false));
+mi.em(struct('Xmax_iters',2,'p0_eval','rand(num_models,1)','quick_print',999999999,'interactive',false));
 h = figure(1);
 saveas(h,strcat(['media/diag_' mi.filename '.pdf']),'pdf');
 
@@ -41,12 +41,14 @@ saveas(h,strcat(['media/fhist_' mi.filename '.pdf']),'pdf');
 toc
 
 
+
+
 hls = [2 5 7 8 9 10 12 14 15 17 20];
 for ii=1:length(hls)
 	tic
 	im=1;
 	try
-	mi = Mixture(struct(	'save_as',strcat(['halo' num2str(hls(ii))]),...
+	mi = Mixture(struct(	'save_as',strcat(['halo' num2str(hls(ii)) '_r2']),...
 							'model_path','data/mastertemp.dat',...
 							'obs_path',strcat(['data/obsdata' num2str(hls(ii)) '.dat']),...
 							'pi_true', Mixture.get_pi_true(hls(ii)),...
@@ -91,6 +93,77 @@ for ii=1:length(hls)
 	toc
 end
 
+
+
+
+
+tic
+im=1;
+mi = Mixture(struct(	'save_as',strcat(['halo5']),...
+						'model_path','data/modeldata5.dat',...
+						'obs_path',strcat(['data/obsdata5_30000.dat']),...
+						'pi_true', Mixture.get_pi_true(3),...
+						'graph',false));
+
+
+mi.em(struct('Xmax_iters',2,'p0_eval','rand(num_models,1)','quick_print',999999999,'interactive',false));
+h = figure(1);
+saveas(h,strcat(['media/diag_' mi.filename '.pdf']),'pdf');
+
+mi.update_stats
+mi.save
+
+
+mi.plot_info_error_bars(2)
+h = figure(2);
+saveas(h,strcat(['media/errorbar_' mi.filename '.pdf']),'pdf');
+
+
+mi.plot_correl(true,true);
+h = figure(3);
+saveas(h,strcat(['media/correl_' mi.filename '.pdf']),'pdf');
+
+
+plot_formation_history(mi);
+h = figure(4);
+saveas(h,strcat(['media/fhist_' mi.filename '.pdf']),'pdf');
+toc
+
+
+
+
+
+tic
+im=1;
+mi = Mixture(struct(	'save_as',strcat(['halo5_r2']),...
+						'model_path','data/modeldata5.dat',...
+						'obs_path',strcat(['data/obsdata5_30000.dat']),...
+						'pi_true', Mixture.get_pi_true(3),...
+						'graph',false));
+
+
+mi.em(struct('Xmax_iters',2,'p0_eval','rand(num_models,1)','quick_print',999999999,'interactive',false));
+h = figure(1);
+saveas(h,strcat(['media/diag_' mi.filename '.pdf']),'pdf');
+
+mi.update_stats
+mi.save
+
+
+mi.plot_info_error_bars(2)
+h = figure(2);
+saveas(h,strcat(['media/errorbar_' mi.filename '.pdf']),'pdf');
+
+
+mi.plot_correl(true,true);
+h = figure(3);
+saveas(h,strcat(['media/correl_' mi.filename '.pdf']),'pdf');
+
+
+plot_formation_history(mi);
+h = figure(4);
+saveas(h,strcat(['media/fhist_' mi.filename '.pdf']),'pdf');
+toc
 
 
 %% 

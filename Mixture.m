@@ -561,7 +561,7 @@ classdef Mixture < handle
 			plot(mi.pi_true,'rx')
 			plot(mi.pi_est,'k.')
 			hold off
-			flabel('j','\pi',['Information based error bars \pm' num2str(nstdevs) '\sigma'])
+			flabel('j','\pi',['Information based error bars \pm 1 & ' num2str(nstdevs) '\sigma - ' mi.filename])
 		end
 		
 		

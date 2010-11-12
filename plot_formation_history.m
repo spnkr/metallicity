@@ -4,15 +4,15 @@ function plot_formation_history(mi)
 	hold on;
 	m=ceil(sqrt(length(mi.model_skip_ndx)));
 	for i=1:m
-		plot([0 m+.5], [i+.5 i+.5], 'Color', [.5 .5 .5])
-		plot([i+.5 i+.5], [0 m+.5], 'Color', [.5 .5 .5])
+		plot([0 m+.5], [i+.5 i+.5], 'Color', [.5 .5 .5], 'LineStyle',':')
+		plot([i+.5 i+.5], [0 m+.5], 'Color', [.5 .5 .5], 'LineStyle',':')
 	end
 	
 % 	set(gcf,'Units','normalized');
 	
 	k=1;
 	mm=1;
-	clr=[0/255 98/255 223/255];
+	clr=[30/255 80/255 30/255];
 	eclr=min(clr.*1.5,1);
 % 	for i=1:m
 % 		for j=1:m
@@ -63,14 +63,14 @@ function plot_formation_history(mi)
 		end
 
 		if msk(xf,yf)==1
-			[x,y,z] = sphere(20);
+			[x,y,z] = sphere(30);
 			sz = mi.pi_est(k);
 			sz = min(max(sz,0.01),.8);
 			
 			
 			
 			surf(sz*x+1*xf,sz*y+1*yf,sz.*z,'FaceColor',clr,...
-				'EdgeColor',eclr,'FaceAlpha',1,'EdgeAlpha',0);
+				'EdgeColor',eclr,'FaceAlpha',.2,'EdgeAlpha',0.05);
 
 
 			text(xf+.05,yf-.35,1.1,...
@@ -81,7 +81,7 @@ function plot_formation_history(mi)
 	
 	hold off
 	axis([.5 m+.5 .5 m+.5])
-	flabel('Accretion time (Gyr)', 'Mass', ['Formation history - ' mi.filename])
+	flabel('Accretion time: 0 \rightarrow 14 Gyr', 'Mass: 10 \rightarrow 10^{9} M', ['Formation history - ' mi.filename])
 	set(gca,'XTick',0);
 	set(gca,'YTick',0);
 	view(0,-90)

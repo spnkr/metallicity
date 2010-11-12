@@ -20,7 +20,7 @@ function [p,ll,P,LL,init_p,counter,tmr] = em(x,f,varargin)
 	
 	%1.235 to 1.236 over past 25 runs is the slowest rate of convergence
 	ll_stop_prec=arg('ll_stop_prec',1000);
-	ll_stop_lookback=arg('ll_stop_lookback',25);
+	ll_stop_lookback=arg('ll_stop_lookback',100);
 	
 	norms = [];
 	LL = [];

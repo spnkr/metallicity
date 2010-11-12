@@ -36,7 +36,7 @@ function sss=plot_correl_dots(mi,correl,size_is_correl,color_neg)
 					[x,y,z] = sphere(20);
 					
 					if size_is_correl
-						pltitle = 'Correlation of \pi';
+						pltitle = strcat(['Correlation of \pi - ' mi.filename]);
 						sz = (cor(i,j).^-2).^-1;
 						sz = cor(i,j);
 						sz = min(max(sz,0.01),.5);
