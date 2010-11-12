@@ -8,16 +8,16 @@ global im;
 im=1;
 
 %% 
-
+tic
 im=1;
 mi = Mixture(struct(	'save_as',strcat(['halo3']),...
 						'model_path','data/modeldata3.dat',...
 						'obs_path',strcat(['data/obsdata3_10000.dat']),...
-						'pi_true', NaN,...
+						'pi_true', Mixture.get_pi_true(3),...
 						'graph',false));
 
 
-mi.em(struct('max_iters',50,'p0_eval','rand(num_models,1)','quick_print',9999999999,'interactive',false));
+mi.em(struct('Xmax_iters',100,'p0_eval','rand(num_models,1)','quick_print',999999999,'interactive',false));
 h = figure(1);
 saveas(h,strcat(['media/diag_' mi.filename '.pdf']),'pdf');
 
@@ -35,23 +35,25 @@ h = figure(3);
 saveas(h,strcat(['media/correl_' mi.filename '.pdf']),'pdf');
 
 
-
 plot_formation_history(mi);
 h = figure(4);
 saveas(h,strcat(['media/fhist_' mi.filename '.pdf']),'pdf');
-	
-	
+toc
+
+
 hls = [2 5 7 8 9 10 12 14 15 17 20];
 for ii=1:length(hls)
+	tic
 	im=1;
+	try
 	mi = Mixture(struct(	'save_as',strcat(['halo' num2str(hls(ii))]),...
 							'model_path','data/mastertemp.dat',...
 							'obs_path',strcat(['data/obsdata' num2str(hls(ii)) '.dat']),...
-							'pi_true', NaN,...
+							'pi_true', Mixture.get_pi_true(hls(ii)),...
 							'graph',false));
 
 
-	mi.em(struct('max_iters',50,'p0_eval','rand(num_models,1)','quick_print',9999999999,'interactive',false));
+	mi.em(struct('Xmax_iters',10,'p0_eval','rand(num_models,1)','quick_print',999999999,'interactive',false));
 	h = figure(1);
 	saveas(h,strcat(['media/diag_' mi.filename '.pdf']),'pdf');
 
@@ -73,6 +75,20 @@ for ii=1:length(hls)
 	plot_formation_history(mi);
 	h = figure(4);
 	saveas(h,strcat(['media/fhist_' mi.filename '.pdf']),'pdf');
+	
+	catch
+		sepr
+		sepr
+		sepr
+		sepr
+		warning('failed!!!!')
+		hls(ii)
+		sepr
+		sepr
+		sepr
+		sepr
+	end
+	toc
 end
 
 
@@ -94,8 +110,31 @@ end
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 %% 
-%ignore below
 error('ignore');
 
 mi = Mixture.load('gen1');

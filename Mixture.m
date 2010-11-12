@@ -63,6 +63,10 @@ classdef Mixture < handle
 				  0.024226458  ;
 				  0.046833900  ];
 				tp = tp./100;
+			else
+				tp = [1.679 21.38 20.53 3.806 1.002 8.522 21.56 12.29 1.841 0.151 1.662 1.536 1.582 0.945...
+					0.053 0.282 0.347 0.542 0.111 0.003 0.045 0.117]';
+				tp = tp./100;
 			end
 		end
 	end
@@ -145,7 +149,9 @@ classdef Mixture < handle
 				yn=length(yrange);
 				k=0;
 				sq = zeros(xn,yn);
+				warning off
 				f = zeros(num_models,xrange,yrange);
+				warning on
 				indic=zeros(xn*yn,1);
 				m = 0;
 				for i=0:x_bin_num-1
@@ -177,7 +183,27 @@ classdef Mixture < handle
 				f = 100*f;
 				fval = EvalDens(x(:,1),x(:,2),f,xrange,yrange,num_models,xn,yn,mi.bin_step/2);
 				id = (sum(fval')~=0);
-				fval = fval(id,:);
+				
+				if sum(id) ~= size(fval,1)
+					fval = fval(id,:);
+					mi.x = mi.x(id,:);
+					sepr
+					sepr
+					sepr
+					sepr
+					sepr
+					sepr
+					sepr(mi.filename);
+					warning('found a 0 fval!');
+					sepr
+					sepr
+					sepr
+					sepr
+					sepr
+					sepr
+				end
+				
+				
 				mi.f = fval;
 				
 				
@@ -426,6 +452,26 @@ classdef Mixture < handle
 			for i=1:m
 				plot(i.*ones(1,2), conf(i,[2 3]), 'c.-');
 			end
+			
+			%alt method test
+			if 1==111
+			for j=1:m
+				t = T(j,:);
+				t = sort(t);
+				lndx = ceil(n*((1-alpha)/2));
+				undx = ceil(n - lndx);
+
+				mu=mi.pi_est(j);
+				conf(j,1) = mu;
+				conf(j,2) = mu + t(undx)/sqrt(n);
+				conf(j,3) = mu + t(lndx)/sqrt(n);
+			end
+			for i=1:m
+				plot(i.*ones(1,2), conf(i,[2 3]), 'r.-');
+			end
+			
+			end
+			%end
 
 			plot(mi.pi_est,'k.')
 			plot(mi.pi_true,'rx')

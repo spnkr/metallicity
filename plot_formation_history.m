@@ -73,7 +73,7 @@ function plot_formation_history(mi)
 				'EdgeColor',eclr,'FaceAlpha',1,'EdgeAlpha',0);
 
 
-			text(xf+.05,yf-.35,1,...
+			text(xf+.05,yf-.35,1.1,...
 				strcat([num2str(round(mi.pi_est(k)*10000)/100) '%']));
 			k=k+1;
 		end

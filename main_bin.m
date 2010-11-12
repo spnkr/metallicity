@@ -17,7 +17,8 @@ load('cache/pistar.mat')
 load('cache/pistar_mn.mat')
 
 
-mnames = {'halo2', 'halo5', 'gen1', 'gen2', 'halo3_1600', 'halo5_1600', 'halo3_30k', 'halo3_50k'};
+mnames = {'halo3', 'halo2','halo5','halo7','halo8','halo9','halo10','halo12','halo14','halo15','halo17','halo20',...
+	'gen1', 'gen2', 'halo3_1600', 'halo5_1600', 'halo3_30k', 'halo3_50k'};
 mi = Mixture.load(mnames{1});
 
 
@@ -29,11 +30,16 @@ mi.plot_bootstrap_covar(S,V,correl,stdev,pistar_mn);
 
 %% 
 im=8;
-mi.bootstrap_plot_bars_both(pistar_mn);
+mi.bootstrap_plot_bars_both(pistar);
 
 %% 
+im=9;
+mi.bootstrap_plot_bars(pistar);
+title('pistar')
+
 im=8;
 mi.bootstrap_plot_bars(pistar_mn);
+title('mn')
 
 
 %% 
@@ -42,8 +48,8 @@ mi.plot_info_error_bars(2);
 
 
 
-
-
+%% 
+round([mean(pistar,2) mean(pistar_mn,2) mi.pi_true].*100.*1000)./1000
 
 
 %% 
@@ -179,8 +185,7 @@ mi
 							'p_actual',mi.pi_true,...
 							'loglike_true', mi.loglike_true,...
 							'interactive',true,...
-							'max_seconds',60,...
-							'baseline_p',p_bs_target_3,...
+							'max_seconds',10,...
 							'quick_print',50));
 
 [I,S,V,stdev] = fisher_info(mi.pi_est,mi.f);
