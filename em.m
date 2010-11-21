@@ -71,7 +71,7 @@ function [p,ll,P,LL,init_p,counter,tmr] = em(x,f,varargin)
 		if tl_part == 0
 			pi_1.*100
 		end
-
+		
 		P(:,counter) = pi_1;
 		norms(counter) = norm(pi_0 - pi_1);
 		ll = s;
@@ -130,7 +130,7 @@ end
 			return
 		end
 		figure(im);
-		spr=3;spc=3;
+		spr=2;spc=3;
 		pi_colors = [11.139; 19.786; 18.486; 10.506; 14.662; 13.257; 16.302; 12.303; 15.799; 16.032; 15.999; 14.484; 10.354; 15.138; 14.077;  11.08; 16.032; 15.999; 14.484; 10.354; 15.138; 14.077;  11.08];
 
 		pi_colors = pi_colors(1:m);
@@ -140,8 +140,69 @@ end
 			'r' 'g' 'b' 'c' 'm' 'y' 'k' 'r' 'g' 'b' 'c' 'm' 'y' 'k' ...
 			'r' 'g' 'b' 'c' 'm' 'y' 'k' 'r' 'g' 'b' 'c' 'm' 'y' 'k' ...
 			'r' 'g' 'b' 'c' 'm' 'y' 'k' 'r' 'g' 'b' 'c' 'm' 'y' 'k'];
-
-		subplot(spr,spc,9);
+		
+		clrint = [  0.23309      0.16965      0.49939      ;
+				  0.71771      0.93246      0.97015      ;
+				  0.75749      0.40726      0.21711      ;
+				  0.45631      0.16391      0.10073      ;
+				  0.36744      0.13855      0.86039      ;
+				  0.78951     0.094644      0.86793      ;
+				  0.45087      0.25999      0.65318      ;
+				 0.058676      0.34455      0.64045      ;
+				  0.56037      0.93054       0.6123      ;
+				 0.067491     0.052629      0.23289      ;
+				  0.70662      0.62035      0.75643      ;
+				 0.039426      0.51577      0.45674      ;
+				  0.54358        0.868      0.88962      ;
+				  0.41002      0.27975      0.87272      ;
+				  0.50077      0.68458      0.59843      ;
+				   0.4534      0.59915     0.096282      ;
+				  0.46896      0.31409      0.42626      ;
+				  0.90027      0.11488      0.11124      ;
+				  0.24429      0.39885      0.79126      ;
+				  0.62341      0.11236      0.99919      ;
+				  0.34019       0.9606      0.47105      ;
+				  0.46092      0.57113      0.54085      ;
+				  0.20918      0.24431      0.64035      ;
+				  0.98938      0.19832      0.29173      ;
+				  0.32373      0.80925      0.43316      ;
+				  0.72088      0.65298      0.55861      ;
+				  0.32011      0.65065      0.63479      ;
+				  0.57024      0.80118      0.10692      ;
+				0.0075955      0.36107      0.93856      ;
+				  0.23355      0.54492      0.48231      ];
+		
+		clrint = min(1,clrint.*2.5);
+		
+		
+		clrint = [  1 0 0      ;
+				  0 1 0      ;
+				  0 0 1      ;
+				    .8 .2 0      ;
+				  0 .8 .2      ;
+				  .2 0 .8      ;
+				    .2 .8 0      ;
+				  .5 .5 0      ;
+				  0 .5 .5      ;
+				    .5 0 .5      ;
+				  .2 .1 .6      ;
+				  .6 .1 .2      ;
+				    .2 .1 .6      ;
+				  .2 .6 .1     ;
+				  .1 .6 .2     ;
+				    1 0 0      ;
+				  0 1 0      ;
+				  0 0 1      ;
+				    1 0 0      ;
+				  0 1 0      ;
+				  0 0 1      ;
+				    1 0 0      ;
+				  0 1 0      ;
+				  0 0 1      ;
+				    1 0 0     ];
+		
+		
+		subplot(spr,spc,4);
 		roll_window_size = quick_print;
 
 		norms_pct_change = norms';
@@ -203,20 +264,20 @@ end
 		end
 
 
-
+		
 
 		subplot(spr,spc,3);
 
 		P = P(:,1:counter);
 
-		plot(1:size(P,2),P(1,:),strcat([clrs(1) '.-']));
-		for i=2:m
+		%plot(1:size(P,2),P(1,:),strcat([clrs(1) '.-']));
+		for i=1:m
 			hold on
-			plot(1:size(P,2),P(i,:),strcat([clrs(i) '.-']));
+			plot(0:size(P,2)-1,P(i,:),'Color',clrint(i,:));
 			hold off
 		end
 		flabel('Trial','\pi_j',strcat(['Weights over time']));
-
+		axis([0 max(1,size(P,2)-1) 0 max(0.001,max(max(P)))])
 
 
 
@@ -250,10 +311,10 @@ end
 				ppc_cols = 1:size(PPC,2);
 			end
 
-			plot(ppc_cols,PPC(1,:),strcat([clrs(1) '.-']));
+			plot(ppc_cols,PPC(1,:),'Color',clrint(1,:));
 			for i=2:m
 				hold on
-				plot(ppc_cols,PPC(i,:),strcat([clrs(i) '.-']));
+				plot(ppc_cols,PPC(i,:),'Color',clrint(i,:));
 				hold off
 			end
 			flabel('Trial','% \Delta',strcat(['Roll ' num2str(roll_window_size) ' % \Delta'...
@@ -326,16 +387,16 @@ end
 		end
 		flabel('Trial','l(\pi|x,y)',strcat(['l(\theta)=' num2str(ll(length(ll)))]));
 		
-		if length(ll)>roll_window_size
-			llchop = ll(length(ll)-roll_window_size:length(ll));
-			subplot(spr,spc,4);
-			plot(llchop,'b.-')
-			if isfinite(true_loglike)
-				hold on
-				plot([0 roll_window_size], [true_loglike true_loglike], 'r--');
-				hold off
-			end
-			flabel('Trial','l(\pi|x,y)',strcat([num2str(roll_window_size) ' roll l(\theta)=' num2str(ll(length(ll)))]));
-		end
+% 		if length(ll)>roll_window_size
+% 			llchop = ll(length(ll)-roll_window_size:length(ll));
+% 			subplot(spr,spc,4);
+% 			plot(llchop,'b.-')
+% 			if isfinite(true_loglike)
+% 				hold on
+% 				plot([0 roll_window_size], [true_loglike true_loglike], 'r--');
+% 				hold off
+% 			end
+% 			flabel('Trial','l(\pi|x,y)',strcat([num2str(roll_window_size) ' roll l(\theta)=' num2str(ll(length(ll)))]));
+% 		end
 
 	end

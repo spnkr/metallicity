@@ -1,4 +1,4 @@
-function plot_lines(i,sat,spf)
+function plot_lines(i,sat,spf,hide_labels)
 
 	subplot(spf,spf,i);
 	
@@ -6,8 +6,10 @@ function plot_lines(i,sat,spf)
 		
 
 		plot(sat(:,1),sat(:,2),'k.')
-		flabel('Fe/H','\alpha/Fe',['Sat ' num2str(i) ', n=' num2str(size(sat,1))]);
-
+		if ~hide_labels
+			flabel('Fe/H','\alpha/Fe',['Sat ' num2str(i) ', n=' num2str(size(sat,1))]);
+			axis([-3 0 -1 1])
+		end
 		if 1==11
 		min_sz=1;
 		max_sz=100;

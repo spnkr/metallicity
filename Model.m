@@ -51,7 +51,7 @@ classdef Model < handle
 			%plot_lines(i,sat,spf);
 
 			%sat = sat(1:50,:);
-			data=sat(:,[1,2]);
+			data=sat(:,1:3);
 
 			global im;
 			fg=figure(im);
@@ -59,7 +59,7 @@ classdef Model < handle
 			clf(fg);
 
 
-			[bandwidth,density,X,Y]=kernel_smooth(data,b);
+			[bandwidth,density,X,Y]=kernel_smooth(data(:,1:2),b);%,data(:,3));
 			bandwidth
 			subplot(1,2,1);
 			contour3(X,Y,density,50), hold on
@@ -86,13 +86,13 @@ classdef Model < handle
 			view(0,90);
 		end
 		
-		function plot_lines(mo,sndx)
+		function plot_lines(mo,sndx,hide_labels)
 			spf=ceil(sqrt(sndx));
-			fig
+			fig;
 			
 			for i=1:sndx
 				sat = mo.data(mo.data(:,6)==i,:);
-				plot_lines(i,sat,spf);
+				plot_lines(i,sat,spf,hide_labels);
 			end
 		end
 	end

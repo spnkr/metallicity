@@ -38,7 +38,9 @@ classdef Mixture < handle
 	
 	
 	methods(Static)
-		function mix = load(filename)
+		function mix = load(varargin)
+			filename = strcat(cell2mat(varargin));
+			
 			load(strcat(['cache/' filename '.mat']));
 			mix=mi;
 		end
@@ -297,9 +299,8 @@ classdef Mixture < handle
 		%--summaries
 		function text_summary(mi)
 			if isfinite(mi.pi_true)
-				'pi_est; pi_true; diff; zscore'
-				pi_summary = 100.*[round(10000.*mi.pi_est)./10000 round(10000.*mi.pi_true)./10000 ...
-					round(10000.*mi.pi_est-mi.pi_true)./10000 round(1000.*mi.zscores)./(1000*100)]
+				'pi_est; pi_true; diff'
+				pi_summary = [rounder(100.*mi.pi_est,10000) rounder(100.*mi.pi_true,10000) rounder(100.*abs(mi.pi_true-mi.pi_est),10000)]
 			else
 				pi_summary = mi.pi_est
 			end

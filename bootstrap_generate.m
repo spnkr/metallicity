@@ -1,4 +1,4 @@
-function bootstrap_generate(base_mb, mi, B, ns, varargin)
+function ps0 = bootstrap_generate(base_mb, mi, B, ns, varargin)
 	load_args
 	do_m_n = arg('do_m_n',false);
 	
@@ -22,6 +22,7 @@ function bootstrap_generate(base_mb, mi, B, ns, varargin)
 			bdata = bootstrap_generate_m_n(mi,ns);
 		else
 			bdata = bootstrap_generate_one(mi,ns);
+			bdata = sortrows(bdata,4);
 		end
 		bmi = Mixture(struct(...
 				'save_as',strcat([file_base num2str(ns) '_' num2str(b+base_mb)]),...

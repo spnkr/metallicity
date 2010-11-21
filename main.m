@@ -9,6 +9,7 @@ clc
 format short g
 addpath('etc/');
 addpath('data/');
+
 global im;
 im=1;
 
@@ -19,24 +20,25 @@ im=1;
 %5 lsat
 %6 nsat  
 
-load('cache/mo_20k.mat','mo')
+motoload='cache/mo_20k.mat';
+motoload='cache/mo_all.mat';
+load(motoload,'mo')
 
 
 %% 
 im=1;
-mo.plot_lines(10)
-
+mo.plot_lines(113,true);
 
 
 %% 
 im=2;
-mo.density(11,.9)
+mo.density(2,.9)
 
 
 
 
-
-
+%% 
+data = mo.data(mo.data(:,6)==1,:);
 
 
 
@@ -130,12 +132,12 @@ end
 
 %% generate
 %   Fe/H  alpha/Fe  weight  tacc  lsat  nsat  
-mo = Model(NaN,0:1); %to 11
+mo = Model(NaN,0:11); %to 11
 size(mo.data)
-save('cache/large/mo_40k.mat','mo')
+save('cache/mo_all.mat','mo')
 
 
-
+sepr('done')
 
 
 

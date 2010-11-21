@@ -23,6 +23,64 @@ mi = Mixture.load(mnames{1});
 
 
 
+%% 
+
+
+
+
+
+
+
+
+
+
+
+
+%% 
+
+clc
+x=[];
+x(:,1) = mi.pi_true;
+x(:,2) = mi.pi_est;
+for i=1:3
+	mii = Mixture.load('temp/halo3_new_boot_10000_', num2str(i));
+	x(:,i+2) = mii.pi_est;
+end
+rounder(x.*100)
+
+
+%% 
+im=1;
+mii = Mixture.load('temp/halo3_new_boot_10000_', num2str(1));
+mii.em(struct('init_p',NaN,'quick_print',10,'interactive',true));
+
+
+
+
+
+%% 
+clc
+h=figure(2);
+clf(h);
+subplot(1,2,1);
+fi=1;
+ndxa=1:size(mi.x,1);
+ndx = mi.f(ndxa,fi)>0;
+F=mi.f(ndx,fi);
+scatter(mi.x(ndx,1), mi.x(ndx,2), max(1,F), [.1 .1 .2], 'filled');
+flabel('x','y',['halo3'])
+halo3_F = [min(F) max(F)]
+axis([-3 0 -.3 .6])
+
+
+subplot(1,2,2);
+fi=1;
+ndx = mii.f(ndxa,fi)>0;
+F=mii.f(ndx,fi);
+scatter(mii.x(ndx,1), mii.x(ndx,2), max(1,F), [.5 .4 .1], 'filled');
+flabel('x','y',['GEN'])
+gen_F = [min(F) max(F)]
+axis([-3 0 -.3 .6])
 
 
 
@@ -56,16 +114,25 @@ round([mean(pistar,2) mean(pistar_mn,2) mi.pi_true].*100.*1000)./1000
 
 
 %% 
-MB=2000-586;
-base_mb=586;
-'doing NONpara'
-size(pistar)
+MB=1;
+base_mb=593;
 
-im=-1;
-bootstrap_generate(base_mb,mi,MB,10000,struct('Xmax_iters',2,'quick_print',999999,...
-											'interactive',false,'do_m_n',false));
+tic
+im=1;
+pmt = bootstrap_generate(base_mb,mi,MB,5000,struct('max_iters',200,'quick_print',999999,...
+											'interactive',true,'do_m_n',false,'init_p',mi.pi_true));
 
-'done with NONpara'
+difference_in_pct=rounder(100.*([abs(pmt-mi.pi_est)]),1000)
+toc
+
+
+
+%% 
+mi_10k = Mixture.load(strcat(['temp/halo3_new_boot_10000_' num2str(587)]));
+mi_100 = Mixture.load(strcat(['temp/halo3_new_boot_100_' num2str(588)]));
+mi_50 = Mixture.load(strcat(['temp/halo3_new_boot_50_' num2str(589)]));
+mi_1k = Mixture.load(strcat(['temp/halo3_new_boot_1000_' num2str(590)]));
+mi_2k = Mixture.load(strcat(['temp/halo3_new_boot_2000_' num2str(591)]));
 
 
 %% 
