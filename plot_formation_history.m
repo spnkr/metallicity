@@ -75,6 +75,8 @@ function plot_formation_history(mi)
 
 			text(xf+.05,yf-.35,1.1,...
 				strcat([num2str(round(mi.pi_est(k)*10000)/100) '%']));
+			text(xf+.05,yf-.25,1.1,...
+				strcat(['(' num2str(round(mi.pi_true(k)*10000)/100) '%)']));
 			k=k+1;
 		end
 	end

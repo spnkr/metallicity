@@ -57,9 +57,11 @@ classdef Model < handle
 			fg=figure(im);
 			im=im+1;
 			clf(fg);
-
-
-			[bandwidth,density,X,Y]=kernel_smooth(data(:,1:2),b);%,data(:,3));
+			
+			rdata = data(:,1:2);
+			
+			
+			[bandwidth,density,X,Y]=kernel_smooth(rdata,b);%,data(:,3));
 			bandwidth
 			subplot(1,2,1);
 			contour3(X,Y,density,50), hold on

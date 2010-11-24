@@ -98,8 +98,9 @@ a= dct2d(initial_data);
 % now compute the optimal bandwidth^2
   I=(0:n-1).^2; A2=a.^2;
 
-% t_star=fzero( @(t)(t-evolve(t)),[0,0.1]);
- 
+if ~isfinite(t_star)
+	t_star=fzero( @(t)(t-evolve(t)),[0,0.1]);
+end
 
 
 p_02=func([0,2],t_star);p_20=func([2,0],t_star); p_11=func([1,1],t_star);

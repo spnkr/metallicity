@@ -559,8 +559,10 @@ classdef Mixture < handle
 				errorbar(1:mi.num_models,mi.pi_est,-i.*mi.stdev,strcat([clrss{-i} '.']));
 			end
 			
-			plot(mi.pi_true,'rx')
-			plot(mi.pi_est,'k.')
+			h1=plot(mi.pi_true,'k.','MarkerSize',20,'LineWidth',2);
+			h2=plot(mi.pi_est,'b*','MarkerSize',10,'LineWidth',2);
+			
+			legend([h1 h2],'True \pi', 'Est \pi')
 			hold off
 			flabel('j','\pi',['Information based error bars \pm 1 & ' num2str(nstdevs) '\sigma - ' mi.filename])
 		end

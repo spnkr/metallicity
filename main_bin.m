@@ -23,14 +23,6 @@ mi = Mixture.load(mnames{1});
 
 
 
-%% 
-
-
-
-
-
-
-
 
 
 

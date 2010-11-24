@@ -21,7 +21,7 @@ im=1;
 %6 nsat  
 
 motoload='cache/mo_20k.mat';
-motoload='cache/mo_all.mat';
+%motoload='cache/mo_all.mat';
 load(motoload,'mo')
 
 
@@ -40,14 +40,68 @@ mo.density(2,.9)
 %% 
 data = mo.data(mo.data(:,6)==1,:);
 
+%% 
+tic
+rdata = zeros(43482479,2);
+k=1;
+m=size(data,1);
+for i=1:m
+	w = ceil(100*data(i,3));
+ 	for j=1:w
+ 		rdata(k,:) = data(i,1:2);
+ 		k=k+1;
+	end
+	i
+end
+toc
 
 
+%% 
 
+rdata = [];
+k=1;
+m=size(data,1);
+for i=1:m
+	w = ceil(100*data(i,3));
+ 	rdata(k)=w;
+ 	k=k+1;
+end
+sum(rdata)
 
+%% 
+load('cache/temp/rdata_4m.mat','rdata')
 
+%% 
+b=0.9;
+nsat=1;
+sat=data;
 
+figure(1)
+[bandwidth,density,X,Y]=kernel_smooth(data(:,1:2),NaN);%,data(:,3));
+			bandwidth
+			subplot(1,2,1);
+			contour3(X,Y,density,50), hold on
+			plot(data(:,1),data(:,2),'r.','MarkerSize',5)
+			flabel('Fe/H','\alpha/Fe',['Sat ' num2str(nsat) ', n=' num2str(size(sat,1)) ... 
+				', b=[' num2str(bandwidth(1)) ' ' num2str(bandwidth(2)) ']']);
 
+			hold off
+			view(-18,44);
 
+			subplot(1,2,2);
+			surf(X,Y,density,'LineStyle','none'), view([0,60])
+			colormap hot, hold on, alpha(.8)
+			set(gca, 'color', 'blue');
+			plot(data(:,1),data(:,2),'w.','MarkerSize',5)
+			flabel('Fe/H','\alpha/Fe',['Sat ' num2str(nsat) ', n=' num2str(size(sat,1)) ... 
+				', b=[' num2str(bandwidth(1)) ' ' num2str(bandwidth(2)) ']']);
+
+			hold off
+			
+			axis([min(min(X)) max(max(X)) min(min(Y)) ...
+			max(max(Y)) min(min(density))-std(std(density)) max(max(density))+std(std(density))])
+		
+			view(0,90);
 
 
 
