@@ -1,14 +1,5 @@
-function ps0 = bootstrap_generate(base_mb, mi, B, ns, varargin)
+function ps0 = bootstrap_generate(file_base, base_mb, mi, B, ns, do_m_n, varargin)
 	load_args
-	do_m_n = arg('do_m_n',false);
-	
-	if do_m_n
-		file_base = 'temp/halo3_new_mn_boot_';
-		sepr('m-out-of-n');
-	else
-		file_base = 'temp/halo3_new_boot_';
-		sepr('generated');
-	end
 	
 	global pistarGL;
 
@@ -25,7 +16,7 @@ function ps0 = bootstrap_generate(base_mb, mi, B, ns, varargin)
 			bdata = sortrows(bdata,4);
 		end
 		bmi = Mixture(struct(...
-				'save_as',strcat([file_base num2str(ns) '_' num2str(b+base_mb)]),...
+				'save_as',strcat([file_base num2str(b+base_mb)]),...
 				'model_path',mi.model_path,...
 				'x',bdata,...
 				'pi_true', mi.pi_est));

@@ -10,7 +10,12 @@ classdef Model < handle
 	
 	
 	methods(Static)
-		
+		%sat_range=0 to 11
+		function mo = generate(sat_range,name)
+			%   Fe/H  alpha/Fe  weight  tacc  lsat  nsat  
+			mo = Model(NaN,sat_range); 
+			save(strcat(['cache/' name '.mat']),'mo')
+		end
 	end
 	
 	
