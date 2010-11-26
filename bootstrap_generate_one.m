@@ -1,8 +1,12 @@
 function [data] = bootstrap_generate_one(mi, n, varargin)
 	load_args
-
-	doplot=false;
-
+	
+	if length(varargin)>0
+		doplot=cell2mat(varargin(1));
+	else
+		doplot=false;
+	end
+	
 	models = mi.models_sparse;
 	m = size(models,1);
 % 	P = mi.pi_true;
@@ -42,7 +46,7 @@ function [data] = bootstrap_generate_one(mi, n, varargin)
 		end
 
 		r1 = R1(i);
-		nzd = models(models(:,4)==pi_ndx & models(:,3)>0,1:3);
+		nzd = models(models(:,4)==pi_ndx & models(:,3)>0 & models(:,1)>-3,1:3);
 
 		cnzd = cumsum(nzd(:,3));
 		nzda = [nzd cnzd];
@@ -66,8 +70,8 @@ function [data] = bootstrap_generate_one(mi, n, varargin)
 	data = data(data(:,3)>0,:);
 
 	global im;
-	if doplot && im>0
-		fig
+	if doplot
+		fig;
 		scatter(data(:,1),data(:,2),data(:,3)./sum(data(:,3)),'k','filled');
 		flabel('Fe/H','\alpha/Fe',[num2str(n) ' generated data points']);
 	end

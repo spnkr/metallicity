@@ -1,9 +1,12 @@
 function [out]= fig()
 	global im;
+	global constant_im;
 	
 	if im > 0
 		figure(im);
-		im=im+1;
+		if ~constant_im
+			im=im+1;
+		end
 		out=true;
 	else
 		out=false;

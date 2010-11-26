@@ -1,6 +1,7 @@
 function ps0 = bootstrap_generate(file_base, base_mb, mi, B, ns, do_m_n, varargin)
 	load_args
 	
+	do_plot = arg('do_plot',false);
 	global pistarGL;
 
 	models = mi.models;
@@ -8,7 +9,6 @@ function ps0 = bootstrap_generate(file_base, base_mb, mi, B, ns, do_m_n, varargi
 	pistar = zeros(mi.num_models,B);
 
 	for b=1:B
-		tic
 		if do_m_n
 			bdata = bootstrap_generate_m_n(mi,ns);
 		else
@@ -21,20 +21,20 @@ function ps0 = bootstrap_generate(file_base, base_mb, mi, B, ns, do_m_n, varargi
 				'x',bdata,...
 				'pi_true', mi.pi_est));
 
-		fig
-		if size(bmi.x,2)>2
-			scatter(bmi.x(:,1),bmi.x(:,2),bmi.x(:,3)./sum(bmi.x(:,3)),'k','filled');
-		else
-			scatter(bmi.x(:,1),bmi.x(:,2),10,'k','filled');
+		if do_plot
+			fig;
+			if size(bmi.x,2)>2
+				scatter(bmi.x(:,1),bmi.x(:,2),bmi.x(:,3)./sum(bmi.x(:,3)),'k','filled');
+			else
+				scatter(bmi.x(:,1),bmi.x(:,2),10,'k','filled');
+			end
+			flabel('Fe/H','\alpha/Fe',['Bootstrap ' num2str(b) ' generated data points']);
+			axis([-3 1 -.7 1]);
 		end
-		flabel('Fe/H','\alpha/Fe',['Bootstrap ' num2str(b) ' generated data points']);
-		axis([-3 1 -.7 1]);
-
+		
 		ps0 = bmi.em(cell2mat(varargin));
 		pistar(:,b) = ps0;
 		pistarGL = pistar;
 		bmi.save;
-		b
-		toc
 	end
 

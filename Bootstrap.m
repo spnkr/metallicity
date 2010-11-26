@@ -2,21 +2,26 @@ classdef Bootstrap < handle
 	
 	properties
 		pi;
+		pi_true;
 		loglike;
 		mi_name;
 		filename;
 		
 		correlation,variance,covariance,stdev;
+		
+		type_string;
 	end
 	
 	
 	methods(Static)
 		function bo = generate_parametric(filename,mi,base_number,B,N,varargin)
 			bo = Bootstrap.generate(filename,false,mi,base_number,B,N,cell2mat(varargin));
+			bo.type_string = 'Parametric';
 		end
 		
 		function bo = generate_non_parametric(filename,mi,base_number,B,N,varargin)
 			bo = Bootstrap.generate(filename,true,mi,base_number,B,N,cell2mat(varargin));
+			bo.type_string = 'Nonparametric';
 		end
 		
 		% private
@@ -66,7 +71,7 @@ classdef Bootstrap < handle
 			bo.pi = pi;
 			bo.loglike = loglike;
 			
-			bo.update_covariance
+			bo.update_covariance;
 		end
 		
 		function save(bo)
@@ -198,12 +203,14 @@ classdef Bootstrap < handle
 
 			global im;
 			fg=figure(im);clf(fg);
-
+			im=im+1;
 			hold on
 
 			for i=1:m
-				plot(i.*ones(1,2), conf(i,[2 3]), 'c.-');
+				h1=plot(i.*ones(1,2), conf(i,[2 3]), 'c.-', 'Color', [.5 .5 .5]);
 			end
+			
+			
 			
 			%alt method test
 			if 1==111
@@ -225,11 +232,15 @@ classdef Bootstrap < handle
 			end
 			%end
 
-			plot(mi.pi_est,'k.')
-			plot(mi.pi_true,'rx')
+			h2=plot(mi.pi_est,'b*');
+			h3=plot(mi.pi_true,'go');
+			
+			legend([h2 h3],'Est \pi','True \pi')
+			
 			hold off
-			flabel('j','\pi',[bo.mi_name ': ' num2str(alpha*100) '% Boostrap error bars (n=' ...
-				num2str(size(bo.pi,2)) '). x=true, .=est'])
+			flabel('j','\pi',[bo.mi_name ': ' num2str(alpha*100) '% ' bo.type_string ...
+				' boostrap errors. B=' ...
+				num2str(size(bo.pi,2)) '.'])
 		end
 
 		function plot_covar(bo)
@@ -331,6 +342,53 @@ classdef Bootstrap < handle
 			gen_F = [min(F) max(F)]
 			axis([-3 0 -.3 .6])
 
+		end
+		
+		function plot_spread(bo)
+			global im;
+			h=figure(im);
+			im=im+1;
+			clf(h);
+			subplot(1,2,1);
+			hold on
+			m=size(bo.pi,1);
+			maxy=max(.5,max(max(abs(bo.pi))));
+			
+			for i=1:m
+				plot([i i], [0 maxy], 'Color', [.5 .5 .5], 'LineStyle',':')
+			end
+
+			h1=plot(1:m,bo.pi(:,1),'k.');
+			if size(bo.pi,2) > 1
+				plot(1:m,bo.pi(:,2:size(bo.pi,2)),'k.');
+			end
+			h2=plot(1:m,bo.pi_true,'b*');
+			
+			legend([h1 h2],'Est \pi','True \pi');
+			
+
+			flabel('j','\pi_j',[bo.type_string ' B=' num2str(length(bo.loglike)) '. ' bo.mi_name])
+			axis([0 m 0 maxy])
+			hold off
+
+			subplot(1,2,2);
+			hold on
+			m=size(bo.pi,1);
+			delt = mean(bo.pi')'-bo.pi_true;
+			
+			maxy=max(.5,max(max(abs(delt))));
+			miny=-maxy;
+			
+			for i=1:m
+				plot([i i], [miny maxy], 'Color', [.5 .5 .5], 'LineStyle',':')
+			end
+
+			plot(1:m,delt,'r>')
+
+			flabel('j','\pi_j',['mean(est \pi) - true \pi'])
+			axis([0 m miny maxy])
+
+			hold off
 		end
 	end
 	

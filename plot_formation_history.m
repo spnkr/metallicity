@@ -1,5 +1,7 @@
 function plot_formation_history(mi)
-	h=figure(4);
+	global im;
+	h=figure(im);
+	im=im+1;
 	clf(h);
 	hold on;
 	m=ceil(sqrt(length(mi.model_skip_ndx)));

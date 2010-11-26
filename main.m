@@ -12,9 +12,31 @@ addpath('data/');
 
 global im;
 im=1;
+global constant_im;
+constant_im=false;
 
 mnames = {'halo3', 'halo2','halo5','halo7','halo8','halo9','halo10','halo12','halo14','halo15','halo17','halo20'};
 mi = Mixture.load(mnames{1});
+
+
+
+
+
+%% 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 %% mixtures --------------------------------------------------
@@ -37,8 +59,9 @@ mi.em(struct('max_iters',10,'p0_eval','rand(num_models,1)','quick_print',100,'in
 
 
 %% bootstrapping ---------------------------------------------
-bnames = {'bo_halo3_nonpara', 'bo_halo3_para', 'bo_halo3_para_true_pi'};
+bnames = {'bo_halo3_nonpara', 'bo_halo3_para', 'bo_halo3_para_true_pi', 'bo_halo7_mn_init_true', 'bo_halo7_init_true'};
 load(strcat(['cache/' bnames{1}]));
+
 
 %% 
 im=1;
@@ -54,9 +77,6 @@ bo = Bootstrap.generate_parametric(	'bo_halo3333',mi,0,5,100,...
 mi = Mixture.load('halo3');
 bo = Bootstrap('bo_halo3_para_true_pi', mi, 'temp/halo3_boot_10000_', 1:4059);
 bo.save
-
-
-
 
 
 

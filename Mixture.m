@@ -310,6 +310,10 @@ classdef Mixture < handle
 		
 		
 		%--plots
+		function plot_history(mi)
+			plot_formation_history(mi);
+		end
+		
 		function plot_correl(mi,size_is_correl,color_neg)
 			plot_correl_dots(mi,mi.correl,size_is_correl,color_neg);
 		end
@@ -359,7 +363,6 @@ classdef Mixture < handle
 			hold off
 		end
 		
-
 		function plot_info_error_bars(mi,nstdevs)
 			global im;
 			fg=figure(im);im=im+1;
