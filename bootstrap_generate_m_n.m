@@ -1,7 +1,7 @@
 function [x] = bootstrap_generate_m_n(mi, B)
 	doplot=false;
 
-	data = load('data/obsdata3_10000.dat');
+	data = mi.x;
 	ds = size(data,1);
 	data2=[];
 	for i=1:B

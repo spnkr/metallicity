@@ -67,7 +67,12 @@ function [data] = bootstrap_generate_one(mi, n, varargin)
 		end
 	end
 
+	
 	data = data(data(:,3)>0,:);
+	
+% 	blur_factor = blur_factor/4;
+% 	data(:,1) = data(:,1) - blur_factor/2 + rand(size(data,1),1).*blur_factor;
+% 	data(:,2) = data(:,2) - blur_factor/2 + rand(size(data,1),1).*blur_factor;
 
 	global im;
 	if doplot
