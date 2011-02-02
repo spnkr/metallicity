@@ -189,20 +189,7 @@ classdef Mixture < handle
 				if sum(id) ~= size(fval,1)
 					fval = fval(id,:);
 					mi.x = mi.x(id,:);
-					sepr
-					sepr
-					sepr
-					sepr
-					sepr
-					sepr
-					sepr(mi.filename);
 					warning('found a 0 fval!');
-					sepr
-					sepr
-					sepr
-					sepr
-					sepr
-					sepr
 				end
 				
 				

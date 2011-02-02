@@ -10,8 +10,30 @@ global constant_im;
 constant_im=false;
 
 
+mnames = {'halo3', 'halo2','halo5','halo7','halo8','halo9','halo10','halo12','halo14','halo15','halo17','halo20'};
+mi = Mixture.load(mnames{1});
 
 
+%% 
+mi
+
+
+
+
+%% 
+I=1000;
+reps = 10;
+
+model_path = 'data/mastertemp_s4t2m7.dat';
+[kld,D_KL] = kl_divergence(model_path,I,reps,1,2);
+
+model_path = 'data/mastertemp.dat';
+[kld,D_KL] = kl_divergence(model_path,I,reps,1,2);
+
+
+
+
+%% 
 %make sure the data files don't have headers--must be only numbers
 new_halo_name = 'new s4t2m720';%saved as this
 model_path = 'data/mastertemp_s4t2m7.dat';
