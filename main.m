@@ -15,7 +15,89 @@ mi = Mixture.load(mnames{1});
 
 
 %% 
-mi
+
+%% models ---------------------------------------------------
+%1 Fe/H
+%2 alpha/Fe
+%3 weight
+%4 tacc
+%5 lsat
+%6 nsat  
+monames = {'mo_20k', 'mo_all'};
+load(strcat(['cache/' monames{2}]));
+
+
+
+%% 
+clc
+results = {};
+tic
+M = max(mo.sats)-1;
+E = 1000000;
+for i=1:M
+	j = i+1;
+	
+	x = mo.data(mo.data(:,6)==i,:);
+	x(:,3) = x(:,3)./sum(x(:,3));
+	y = mo.data(mo.data(:,6)==j,:);
+	y(:,3) = y(:,3)./sum(y(:,3));
+	
+	xc = cumsum(x(:,3));
+	yc = cumsum(y(:,3));
+	
+	D = zeros(1,E);
+	
+	for e=1:(E-1)
+		xndx = sum(xc<=(e/E))+1;
+		yndx = sum(yc<=(e/E))+1;
+		
+		D(e) = sqrt((x(xndx,1)-y(yndx,1))^2+(x(xndx,2)-y(yndx,2))^2);
+	end
+	
+	results{i} = struct('i',i,'j',j,'sum',sum(D),'normalized_sum',sum(D)/E,'D',D);
+	'finished for'
+	[i j]
+end
+
+for k=1:M
+	results{k}
+end
+toc
+
+del = zeros(1,M);
+for k=2:M
+	del(k) = (results{k}.normalized_sum) - (results{k-1}.normalized_sum);
+end
+
+figure(1)
+subplot(1,3,1)
+plot(1:M,del,'k.-');
+title(strcat('Distance between curves, E=', num2str(E)));
+xlabel('Sat index');
+ylabel('D_i - D_{i-1}');
+
+
+
+subplot(1,3,2)
+plot(1:M,log(del),'r.-');
+title(strcat('Log distance between curves, E=', num2str(E)));
+xlabel('Sat index');
+ylabel('log(D_i - D_{i-1})');
+
+
+subplot(1,3,3)
+plot(1:M,del.^2,'b.-');
+title(strcat('Square distance between curves, E=', num2str(E)));
+xlabel('Sat index');
+ylabel('(D_i - D_{i-1})^2');
+
+
+%% 
+mo.plot_lines(113,true);
+%mo.density(2,.9)
+%generate from raw data files for specified sats
+%mo = Model.generate(1:2,'mo_something');
+
 
 
 
