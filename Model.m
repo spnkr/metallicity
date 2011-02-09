@@ -93,15 +93,27 @@ classdef Model < handle
 			view(0,90);
 		end
 		
-		function plot_lines(mo,sndx,hide_labels)
+		function plot_lines(mo,sndx)
 			spf=ceil(sqrt(sndx));
 			fig;
 			
 			for i=1:sndx
 				sat = mo.data(mo.data(:,6)==i,:);
-				plot_lines(i,sat,spf,hide_labels);
+				plot_lines(i,sat,spf);
 			end
 		end
+		
+		function plot_lines_compare(mo,sndx)
+			spf=ceil(sqrt(sndx-1));
+			fig;
+			
+			for i=1:sndx-1
+				sat = mo.data(mo.data(:,6)==i,:);
+				sat2 = mo.data(mo.data(:,6)==i+1,:);
+				plot_lines_compare(i,sat,sat2,spf);
+			end
+		end
+		
 	end
 	
 end

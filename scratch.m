@@ -187,7 +187,7 @@ monames = {'mo_20k', 'mo_all'};
 load(strcat(['cache/' monames{1}]));
 
 %% 
-mo.plot_lines(113,true);
+mo.plot_lines(113);
 mo.density(2,.9)
 %generate from raw data files for specified sats
 mo = Model.generate(1:2,'mo_something');
