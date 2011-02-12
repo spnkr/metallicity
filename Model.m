@@ -59,6 +59,26 @@ classdef Model < handle
 			data = data(data(:,1)>-3,:);
 			
 			mo.data = data;
+			
+			mo.data(:,8) = mo.data(:,6)+1000.*mo.data(:,7);
+
+
+			ndxes = unique(mo.data(:,8));
+			nsat = 1;
+
+			for i=1:length(ndxes)
+				ndx = ndxes(i);
+				if i>0
+					mo.data(mo.data(:,8)==ndx,9) = nsat;
+					nsat = nsat + 1;
+				end
+			end
+
+			mo.data(:,6) = mo.data(:,9);
+
+			mo.data = mo.data(:,1:7);
+
+			
 			mo.sats = [min(mo.data(:,6)) max(mo.data(:,6))];
 			mo.n = size(data,1);
 		end
@@ -110,8 +130,8 @@ classdef Model < handle
 			spf=ceil(sqrt(sndx));
 			fig;
 			
-			for i=1:sndx
-				sat = mo.data(mo.data(:,6)==i,:);
+			for i=1:length(sndx)
+				sat = mo.data(mo.data(:,6)==sndx(i),:);
 				plot_lines(i,sat,spf);
 			end
 		end
@@ -120,12 +140,30 @@ classdef Model < handle
 			spf=ceil(sqrt(sndx-1));
 			fig;
 			
-			for i=1:sndx-1
-				sat = mo.data(mo.data(:,6)==i,:);
-				sat2 = mo.data(mo.data(:,6)==i+1,:);
+			for i=1:length(sndx)-1
+				sat = mo.data(mo.data(:,6)==sndx(i),:);
+				sat2 = mo.data(mo.data(:,6)==sndx(i+1),:);
 				plot_lines_compare(i,sat,sat2,spf);
 			end
 		end
+		
+		
+		function ndx = curve_ndx_by_mass_time(mo,min_m,max_m,min_t,max_t)
+			ndx = unique(mo.data(mo.data(:,5)<max_m & mo.data(:,5)>=min_m & mo.data(:,4)<max_t & mo.data(:,4)>=min_t, 6));
+		end
+		
+		function ndx = curve_ndx_by_mass(mo,min_m,max_m)
+			ndx = unique(mo.data(mo.data(:,5)<max_m & mo.data(:,5)>=min_m,6));
+		end
+		
+		function ndx = curve_by_mass_time(mo,min_m,max_m,min_t,max_t)
+			ndx = mo.data(mo.data(:,5)<max_m & mo.data(:,5)>=min_m & mo.data(:,4)<max_t & mo.data(:,4)>=min_t, :);
+		end
+		
+		function c = curve_by_mass_sorted_by_time(mo,min_m,max_m)
+			c = sortrows(mo.data(mo.data(:,5)<max_m & mo.data(:,5)>=min_m,:),4);
+		end
+		
 		
 	end
 	

@@ -16,9 +16,11 @@ constant_im=false;
 
 %% 
 all_halos = [2 5 7 8 9 10 12 14 15 17 20];
-Model.generate(NaN,[2 5 7 8],'mo_h2578');
-load(strcat(['cache/', 'mo_h2578']));
 
+Model.generate(NaN,[2 5 7 8 9],'mo_h25789');
+load(strcat(['cache/', 'mo_h25789']));
+
+sepr('finished')
 
 %% models ---------------------------------------------------
 %1 Fe/H
@@ -27,76 +29,76 @@ load(strcat(['cache/', 'mo_h2578']));
 %4 tacc
 %5 lsat
 %6 nsat  
-monames = {'mo_h2','large/mo_h25','large/mo_h257','large/mo_h2578'};
-load(strcat(['cache/' monames{2}]));
+monames = {'mo_h2','large/mo_h25','large/mo_h257','large/mo_h2578','large/mo_h25789'};
+load(strcat(['cache/' monames{3}]));
+
+%% 
+Mass = [0 1e5;1e5 1e6;1e6 1e7;1e7 1e8;1e8 1e99];
+
+
+ndx = mo.curve_ndx_by_mass(0,1e5);
+
+ndx = mo.curve_ndx_by_mass_time(0,1e5,0,10);
+
+
 
 
 
 %% 
-l=1000
-y=betarnd(2,5,1,l);
-y=sort(y);
-plot(1:l,y);
-
-
-
-%% 
-im=1;
+load(strcat(['cache/' monames{5}]));
 clc
-results = {};
-tic
-M = max(mo.sats)-1;
-E = 1000;
-for i=1:M
-	j = i+1;
-	
-	x = mo.data(mo.data(:,6)==i,:);
-	x = sortrows(x,1);
-	x(:,3) = x(:,3)./sum(x(:,3));
-	y = mo.data(mo.data(:,6)==j,:);
-	y(:,3) = y(:,3)./sum(y(:,3));
-	y = sortrows(y,1);
-	
-	xc = cumsum(x(:,3));
-	yc = cumsum(y(:,3));
-	
-	D = zeros(1,E);
-	
-	for e=1:(E-1)
-		xndx = sum(xc<=(e/E))+1;
-		yndx = sum(yc<=(e/E))+1;
-		
-		D(e) = sqrt((x(xndx,1)-y(yndx,1))^2+(x(xndx,2)-y(yndx,2))^2);
-	end
-	
-	results{i} = struct('i',i,'j',j,'sum',sum(D),'normalized_sum',sum(D)/E,'D',D);
-	strcat(['finished for ',num2str(i),'/',num2str(j)])
-end
+E=100;
+hlosm = 'H:[2,5,7,8,9]';
+hlosmfn = 'h25789';
 
-toc
+im=1;
+msssm = '0_1e5';
+[results,mass_time_of_sats,DD,del] = walk_distance(mo,E,1e5,1e6,hlosm);
+h = figure(1);
+saveas(h,strcat(['media_local/cd_' hlosmfn '_' msssm '.pdf']),'pdf');
 
-del = zeros(1,M);
-for k=1:M
-	del(k) = results{k}.normalized_sum;
-end
+
+im=5;
+msssm = '1e5_1e6';
+[results,mass_time_of_sats,DD] = walk_distance(mo,E,1e5,1e6,hlosm);
+h = figure(5);
+saveas(h,strcat(['media_local/cd_' hlosmfn '_' msssm '.pdf']),'pdf');
+
+
+im=2;
+msssm = '1e6_1e7';
+[results,mass_time_of_sats,DD] = walk_distance(mo,E,1e6,1e7,hlosm);
+h = figure(2);
+saveas(h,strcat(['media_local/cd_' hlosmfn '_' msssm '.pdf']),'pdf');
+
+
+im=3;
+msssm = '1e7_1e8';
+[results,mass_time_of_sats,DD] = walk_distance(mo,E,1e7,1e8,hlosm);
+h = figure(3);
+saveas(h,strcat(['media_local/cd_' hlosmfn '_' msssm '.pdf']),'pdf');
+
+im=4;
+msssm = '1e8_+';
+[results,mass_time_of_sats,DD] = walk_distance(mo,E,1e8,1e99,hlosm);
+h = figure(4);
+saveas(h,strcat(['media_local/cd_' hlosmfn '_' msssm '.pdf']),'pdf');
+
+
 
 %% 
-figure(1)
-subplot(1,2,1)
-plot(1:M,del,'k.-');
-title(strcat('Distance between curves, E=', num2str(E)));
-xlabel('Sat index');
-ylabel('D(i,i-1)');
+load(strcat(['cache/' monames{2}]));
+clc
+E=100;
+hlosm = 'H:[2,5]';
+hlosmfn = 'h25';
 
+im=1;
+msssm = '1e5_1e6';
+[results,mass_time_of_sats,DD] = walk_distance(mo,E,1e5,1e6,hlosm);
 
-
-subplot(1,2,2)
-plot(1:M,log(del),'r.-');
-title(strcat('Log distance between curves, E=', num2str(E)));
-xlabel('Sat index');
-ylabel('log(D(i,i-1))');
-
-
+h = figure(1);
+saveas(h,strcat(['media_local/cd_' hlosmfn '_' msssm '.pdf']),'pdf');
 
 
 %% 
@@ -127,10 +129,10 @@ I=1000;
 reps = 10;
 
 model_path = 'data/mastertemp_s4t2m7.dat';
-[kld,D_KL] = kl_divergence(model_path,I,reps,1,2);
+[kld,D_KL] = hellinger(model_path,I,reps,1,2);
 
 model_path = 'data/mastertemp.dat';
-[kld,D_KL] = kl_divergence(model_path,I,reps,1,2);
+[kld,D_KL] = hellinger(model_path,I,reps,1,2);
 
 
 
