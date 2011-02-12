@@ -10,11 +10,15 @@ global constant_im;
 constant_im=false;
 
 
-mnames = {'halo3', 'halo2','halo5','halo7','halo8','halo9','halo10','halo12','halo14','halo15','halo17','halo20'};
-mi = Mixture.load(mnames{1});
+%mnames = {'halo3', 'halo2','halo5','halo7','halo8','halo9','halo10','halo12','halo14','halo15','halo17','halo20'};
+%mi = Mixture.load(mnames{1});
 
 
 %% 
+all_halos = [2 5 7 8 9 10 12 14 15 17 20];
+Model.generate(NaN,[2 5 7 8],'mo_h2578');
+load(strcat(['cache/', 'mo_h2578']));
+
 
 %% models ---------------------------------------------------
 %1 Fe/H
@@ -23,8 +27,16 @@ mi = Mixture.load(mnames{1});
 %4 tacc
 %5 lsat
 %6 nsat  
-monames = {'mo_20k', 'mo_all'};
+monames = {'mo_h2','large/mo_h25','large/mo_h257','large/mo_h2578'};
 load(strcat(['cache/' monames{2}]));
+
+
+
+%% 
+l=1000
+y=betarnd(2,5,1,l);
+y=sort(y);
+plot(1:l,y);
 
 
 

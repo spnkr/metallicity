@@ -2,7 +2,7 @@ classdef Model < handle
 	
 	properties
 		data;
-		header='  Fe/H  alpha/Fe  weight  tacc  lsat  nsat  ';
+		header='  Fe/H  alpha/Fe  weight  tacc  lsat  nsat  halo_num';
 		
 		sats;
 		n;
@@ -11,28 +11,41 @@ classdef Model < handle
 	
 	methods(Static)
 		%sat_range=0 to 11
-		function mo = generate(sat_range,name)
+		function mo = generate(n,sat_range,name)
 			%   Fe/H  alpha/Fe  weight  tacc  lsat  nsat  
-			mo = Model(NaN,sat_range); 
+			mo = Model(n,sat_range); 
 			save(strcat(['cache/' name '.mat']),'mo')
+			sepr(strcat(['saved to cache/' name '.mat']))
 		end
 	end
 	
 	
 	methods
 		%--loading
-		function mo = Model(n,parts)
-			data = zeros(1,6);
+		function mo = Model(n,halos)
+			data = zeros(1,7);
+			parts = 0:22;
 			k=1;
-			for i=1:length(parts)
-				nd = load(strcat(['data/large/datalist_halo2part.' num2str(parts(i)) '.dat']));
+			for i=1:length(halos)
+				for j=1:length(parts)
+					fpl = strcat(['data/halodataall/halodataall/datalist_halo' num2str(halos(i)) 'part.' num2str(parts(j)) '.dat']);
+					if exist(fpl) > 0
+						disp(strcat(['loading ', fpl]))
+						if true
+							[h,nd] = hdrload(fpl);
 
-				try
-					b=size(data,1)+1
-					c=b+size(nd,1)-1
-					data(b:c,:) = nd;
-				catch
-					disp('load error')
+							try
+								b=size(data,1)+1
+								c=b+size(nd,1)-1
+								data(b:c,:) = [nd halos(i)*ones(size(nd,1),1)];
+							catch
+								disp('load error')
+							end
+						end
+						if isfinite(n) && size(data,1)>=n
+							break;
+						end
+					end
 				end
 				if isfinite(n) && size(data,1)>=n
 					break;
