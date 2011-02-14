@@ -79,6 +79,7 @@ classdef Mixture < handle
 		function mi = Mixture(varargin)
 			load_args
 			
+			with_headers = arg('with_headers',false);
 			mi.filename = arg('save_as',NaN);
 			obs_path = arg('obs_path',NaN);
 			model_path = arg('model_path',NaN);
@@ -101,7 +102,12 @@ classdef Mixture < handle
  			if isfinite(mi.f)
 				mi.num_models = size(mi.f,2);
 			else
- 				models = load(model_path);
+				if with_headers
+					[h,models] = hdrload(model_path);
+				else
+					models = load(model_path);
+				end
+ 				
 				mi.model_path = model_path;
 				
 				xbin = models(:,4);
@@ -189,7 +195,7 @@ classdef Mixture < handle
 				if sum(id) ~= size(fval,1)
 					fval = fval(id,:);
 					mi.x = mi.x(id,:);
-					warning('found a 0 fval!');
+					%warning('found a 0 fval!');
 				end
 				
 				

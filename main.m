@@ -9,13 +9,45 @@ im=1;
 global constant_im;
 constant_im=false;
 
+all_halos = [2 5 7 8 9 10 12 14 15 17 20];
 
-%mnames = {'halo3', 'halo2','halo5','halo7','halo8','halo9','halo10','halo12','halo14','halo15','halo17','halo20'};
-%mi = Mixture.load(mnames{1});
+mnames = {'halo3', 'halo2','halo5','halo7','halo8','halo9','halo10','halo12','halo14','halo15','halo17','halo20'};
+mi = Mixture.load(mnames{1});
+
+
 
 
 %% 
-all_halos = [2 5 7 8 9 10 12 14 15 17 20];
+clc
+tic
+I=10000;
+reps = 10;
+
+
+mpaths = {'modeldata_s4t10m7','modeldata_s4t12m7','modeldata_s4t8m7','modeldata_s4t2m7'};
+
+
+for i=1:length(all_halos)
+	im=1;
+	plot_hellinger(I,reps,all_halos(i),mpaths);
+	h = figure(1);
+	saveas(h,strcat(['media_local/hd_' num2str(all_halos(i)) '_' num2str(I) '.pdf']),'pdf');
+end
+
+mpaths = {'mastertemp_s4t10m7','mastertemp_s4t12m7','mastertemp_s4t8m7','mastertemp_s4t2m7'};
+im=1;
+plot_hellinger(I,reps,-1,mpaths);
+h = figure(1);
+saveas(h,strcat(['media_local/hd_master_' num2str(I) '.pdf']),'pdf');
+
+toc
+%% 
+
+
+
+
+%% 
+
 
 Model.generate(NaN,[2 5 7 8 9],'mo_h25789');
 load(strcat(['cache/', 'mo_h25789']));
@@ -124,15 +156,6 @@ mo.plot_lines_compare(10);
 
 
 
-%% 
-I=1000;
-reps = 10;
-
-model_path = 'data/mastertemp_s4t2m7.dat';
-[kld,D_KL] = hellinger(model_path,I,reps,1,2);
-
-model_path = 'data/mastertemp.dat';
-[kld,D_KL] = hellinger(model_path,I,reps,1,2);
 
 
 
