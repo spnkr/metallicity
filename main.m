@@ -49,10 +49,51 @@ toc
 %% 
 
 
-Model.generate(NaN,[2 5 7 8 9],'mo_h25789');
-load(strcat(['cache/', 'mo_h25789']));
+Model.generate(NaN,[2 5 7 8 9 10 12 14 15 17 20],'mo_h25789101214151720');
+load(strcat(['cache/', 'mo_h25789101214151720']));
 
-sepr('finished')
+clc
+E=10000;
+hlosm = 'H:[2,5,7,8,9,10,12,14,15,17,20]';
+hlosmfn = 'h25789101214151720';
+
+
+im=1;
+msssm = '0_1e5';
+[results,mass_time_of_sats,DD,del] = walk_distance(mo,E,1e5,1e6,hlosm);
+h = figure(1);
+saveas(h,strcat(['media_local/cd_' hlosmfn '_' msssm '.pdf']),'pdf');
+
+
+
+im=5;
+msssm = '1e5_1e6';
+[results,mass_time_of_sats,DD] = walk_distance(mo,E,1e5,1e6,hlosm);
+h = figure(5);
+saveas(h,strcat(['media_local/cd_' hlosmfn '_' msssm '.pdf']),'pdf');
+
+
+im=2;
+msssm = '1e6_1e7';
+[results,mass_time_of_sats,DD] = walk_distance(mo,E,1e6,1e7,hlosm);
+h = figure(2);
+saveas(h,strcat(['media_local/cd_' hlosmfn '_' msssm '.pdf']),'pdf');
+
+
+im=3;
+msssm = '1e7_1e8';
+[results,mass_time_of_sats,DD] = walk_distance(mo,E,1e7,1e8,hlosm);
+h = figure(3);
+saveas(h,strcat(['media_local/cd_' hlosmfn '_' msssm '.pdf']),'pdf');
+
+im=4;
+msssm = '1e8_+';
+[results,mass_time_of_sats,DD] = walk_distance(mo,E,1e8,1e99,hlosm);
+h = figure(4);
+saveas(h,strcat(['media_local/cd_' hlosmfn '_' msssm '.pdf']),'pdf');
+
+
+
 
 %% models ---------------------------------------------------
 %1 Fe/H
@@ -61,7 +102,7 @@ sepr('finished')
 %4 tacc
 %5 lsat
 %6 nsat  
-monames = {'mo_h2','large/mo_h25','large/mo_h257','large/mo_h2578','large/mo_h25789'};
+monames = {'mo_h25789101214151720','mo_h2','large/mo_h25','large/mo_h257','large/mo_h2578','large/mo_h25789'};
 load(strcat(['cache/' monames{3}]));
 
 %% 
@@ -88,6 +129,7 @@ msssm = '0_1e5';
 [results,mass_time_of_sats,DD,del] = walk_distance(mo,E,1e5,1e6,hlosm);
 h = figure(1);
 saveas(h,strcat(['media_local/cd_' hlosmfn '_' msssm '.pdf']),'pdf');
+
 
 
 im=5;
