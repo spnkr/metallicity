@@ -127,12 +127,14 @@ classdef Model < handle
 		end
 		
 		function plot_lines(mo,sndx)
-			spf=ceil(sqrt(sndx));
+			spf=ceil(sqrt(length(sndx)));
 			fig;
 			
 			for i=1:length(sndx)
 				sat = mo.data(mo.data(:,6)==sndx(i),:);
-				plot_lines(i,sat,spf);
+				if length(sat)>0
+					plot_lines(i,sat,spf);
+				end
 			end
 		end
 		
