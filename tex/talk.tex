@@ -25,6 +25,13 @@
 \newcommand{\Bl}{\Big\{}
 \newcommand{\Br}{\Big\}}
 \newcommand{\argmax}{\operatornamewithlimits{argmax}}
+\newcommand{\eqnset}[4]{
+\[ #1 = #2 \left\{ \begin{array}{#3}
+        #4
+\end{array} \right. \] 
+}
+
+
 
 
 \newcommand{\vz}{\vect{z}}
@@ -39,7 +46,7 @@
 \newcommand{\sumg}{\sum^g_{j=1}}
 \newcommand{\sumk}{\sum^m_{k=1}}
 \newcommand{\fab}{f_j}
-\newcommand{\llp}{\log L(\vp)}
+\newcommand{\llp}{L(\vp)}
 
 \begin{document}
 
@@ -52,7 +59,7 @@
 	(Duane will cover this part I think)
 	
 	
-	Partition the mass and accretion time into $M$ combinations of $\mathcal{M},\mathcal{T}$ where
+	Partition the mass and accretion time into $m$ combinations of $\mathcal{M},\mathcal{T}$ where
 	
 	\eqn{
 		\text{Sat. stellar mass:} \hspace{3mm} \bigcup \mathcal{M}_j &= [0, 10^9] M_{\bigodot}  		\\
@@ -66,17 +73,20 @@
 
 
 %%%%%%%%%%%%%%%%%%%%%
-\begin{frame}{Each observation is generated from one of these M theoretical distributions}
+\begin{frame}{A generative finite mixture model}
 	
-	\eqn{
-		\Bigg[\feh,\afe\Bigg]_{i=1}^{N} \text{i.i.d} \sim F(x,y) = \sum^M_{j=1} \pi_j f_j(x,y)
-	}	
+	
 		
 	\begin{figure}
 			\begin{center}
 				\includegraphics[width=\textwidth]{denstoobs.pdf}
 			\end{center}
 	\end{figure}
+	
+	\eqn{
+		\Bigg[\feh,\afe\Bigg]_{i=1}^{N} \text{i.i.d} \sim F(x,y) = \sum^m_{j=1} \pi_j f_j(x,y)
+	}	
+	
 \end{frame}
 
 
@@ -88,12 +98,36 @@
 %%%%%%%%%%%%%%%%%%%%%
 \begin{frame}{Finding the mixing proportions $\vect{\pi}$}
 	
-	Standard maximum likelihood estimates of $\vp$ won't work
-	
+	Unfortunately the maximum likelihood estimate of the mixing proportions,
 	\eqn{
-		\log L(\vect{\pi}) &= \sumn \log \Big( \summ \pi_j \fab(x_i,y_i)  \Big)
+		\vph_{\text{MLE}} &= \argmax_{\vp} L(\vect{\pi})
 	}
 	
+	
+	is intractable as our model
+	
+	\eqn{
+		F(x,y) &= \sum^m_{j=1} \pi_j f_j(x,y)
+	}
+	
+	has a log likelihood of
+	\eqn{
+		L(\vect{\pi}) &= \sumn \log \Big( \summ \pi_j \fab(x_i,y_i)  \Big)
+	}
+	
+	
+	
+	
+\end{frame}
+
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Adding the latent variable $\vect{z}$}
 	
 	Suppose we knew which $f_j$ each observation came from:
 	
@@ -102,12 +136,14 @@
 				& 0 \hspace{4mm} \text{otherwise}
 	}
 	
-	Then
 	
-	\eqnl{loglike}{
-		\log L(\vect{\pi}) &= \sumn \summ z_{ij}  \log \bl \pi_j  \fab(x_i,y_i) \br
+	The log likelihood can then be expressed as
+	
+	\eqn{
+		L(\vect{\pi}) &= \sumn \summ z_{ij}  \log \bl \pi_j  \fab(x_i,y_i) \br
 	}
 	
+	The addition of the latent variable $\vect{z}$ actually makes things easier by allowing us to use expectation maximization to estimate of $\vp$. 
 	
 	
 \end{frame}
@@ -124,15 +160,53 @@
 %%%%%%%%%%%%%%%%%%%%%
 \begin{frame}{Finding $\vph$ using expectation maximization}
 	
+	\eqn{
+		\vph^{(t)} &= \argmax_{\vp} \mathbb{E}_{\vect{z}| \vx,\vy,\vph^{(t-1)} }\Big[\llp \Big]   
+	}
+	
+	At each time $t$, the estimate for $\vp$ is the argmax of the expected value of the likelihood, given the data and the estimate of $\vp$ from the previous time.
 	
 	\begin{itemize}
-		\item Find the expected value of the log likelihood, given the data
-		\item Find the $\argmax_{\vp}$ of this expectation
-		\item Repeat until $\llp$ stabilizes
+		\item First we find the expected value of $\llp$ using the current estimate of the latent variable
+		\item $\vph^{(t)}$ is the $\argmax_{\vp}$ of this expectation
+		\item We repeat until $\llp$ stabilizes
 	\end{itemize}
 	
 	
+	
+	
 \end{frame}
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Find the expected value of $L(\vect{\pi})$ using the current estimate of the latent variable}
+	
+	The expected value of $\llp$, with respect to the conditional distribution of $\vect{z}$, given observed data and $\vp^{(t-1)}$ is
+	
+	\eqn{
+		\mathbb{E}_{\vp}\Big[\llp \big| \vx,\vy \Big] &= \sumn \summ \mathbb{E}_{\vp}\big[z_{ij}|x_i,y_i\big] \bl \log \fab(x_i,y_i) + \log \pi_j  \br
+	}
+	
+	Since $z_{ij}$ is an indicator, its expected value is simply the probability that data point $i$ comes from model $j$
+	\eqn{
+		\mathbb{E}_{\vp}\Big[  z_{ij} | x_i, y_i \Big]	&= \text{Pr}_{\vp}(z_{ij}|x_i,y_i)	\\
+										&= \frac{p(x_i,y_i|z_{ij}=1)p(z_{ij}=1)}{p(x_i,y_i)}	\\
+										&=  \frac{\pi_j \fab(x_i,y_i)  }{\summ \pi_j \fab(x_i,y_i)}
+	}
+	
+	
+		
+	
+\end{frame}
+
+
+
+
+
 
 
 
@@ -144,23 +218,40 @@
 
 
 %%%%%%%%%%%%%%%%%%%%%
-\begin{frame}{Find the expected value of the log likelihood, given the data}
+\begin{frame}{Find the $\argmax_{\vp}$ of this expectation}
 	
+		
+	Now that we have the expected value of $\llp$ with respect to the conditional distribution of $\vect{z}$, we need only evaluate
 	
 	
 	\eqn{
-		\text{E}_{\vp}\Big[\llp \big| \vx,\vy \Big] &= \sumn \summ \text{E}_{\vp}\big[z_{ij}|x_i,y_i\big] \bl \log \fab(x_i,y_i) + \log \pi_j  \br
-	}
-	\eqn{
-		\hat{w}_{ij}^{(t)} 	&= \text{E}_{\vp}\Big[  z_{ij} | x_i, y_i \Big] 		\\
-						&= \text{Pr}_{\vp}(z_{ij}|x_i,y_i)	\\
-						&= \frac{p(x_i,y_i|z_{ij}=1)p(z_{ij}=1)}{p(x_i,y_i)}	\\
-						&=  \frac{\pi_j \fab(x_i,y_i)  }{\summ \pi_j \fab(x_i,y_i)}
+		\vph^{(t)} &= \argmax_{\vp} \mathbb{E}\Big[\llp \big| \vx,\vy,\vph^{(t-1)} \Big]   
 	}
 	
+	Let
+	
+	\eqn{
+		\hat{\vect{w}}^{(t)} = \mathbb{E}_{\vp}\Big[  z_{ij} | x_i, y_i \Big]
+	}
+	
+	Accounting for the $m-1$ free parameters of $\vp$, differentiation proceeds, for $k=1,\ldots,m-1$, as:
+	
+	\eqn{
+		\frac{\partial}{\partial \pi_k} \mathbb{E}\Big[\llp \big| \vect{x},\vect{y}\Big]   &=      \sumn \Bl  w^{(t-1)}_{ik} \frac{1}{\pi_k} - w^{(t-1)}_{im} \frac{1}{1-\pi_1-\ldots-\pi_{m-1}}   \Br
+	}
+	\eqn{
+		\frac{1}{\pi_k} \sumn w_{ik}^{(t-1)} &= \frac{1}{1-\pi_1-\ldots-\pi_{m-1}} \sumn w_{im}^{(t-1)}
+	}
 	
 	
 \end{frame}
+
+
+
+
+
+
+
 
 
 
@@ -173,26 +264,22 @@
 \begin{frame}{Find the $\argmax_{\vp}$ of this expectation}
 	
 	
-	\eqn{
-		\vph^{(t)} &= \argmax_{\vp} \text{E}\Big[\llp \big| \vx,\vy,\vph^{(t-1)} \Big]   
-	}
-	
-	Accounting for the $m-1$ free parameters of $\vp$, differentiation proceeds, for $k=1,\ldots,m-1$, as:
-	
-	\eqn{
-		\frac{\partial}{\partial \pi_k} \text{E}\Big[\llp \big| \vect{x},\vect{y}\Big]   &=      \sumn \Bl  w^{(t-1)}_{ik} \frac{1}{\pi_k} - w^{(t-1)}_{im} \frac{1}{1-\pi_1-\ldots-\pi_{m-1}}   \Br
-	}
-	\eqn{
-		\frac{1}{\pi_k} \sumn w_{ik}^{(t-1)} &= \frac{1}{1-\pi_1-\ldots-\pi_{m-1}} \sumn w_{im}^{(t-1)}
-	}
-	
 	Consequently
-	\eqn{
-		\hat{\pi}^{(t)}_k &= \frac{\sumn w^{(t-1)}_{ij}}{n}	\\
-		\hat{\pi}^{(t)}_m &= 1-\pi_1-\ldots-\pi_{m-1}
+	\eqnset{\hat{\pi}^{(t)}_k }{}{ll}{
+		\frac{\sumn w^{(t-1)}_{ij}}{n}			& k=1,\ldots,m-1	\\
+		\vspace{1mm} & \\
+		1-\pi_1-\ldots-\pi_{m-1}		& k=m
+	}
+	
+		Where
+	\eqnset{w^{(t+1)}_{ij}}{}{ll}{
+		\frac{\displaystyle\pi^{(t)}_{j} \fab(x_i,y_i)}{\displaystyle\sumk \pi^{(t)}_{k}f_k(x_i,y_i)}				& j=1,\ldots,m-1	\\
+		\vspace{1mm} & \\
+		1 - w_{i1} - \ldots - w_{i,m-1}		& j=m
 	}
 	
 \end{frame}
+
 
 
 
