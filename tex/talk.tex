@@ -48,6 +48,11 @@
 \newcommand{\fab}{f_j}
 \newcommand{\llp}{L(\vp)}
 
+\newcommand{\vpg}{\vp^{\prime}}
+\newcommand{\vpgh}{\hat{\vp}^{\prime}}
+\newcommand{\llpp}{L(\vpg)}
+\newcommand{\llpph}{L(\vpgh)}
+
 \begin{document}
 
 
@@ -285,8 +290,23 @@
 
 
 %%%%%%%%%%%%%%%%%%%%%
-\begin{frame}{We used a 5x5 and a 2x2 set of theoretical distributions}
+\begin{frame}{Simulations}
+	
+	
+	
+	
+	\begin{itemize}
+		\item Generated observations from one halo and multiple halos
 		
+		\item Used a 5x5 grid ($m=25$), and several 2x2 grids ($m=4$)
+		\begin{itemize}
+			\item 5x5 grid did not work for some halo realizations
+			\item 2x2 grid reliably converged on the correct mixing proportions
+		\end{itemize}
+	\end{itemize}
+	
+	
+	
 	\begin{figure}
 			\begin{center}
 				\includegraphics[width=\textwidth]{ourdens.pdf}
@@ -303,19 +323,79 @@
 
 
 
+%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{EM formation history for $m$=25}
+	
+	\begin{figure}
+			\begin{center}
+				\includegraphics[scale=0.3]{h3fh.pdf}
+			\end{center}
+	\end{figure}
+	
+\end{frame}
 
 
 
 
 
 %%%%%%%%%%%%%%%%%%%%%
-\begin{frame}{Simulation results}
-	
-	Works starting at about 1,000 observations, although larger $\vp$ values are found with smaller data sets.
+\begin{frame}{EM formation history for $m$=4}
 	
 	\begin{figure}
 			\begin{center}
-				\includegraphics[scale=0.5]{diagnosticstalk.pdf}
+				\includegraphics[scale=0.3]{fh2x2.pdf}
+			\end{center}
+	\end{figure}
+
+	
+\end{frame}
+
+
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Simulation overview}
+	
+	\begin{figure}
+			\begin{center}
+				\includegraphics[width=\textwidth]{diag_simple.pdf}
+			\end{center}
+	\end{figure}
+	
+	\begin{itemize}
+		\item Works with as few as 1,000 observations
+		\item Insensitive to initialization of $\vect{\pi}$
+		\item Always converges
+		\item Large weights identified after 10 iterations
+		\item $\llp$ stops changing appreciably after 60 ($m$=4) or 600 ($m$=25) iterations
+	\end{itemize}
+	
+%	1,000 obs, 62 runs, 0.3s m=4
+	
+%	50,000 obs, 1371 runs, 460s, m=25
+	
+\end{frame}
+
+
+
+
+
+
+
+
+
+
+
+%%%%
+\begin{frame}{Confidence intervals from observed Fisher Information}
+	
+	\begin{figure}
+			\begin{center}
+				\includegraphics[scale=0.3]{5x5eb.pdf}
 			\end{center}
 	\end{figure}
 	
@@ -332,12 +412,13 @@
 
 
 
-%%%%sample
-\begin{frame}{Confidence intervals}
+
+%%%%
+\begin{frame}{Confidence intervals from observed Fisher Information}
 	
 	\begin{figure}
 			\begin{center}
-				\includegraphics[scale=0.5]{errorgrid2.pdf}
+				\includegraphics[scale=0.3]{2x2eb.pdf}
 			\end{center}
 	\end{figure}
 	
@@ -352,17 +433,16 @@
 
 
 
-
-
-
-%%%%sample
+%%%%
 \begin{frame}{Correlation between $\vp$}
 	
-	
+	\eqn{	
+		I(\vpg|\vx,\vy)=-\frac{\partial^2 \llpp}{\partial \vp^\prime \partial \vp^{\prime T}}
+	}		
 	
 	\begin{figure}
 			\begin{center}
-				\includegraphics[scale=0.5]{correlgrid2.pdf}
+				\includegraphics[width=\textwidth]{correl.pdf}
 			\end{center}
 	\end{figure}	
 	
@@ -375,7 +455,7 @@
 
 
 
-%%%%sample
+%%%%
 \begin{frame}{Conclusion}
 	
 	Worked

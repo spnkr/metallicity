@@ -362,13 +362,16 @@ classdef Mixture < handle
 			clf(fg)
 
 			clrss = {'c', 'm', 'k', 'g'};
+			clrg = [0.7 0.4];
+			k=1;
 			hold on
 			for i=-nstdevs:-1
-				errorbar(1:mi.num_models,mi.pi_est,-i.*mi.stdev,strcat([clrss{-i} '.']));
+				errorbar(1:mi.num_models,mi.pi_est,-i.*mi.stdev,strcat([clrss{-i} '.']),'LineWidth',2,'Color',clrg(k).*ones(1,3));
+				k=k+1;
 			end
 			
-			h1=plot(mi.pi_true,'k.','MarkerSize',20,'LineWidth',2);
-			h2=plot(mi.pi_est,'b*','MarkerSize',10,'LineWidth',2);
+			h1=plot(mi.pi_true,'ko','MarkerSize',15,'LineWidth',2);
+			h2=plot(mi.pi_est,'gx','MarkerSize',20,'LineWidth',2,'Color',[10 198 28]./255);
 			
 			legend([h1 h2],'True \pi', 'Est \pi')
 			hold off

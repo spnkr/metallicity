@@ -26,7 +26,35 @@ mi
 %covar, variance, stdev, and correl are information based (as opposed to
 %bootstrap based, which is not included here)
 
+% 
+% 
+% %% temp
+% im=15;
+% plus_minus_num_std_devs=2;
+% mi = Mixture.load('temp/new s4t2m72');
+% 
+% 
+% %% 
+% 
+% im=15;
+% mi.plot_info_error_bars(plus_minus_num_std_devs);
+% %% 
+% im=15;
+% mi.plot_correl(true,true);
+% %% 
+% im=15;
+% plot_formation_history(mi);
+%% 
+im=15;
+mi = Mixture.load('halo2_t');
+%mi = Mixture.load('temp/new s4t2m77');
 
+mi.em(struct(	'Xmax_iters',10,...	%max iters to run. change name to something else (e.g. Xmax_iters) to let it run until log like stop changing
+				'p0_eval','rand(num_models,1)',... %starting pi value (eval'ed)
+				'quick_print',999999999,...		%update UI after this many runs + print current pi state
+				'interactive',false));			%show progress (slow)
+
+sepr('finished');
 
 %% plots
 im=1; %sets figure window to use
