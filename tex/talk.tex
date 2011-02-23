@@ -111,12 +111,15 @@
 	\begin{itemize}
 		
 		
-		\item each observed point comes from one of $m$ mixture components (pictured)
+		\item in order to recover the formation history of the halo
 		\item we propose a generative model in the form of a finite mixture model
+		\item where each observed point comes from one of $m$ mixture components (pictured)
 		\item since each mixture component has an associated mass and accretion time range, the formation history is specified if we know what percentage of observations come from each mixture component
+		
 		\item our goal, then, is to determine the mixing proportions, $\vp$
 		
-		\item note that the simulations that produce observed points do not follow this model; we don't know the true generative method, and are proposing a reasonable one that we think can be fit, and that will spit out the formation history
+		\item note that the observed points we are attempting to fit are generated via simulation, not our proposed generative model
+		\item we don't know the true generative method, and are proposing a reasonable one that we think can be fit, and that will reveal the formation history
 	\end{itemize}
 	
 \end{frame}
@@ -156,7 +159,9 @@
 	\begin{itemize}
 		\item For notational simplicity, x=$\afe$ and y=$\feh$
 		\item Formally, given m mixture components, the density from which all observations are drawn is as shown
+		\item each observation comes from one of the mixture components with some probability $\pi_j$
 		\item The mixing proportions, $\vp$ must be non-negative, and sum to 1
+		\item the mixture components, $f_j$, are known and taken as given
 	\end{itemize}
 	
 \end{frame}
@@ -183,7 +188,7 @@
 	
 	To estimate the mixing proportions, we can use a maximum likelihood approach
 	\eqn{
-		\vph_{\text{MLE}} &= \argmax_{\vp} L(\vect{\pi})
+		\vph_{\text{MLE}} &= \argmax_{\vp} \script{L}(\vect{\pi})
 	}
 	
 	
@@ -194,7 +199,7 @@
 	
 	Unfortunately the standard MLE procedure for estimating $\vp$ is intractable with this likelihood.\newline
 	
-	Expectation Maximization (EM) algorithm to the rescue!
+	The Expectation Maximization (EM) algorithm provides an alternative way to estimate $\vph_{\text{MLE}}$
 	
 	
 	
@@ -203,7 +208,7 @@
 \begin{frame}[shrink]{Estimating the mixing proportions $\vect{\pi}$}
 	
 	\begin{itemize}
-		\item hi
+		\item 1
 	\end{itemize}
 	
 \end{frame}
@@ -310,12 +315,12 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{frame}{Find the expected value of $L(\vect{\pi})$ using the current expected value of the latent variable}
+\begin{frame}{Find the expected value of $\llp$ using the current expected value of the latent variable}
 	
-	The expected value of $\llp$, with respect to the conditional distribution of $\vect{z}$, given observed data and $\vp^{(t-1)}$ is
+	The expected value of $\llp$, with respect to the conditional distribution of $\vect{z}$, given observed data and $\vph^{(t-1)}$ is
 	
 	\eqn{
-		\mathbb{E}_{\vp}\Big[\llp \big| \vx,\vy \Big] &= \sumn \summ \mathbb{E}_{\vp}\big[z_{ij}|x_i,y_i\big] \bl \log \fab(x_i,y_i) + \log \pi_j  \br
+		\mathbb{E}_{\vp}\Big[\llp \big| \vx,\vy,\vph^{(t-1)} \Big] &= \sumn \summ \mathbb{E}_{\vp}\big[z_{ij}|x_i,y_i\big] \bl \log \fab(x_i,y_i) + \log \pi_j  \br
 	}
 	
 	Since $z_{ij}$ is an indicator, its expected value is simply the probability that data point $i$ comes from model $j$
@@ -587,9 +592,9 @@
 	\begin{itemize}
 		\item Works with as few as 1,000 observations
 		\item Insensitive to initialization of $\vect{\pi}$
-		\item Always converges
 		\item Large weights identified after 10 iterations
 		\item $\llp$ stops changing appreciably after 60 ($m$=4) or 600 ($m$=25) iterations
+		\item Always converges
 	\end{itemize}
 
 	
