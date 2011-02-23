@@ -113,13 +113,13 @@
 		
 		\item in order to recover the formation history of the halo
 		\item we propose a generative model in the form of a finite mixture model
-		\item where each observed point comes from one of $m$ mixture components (pictured)
+		\item where each observed point comes from one of $m$ mixture components (the case of m=4 is pictured on the left)
 		\item since each mixture component has an associated mass and accretion time range, the formation history is specified if we know what percentage of observations come from each mixture component
 		
 		\item our goal, then, is to determine the mixing proportions, $\vp$
 		
-		\item note that the observed points we are attempting to fit are generated via simulation, not our proposed generative model
-		\item we don't know the true generative method, and are proposing a reasonable one that we think can be fit, and that will reveal the formation history
+		\item the observed points we are attempting to fit are based on some subset of the 1,500 satellites from simulations, whereas the mixture components are based on all 1,500 satellites
+		\item our generative model is designed to be generic enough to fit specific halos using a more general set of templates.
 	\end{itemize}
 	
 \end{frame}
@@ -139,9 +139,23 @@
 	 }
 	
 	Given $m$ mixture components, we propose that the density from which observations are generated is
-		\begin{equation}
-		f(x,y) = \sum^m_{j=1}		\tikz[baseline]{\node[fill=blue!20,anchor=base] (t3) {$\pi_j$};}		\tikz[baseline]{\node[fill=red!20,anchor=base] (t4) {$f_j(x,y)$};}	\end{equation}	\begin{itemize}		\item		Mixing proportion \tikz\node[fill=blue!20,draw,circle] (n3){};		\item		Mixture component $j$ \tikz\node[fill=red!20,draw,circle] (n4){};	\end{itemize}
-			\begin{tikzpicture}[overlay]		\path[->] (n3) edge [out=0, in=-90] (t3);		\path[->] (n4) edge [out=0, in=-90] (t4);	\end{tikzpicture}
+	
+	\begin{equation}
+		f(x,y) = \sum^m_{j=1}
+		\tikz[baseline]{\node[fill=blue!20,anchor=base] (t3) {$\pi_j$};}
+		\tikz[baseline]{\node[fill=red!20,anchor=base] (t4) {$f_j(x,y)$};}
+	\end{equation}
+	\begin{itemize}
+		\item
+		Mixing proportion \tikz\node[fill=blue!20,draw,circle] (n3){};
+		\item
+		Mixture component $j$ \tikz\node[fill=red!20,draw,circle] (n4){};
+	\end{itemize}
+		
+	\begin{tikzpicture}[overlay]
+		\path[->] (n3) edge [out=0, in=-90] (t3);
+		\path[->] (n4) edge [out=0, in=-90] (t4);
+	\end{tikzpicture}
 	
 	
 	
@@ -165,6 +179,184 @@
 	\end{itemize}
 	
 \end{frame}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Simulations}
+	
+	
+	
+	
+	\begin{itemize}
+		\item Generated observations from 11 realizations of halos
+		\item Generated mixing components for these halos
+		\item Used a 5x5 grid ($m=25$), and several 2x2 grids ($m=4$)
+	\end{itemize}
+	
+	
+	
+	\begin{figure}
+			\begin{center}
+				\includegraphics[width=\textwidth]{ourdens.pdf}
+			\end{center}
+	\end{figure}
+	
+	
+	
+	
+\end{frame}
+%---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+\begin{frame}[shrink]{Simulations}
+	
+	\begin{itemize}
+		\item Tried several different mass/accretion time separations for 2x2
+		\item 2x2 grid reliably converged on the correct mixing proportions
+		\item 5x5 grid produced an accurate formation history for some halo realizations, but not all
+		\item since the mixing components are generated from 1,500 satellites, and the observed data points from some subset of these, the 5x5 grid was too granular--there is a limit to how specific we can be if our generative model doesn't know about the vagaries of the individual galaxy its looking at
+		\item since these observations were generated from the simulations (not our model) we know the correct mixing proportions, pi
+	\end{itemize}
+	
+\end{frame}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Results for a 5x5 grid ($m=25$), for one halo realization}
+	
+	
+	
+	
+	
+	
+	\begin{figure}
+			\begin{center}
+				\includegraphics[scale=0.3]{5x5eb.pdf}
+			\end{center}
+	\end{figure}
+	
+	
+	
+	
+\end{frame}
+%---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+\begin{frame}[shrink]{Simulations}
+	
+	\begin{itemize}
+		\item Note the good fit
+		\item Fits even small mixing proportions, e.g. 1\% of total luminosity
+		\item We got these results by implementing the aforementioned finite mixture model using the expectation maximization algorithm
+	\end{itemize}
+	
+\end{frame}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{2x2: All 11 halos}
+	
+	\begin{figure}
+			\begin{center}
+				\includegraphics[scale=0.30]{s4t2m7allpctdiff.pdf}
+			\end{center}
+	\end{figure}	
+	
+\end{frame}
+%---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+\begin{frame}[shrink]{2x2: All 11 halos}
+	
+	\begin{itemize}
+		\item Absolute difference btwn true and est on left
+		\item Showing all 11 halos, or 44 points
+		\item In general, the 2x2 reconstructs the formation history fairly well
+		\item Most errors are very small, and none are orders of magnitude off
+	\end{itemize}
+	
+\end{frame}
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -208,7 +400,10 @@
 \begin{frame}[shrink]{Estimating the mixing proportions $\vect{\pi}$}
 	
 	\begin{itemize}
-		\item 1
+		\item MLE is a common statistical approach
+		\item give we have some densities, say Normal(mu, sigma), and some data, we choose the mu and sigma that maximize the joint probability, or likelihood, of the data we observe.
+		\item Typically the log of the likelihood is used because it's easier to work with.
+		\item In our case, this means that pi hat, or the estimate of the mixing proportions, is the argmax of the log likelihood.
 	\end{itemize}
 	
 \end{frame}
@@ -253,9 +448,10 @@
 \begin{frame}[shrink]{Expectation Maximization}
 	
 	\begin{itemize}
+		\item given that we know the mixture components, or fj's
 		\item Suppose we knew which mixture component $f_j$ each observation came from
 		\item Then we could construct a latent indicator variable, $z_{ij}$, which is 1 if point $i$ comes from mixture component $j$, and 0 otherwise
-		\item The log like then becomes
+		\item The complete log likelihood can then be expressed as
 		\item Since we're supposing that we know $z_{ij}$, it's trivial to differentiate this log likelihood with respect to $\vph$
 		\item 
 	\end{itemize}
@@ -327,7 +523,7 @@
 	\eqn{
 		\mathbb{E}_{\vp}\Big[  z_{ij} | x_i, y_i \Big]	&= \text{Pr}_{\vp}(z_{ij}|x_i,y_i)	\\
 										&= \frac{p(x_i,y_i|z_{ij}=1)p(z_{ij}=1)}{p(x_i,y_i)}	\\
-										&=  \frac{\pi_j \fab(x_i,y_i)  }{\summ \pi_j \fab(x_i,y_i)}
+										&=  \frac{\pi_j \fab(x_i,y_i)  }{\sum^{m}_{k=1} \pi_k f_k(x_i,y_i)}
 	}
 \end{frame}
 %---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -407,158 +603,10 @@
 
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{frame}{Simulations}
-	
-	
-	
-	
-	\begin{itemize}
-		\item Generated observations from 10 realizations of halos
-		\item Generated mixing components for these halos
-		\item Used a 5x5 grid ($m=25$), and several 2x2 grids ($m=4$)
-	\end{itemize}
-	
-	
-	
-	\begin{figure}
-			\begin{center}
-				\includegraphics[width=\textwidth]{ourdens.pdf}
-			\end{center}
-	\end{figure}
-	
-	
-	
-	
-\end{frame}
-%---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-\begin{frame}[shrink]{Simulations}
-	
-	\begin{itemize}
-		\item Tried several different mass/accretion time separations for 2x2
-		\item 5x5 grid did not work for some halo realizations
-		\item 2x2 grid reliably converged on the correct mixing proportions
-		\item since these observations were generated from the simulations (not our model) we know the correct mixing proportions, pi
-	\end{itemize}
-	
-\end{frame}
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{frame}{Halo 2: least accurate 2x2 fit}	
-	
-	\begin{figure}
-			\begin{center}
-				\includegraphics[scale=0.22]{halo2pct2x25x5.pdf}
-			\end{center}
-	\end{figure}	
-	
-\end{frame}
-%---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-\begin{frame}[shrink]{Halo 2 results}
-	
-	\begin{itemize}
-		\item top is 5x5
-		\item bottom is 2x2
-		\item left is absolute difference between the true mixing proportions and the estimated ones
-		\item right is percent difference between the true mixing proportions and the estimated ones
-		\item 2x2 is pretty close, although not a perfect fit, it does reconstruct the formation history fairly accurately.
-	\end{itemize}
-	
-\end{frame}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{frame}{Halo 5: most accurate 2x2 fit}
-	
-	\begin{figure}
-			\begin{center}
-				\includegraphics[scale=0.22]{halo5pct2x25x5.pdf}
-			\end{center}
-	\end{figure}	
-	
-\end{frame}
-%---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-\begin{frame}[shrink]{Halo 5 results}
-	
-	\begin{itemize}
-		\item Running the same algorithm for another halo realization
-		\item In this case, the 2x2 is dead-on
-		\item The large percent differences are caused by a true value of 0 and an estimated value of $< 1 x 10^{-6}$
-		\item In general, the 10 different halo realizations have accuracies falling somewhere in between the good fit pictured here, and the less good fit from the previous slide.
-
-	\end{itemize}
-	
-\end{frame}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{frame}{2x2: All 10 halos}
-	
-	\begin{figure}
-			\begin{center}
-				\includegraphics[scale=0.30]{s4t2m7allpctdiff.pdf}
-			\end{center}
-	\end{figure}	
-	
-\end{frame}
-%---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-\begin{frame}[shrink]{2x2: All 10 halos}
-	
-	\begin{itemize}
-		\item Same graphs, but all 10 halo realizations stacked on top of eachother
-		\item In general, the 2x2 reconstructs the formation history fairly well
-	\end{itemize}
-	
-\end{frame}
 
 
 
@@ -590,7 +638,8 @@
 	\end{figure}
 	
 	\begin{itemize}
-		\item Works with as few as 1,000 observations
+		\item Produces reasonable results few as 1,000 observations
+		\item Confidence intervals narrow with more data
 		\item Insensitive to initialization of $\vect{\pi}$
 		\item Large weights identified after 10 iterations
 		\item $\llp$ stops changing appreciably after 60 ($m$=4) or 600 ($m$=25) iterations
@@ -678,11 +727,11 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{frame}{Confidence Intervals}
+\begin{frame}{Confidence Intervals: 2x2 results}
 	
 	\begin{figure}
 			\begin{center}
-				\includegraphics[scale=0.3]{5x5eb.pdf}
+				\includegraphics[scale=0.3]{2x2eb.pdf}
 			\end{center}
 	\end{figure}
 	
@@ -691,8 +740,7 @@
 \begin{frame}[shrink]{Confidence Intervals}
 	
 	\begin{itemize}
-		\item Using m-out-of-n bootstrapping, at a 95\% confidence level, produced similar results
-		\item for 5x5 grids the estimates of the mixing proportions were not always inside 2 standard deviations, or the 95\% bootstrapped confidence interval
+		\item Using n-out-of-n bootstrapping, at a 95\% confidence level, produced similar results
 		\item for 2x2 grids, the estimates are almost always inside 2 standard deviations, or the 95\% bootstrapped confidence interval
 	\end{itemize}
 	
@@ -713,7 +761,7 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{frame}{Correlation between $\vp$}	
+\begin{frame}{Correlation between $\vph$}	
 	
 	\begin{figure}
 			\begin{center}
@@ -753,51 +801,33 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{frame}{Conclusion}
 	
-	Poor results
-	\begin{itemize}
-		\item 5x5 grids, except in a few cases
-		\item Parametric bootstrapping
-	\end{itemize}	
 	
-	
-	Good results
 	\begin{itemize}
-		\item 2x2 grids
-		\item EM
-		\item 5x5 in a few cases
-		\item Confidence intervals
+		\item We were able to reconstruct the formation history
 		\begin{itemize}
-			\item Observed Fisher information
-			\item M-of-n bootstrapping
+			\item For multiple halo realizations
+			\item With a single finite mixture model
+			\item With good accuracy on a 2x2 grid
+			\item Relatively quickly
+			\item Equally well for large and small values of $\pi_j$
+			\item With more data, more granular grids could be used
+		\end{itemize}
+		\item We found confidence intervals and covariance matrices for the mixing proportions
+		\begin{itemize}
+			\item Fisher information and n-out-of-n bootstrapping produced nearly identical results
 		\end{itemize}
 	\end{itemize}	
 	
 	
-	
-	
 	Future work
 	\begin{itemize}
-		\item Adaptive partitioning of mass and time since accretion for mixing components
-		\item Smoothing the 1,500 metallicity curves and constructing mixing components from them
+		\item Adaptive partitioning of mass and time since accretion
+		\item Mixing components from smoothed metallicity curves
 	\end{itemize}	
 	
 \end{frame}
 %---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 \begin{frame}[shrink]{Conclusion}
-	
-	\begin{itemize}
-		\item starting with what didn't work
-		\item 5x5 grids tended to converge to the wrong answers in all but a handful of cases
-		\item since our mixture model is not the true generative model, we can consistently converge on estimates of the mixing proportions that are incorrect.
-		\item this is also likely the reason that parametric bootstrapping didn't work--the observed points are not actually generated from a set of mixing components, and so when we make the grid too granular, we find patterns that are not found in the simulated data.
-	\end{itemize}	
-	\begin{itemize}
-		\item we did have success with 2x2 grids
-		\item the EM algorithm converged, and we did not see any degeneracies--we always converged on the same answers, even if they weren't the "true" values.
-		\item in some cases, the 5x5 grids were fit quite well
-		\item m-out-of-n bootstrapping confirmed confidence intervals and covariance matrices derived from observed Fisher information
-		
-	\end{itemize}
 	
 	\begin{itemize}
 		\item we have done some work on adaptive gridding, based on finding the partitions of mass and time since accretion that maximize the difference between the mixing components, and the underlying metallicity curves
@@ -921,7 +951,33 @@
 	
 	\tikzstyle{na} = [baseline=-.5ex]
 			
-			A modest attempt at using PGF/TikZ. \\		Green's Theorem: \\		\begin{itemize}		\item		Curl \tikz\node[fill=yellow!20,draw,circle] (n4){};		\item		Divergence \tikz\node[fill=green!20,draw,circle] (n2){};		\end{itemize}		\begin{equation}		\oint_{\tikz[baseline]{\node[fill=red!20,anchor=base] (t1) {$\partial D$};}} \,		\tikz[baseline]{\node[fill=green!20,anchor=base] (t2) {$F\cdot ds$};}		\ = \		\int\int_{\tikz[baseline]{\node[fill=blue!20,anchor=base] (t3) {$D$};}} \,(		\tikz[baseline]{\node[fill=yellow!20,anchor=base] (t4) {$\nabla \times F$};})\cdot k \,dA		\end{equation}		\begin{itemize}		\item		Boundary of Region \tikz\node[fill=red!20,draw,circle] (n1){};		\item		Region \tikz\node[fill=blue!20,draw,circle] (n3){};		\end{itemize}		\begin{tikzpicture}[overlay]		\path[->] (n1) edge [out=90, in=-90] (t1);		\path[->] (n2) edge [bend left] (t2);		\path[->] (n3) edge [out=0, in=-90] (t3);		\path[->] (n4) edge [out=0, in=90] (t4);		\end{tikzpicture}
+			A modest attempt at using PGF/TikZ. \\
+		Green's Theorem: \\
+		\begin{itemize}
+		\item
+		Curl \tikz\node[fill=yellow!20,draw,circle] (n4){};
+		\item
+		Divergence \tikz\node[fill=green!20,draw,circle] (n2){};
+		\end{itemize}
+		\begin{equation}
+		\oint_{\tikz[baseline]{\node[fill=red!20,anchor=base] (t1) {$\partial D$};}} \,
+		\tikz[baseline]{\node[fill=green!20,anchor=base] (t2) {$F\cdot ds$};}
+		\ = \
+		\int\int_{\tikz[baseline]{\node[fill=blue!20,anchor=base] (t3) {$D$};}} \,(
+		\tikz[baseline]{\node[fill=yellow!20,anchor=base] (t4) {$\nabla \times F$};})\cdot k \,dA
+		\end{equation}
+		\begin{itemize}
+		\item
+		Boundary of Region \tikz\node[fill=red!20,draw,circle] (n1){};
+		\item
+		Region \tikz\node[fill=blue!20,draw,circle] (n3){};
+		\end{itemize}
+		\begin{tikzpicture}[overlay]
+		\path[->] (n1) edge [out=90, in=-90] (t1);
+		\path[->] (n2) edge [bend left] (t2);
+		\path[->] (n3) edge [out=0, in=-90] (t3);
+		\path[->] (n4) edge [out=0, in=90] (t4);
+		\end{tikzpicture}
 	\end{frame}
 
 
@@ -968,6 +1024,81 @@
 	
 \end{frame}
 
+
+
+
+
+
+
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Halo 2: least accurate 2x2 fit}	
+	
+	\begin{figure}
+			\begin{center}
+				\includegraphics[scale=0.22]{halo2pct2x25x5.pdf}
+			\end{center}
+	\end{figure}	
+	
+\end{frame}
+%---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+\begin{frame}[shrink]{Halo 2 results}
+	
+	\begin{itemize}
+		\item top is 5x5
+		\item bottom is 2x2
+		\item left is absolute difference between the true mixing proportions and the estimated ones
+		\item right is percent difference between the true mixing proportions and the estimated ones
+		\item 2x2 is pretty close, although not a perfect fit, it does reconstruct the formation history fairly accurately.
+	\end{itemize}
+	
+\end{frame}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Halo 5: most accurate 2x2 fit}
+	
+	\begin{figure}
+			\begin{center}
+				\includegraphics[scale=0.22]{halo5pct2x25x5.pdf}
+			\end{center}
+	\end{figure}	
+	
+\end{frame}
+%---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+\begin{frame}[shrink]{Halo 5 results}
+	
+	\begin{itemize}
+		\item Running the same algorithm for another halo realization
+		\item In this case, the 2x2 is dead-on
+		\item The large percent differences are caused by a true value of 0 and an estimated value of $< 1 x 10^{-6}$
+		\item In general, the 11 different halo realizations have accuracies falling somewhere in between the good fit pictured here, and the less good fit from the previous slide.
+
+	\end{itemize}
+	
+\end{frame}
 
 
 
