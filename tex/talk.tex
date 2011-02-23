@@ -58,23 +58,7 @@
 
 
 
-%%%%%%%%%%%%%%%%%%%%%
-\begin{frame}{Link between curves and M theoretical distributions}
-	
-	(Duane will cover this part I think)
-	
-	
-	Partition the mass and accretion time into $m$ combinations of $\mathcal{M},\mathcal{T}$ where
-	
-	\eqn{
-		\text{Sat. stellar mass:} \hspace{3mm} \bigcup \mathcal{M}_j &= [0, 10^9] M_{\bigodot}  		\\
-		\text{Accretion time:} \hspace{3mm} \bigcup \mathcal{T}_j &= [0, 14] \text{Gyr} 
-	}
-	\eqn{
-		f_j(x,y) &= P(x,y|\text{Mass}\in \mathcal{M}_j, \text{Accretion time}\in \mathcal{T}_j)
-	}
 
-\end{frame}
 
 
 %%%%%%%%%%%%%%%%%%%%%
@@ -89,7 +73,7 @@
 	\end{figure}
 	
 	\eqn{
-		\Bigg[\feh,\afe\Bigg]_{i=1}^{N} \text{i.i.d} \sim F(x,y) = \sum^m_{j=1} \pi_j f_j(x,y)
+		\Bigg[\feh,\afe\Bigg]_{i=1}^{N} \text{i.i.d} \sim f(x,y) = \sum^m_{j=1} \pi_j f_j(x,y)
 	}	
 	
 \end{frame}
@@ -100,28 +84,22 @@
 
 
 
+
+
 %%%%%%%%%%%%%%%%%%%%%
-\begin{frame}{Finding the mixing proportions $\vect{\pi}$}
+\begin{frame}{A generative finite mixture model}
 	
-	Unfortunately the maximum likelihood estimate of the mixing proportions,
+	define x
 	\eqn{
-		\vph_{\text{MLE}} &= \argmax_{\vp} L(\vect{\pi})
+		\Bigg[\feh,\afe\Bigg]_{i=1}^{N} \text{i.i.d} \sim f(x,y) = \sum^m_{j=1} \pi_j f_j(x,y)
 	}
 	
 	
-	is intractable as our model
+	where the mixing proportions, $\vp$, give the formation history of the halo \eqn{
+		\sum^m_{j=1} \pi_j = 1,  \hspace{3mm}    \pi_j \geq 0, \hspace{3mm} j=1,\ldots,m
+	 }
 	
-	\eqn{
-		F(x,y) &= \sum^m_{j=1} \pi_j f_j(x,y)
-	}
-	
-	has a log likelihood of
-	\eqn{
-		L(\vect{\pi}) &= \sumn \log \Big( \summ \pi_j \fab(x_i,y_i)  \Big)
-	}
-	
-	
-	
+
 	
 \end{frame}
 
@@ -132,9 +110,37 @@
 
 
 %%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Estimating the mixing proportions $\vect{\pi}$}
+	
+	To estimate the mixing proportions, we can use a maximum likelihood approach
+	\eqn{
+		\vph_{\text{MLE}} &= \argmax_{\vp} L(\vect{\pi})
+	}
+	
+	
+	
+	\eqn{
+		\mbox{where} \;\;\;\;\;\;\;\;\;\;\; L(\vect{\pi}) &= \sumn \log \Big( \summ \pi_j \fab(x_i,y_i)  \Big)
+	}
+	
+	Unfortunately the standard MLE procedure for estimating $\vp$ is intractable with this likelihood.\newline
+	
+	Expectation Maximization (EM) algorithm to the rescue!
+	
+	
+	
+\end{frame}
+
+
+
+
+
+%different L notation
+
+%%%%%%%%%%%%%%%%%%%%%
 \begin{frame}{Adding the latent variable $\vect{z}$}
 	
-	Suppose we knew which $f_j$ each observation came from:
+	Suppose we knew which mixture component $f_j$ each observation came from:
 	
 	\eqn{
 		z_{ij} 	= \hspace{1mm} & 1  \hspace{4mm} \text{if} \hspace{1mm} (x_i,y_i) \sim f_j	\\
@@ -148,8 +154,7 @@
 		L(\vect{\pi}) &= \sumn \summ z_{ij}  \log \bl \pi_j  \fab(x_i,y_i) \br
 	}
 	
-	The addition of the latent variable $\vect{z}$ actually makes things easier by allowing us to use expectation maximization to estimate of $\vp$. 
-	
+	The addition of the latent variable $\vect{z}$ actually makes things easier because it is easily differentiable in $\vp$.
 	
 \end{frame}
 
@@ -165,15 +170,18 @@
 %%%%%%%%%%%%%%%%%%%%%
 \begin{frame}{Finding $\vph$ using expectation maximization}
 	
+	but we dont know z.
+	the true likelihood is increasing in each iteration
+	
 	\eqn{
 		\vph^{(t)} &= \argmax_{\vp} \mathbb{E}_{\vect{z}| \vx,\vy,\vph^{(t-1)} }\Big[\llp \Big]   
 	}
 	
-	At each time $t$, the estimate for $\vp$ is the argmax of the expected value of the likelihood, given the data and the estimate of $\vp$ from the previous time.
+	At each time $t$, the estimate for $\vp$ is the argmax of the expected log likelihood, given the data and the estimate of $\vp$ from the previous time.
 	
 	\begin{itemize}
-		\item First we find the expected value of $\llp$ using the current estimate of the latent variable
-		\item $\vph^{(t)}$ is the $\argmax_{\vp}$ of this expectation
+		\item First we find the expected value of $\llp$ using the current expected values of the latent variable $\vect{z}$
+		\item $\vph^{(t)}$ is the $\argmax_{\vp}$ of this expectation, which is simple to compute
 		\item We repeat until $\llp$ stabilizes
 	\end{itemize}
 	
@@ -188,7 +196,7 @@
 
 
 %%%%%%%%%%%%%%%%%%%%%
-\begin{frame}{Find the expected value of $L(\vect{\pi})$ using the current estimate of the latent variable}
+\begin{frame}{Find the expected value of $L(\vect{\pi})$ using the current expected value of the latent variable}
 	
 	The expected value of $\llp$, with respect to the conditional distribution of $\vect{z}$, given observed data and $\vp^{(t-1)}$ is
 	
@@ -358,7 +366,7 @@
 
 
 %%%%%%%%%%%%%%%%%%%%%
-\begin{frame}{Simulation overview}
+\begin{frame}{EM overview}
 	
 	\begin{figure}
 			\begin{center}
