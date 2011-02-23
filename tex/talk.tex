@@ -78,37 +78,6 @@
 
 
 
-\begin{frame}[shrink]{A generative finite mixture model}
-	
-	\alert{hello}
-	
-	\structure{hello}
-	
-	\pgfputat{\pgfxy(0,-6.5)}{\pgfbox[left,base]{\pgfimage[width=\textwidth]{denstoobs}}}
-	
-	\begin{itemize}
-		\item \clr{red}{a}bc
-	\end{itemize}
-	
-	\eqn{
-		\Bigg[\feh,\afe\Bigg]_{i=1}^{N} \text{i.i.d} \sim f(\alert{x},\structure{y}) = \sum^m_{j=1} \pi_j f_j(x,y)
-	}
-	
-\end{frame}
-
-
-
-
-\begin{frame}{Rigid body dynamics}
-	
-	\tikzstyle{na} = [baseline=-.5ex]
-			
-			A modest attempt at using PGF/TikZ. \\		Green's Theorem: \\		\begin{itemize}		\item		Curl \tikz\node[fill=yellow!20,draw,circle] (n4){};		\item		Divergence \tikz\node[fill=green!20,draw,circle] (n2){};		\end{itemize}		\begin{equation}		\oint_{\tikz[baseline]{\node[fill=red!20,anchor=base] (t1) {$\partial D$};}} \,		\tikz[baseline]{\node[fill=green!20,anchor=base] (t2) {$F\cdot ds$};}		\ = \		\int\int_{\tikz[baseline]{\node[fill=blue!20,anchor=base] (t3) {$D$};}} \,(		\tikz[baseline]{\node[fill=yellow!20,anchor=base] (t4) {$\nabla \times F$};})\cdot k \,dA		\end{equation}		\begin{itemize}		\item		Boundary of Region \tikz\node[fill=red!20,draw,circle] (n1){};		\item		Region \tikz\node[fill=blue!20,draw,circle] (n3){};		\end{itemize}		\begin{tikzpicture}[overlay]		\path[->] (n1) edge [out=90, in=-90] (t1);		\path[->] (n2) edge [bend left] (t2);		\path[->] (n3) edge [out=0, in=-90] (t3);		\path[->] (n4) edge [out=0, in=90] (t4);		\end{tikzpicture}
-	\end{frame}
-
-
-
-
 
 
 
@@ -141,10 +110,13 @@
 	
 	\begin{itemize}
 		
+		
 		\item each observed point comes from one of $m$ mixture components (pictured)
 		\item we propose a generative model in the form of a finite mixture model
 		\item since each mixture component has an associated mass and accretion time range, the formation history is specified if we know what percentage of observations come from each mixture component
 		\item our goal, then, is to determine the mixing proportions, $\vp$
+		
+		\item note that the simulations that produce observed points do not follow this model; we don't know the true generative method, and are proposing a reasonable one that we think can be fit, and that will spit out the formation history
 	\end{itemize}
 	
 \end{frame}
@@ -438,13 +410,9 @@
 	
 	
 	\begin{itemize}
-		\item Generated observations from one halo and multiple halos
-		
+		\item Generated observations from 10 realizations of halos
+		\item Generated mixing components for these halos
 		\item Used a 5x5 grid ($m=25$), and several 2x2 grids ($m=4$)
-		\begin{itemize}
-			\item 5x5 grid did not work for some halo realizations
-			\item 2x2 grid reliably converged on the correct mixing proportions
-		\end{itemize}
 	\end{itemize}
 	
 	
@@ -459,7 +427,497 @@
 	
 	
 \end{frame}
+%---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+\begin{frame}[shrink]{Simulations}
+	
+	\begin{itemize}
+		\item Tried several different mass/accretion time separations for 2x2
+		\item 5x5 grid did not work for some halo realizations
+		\item 2x2 grid reliably converged on the correct mixing proportions
+		\item since these observations were generated from the simulations (not our model) we know the correct mixing proportions, pi
+	\end{itemize}
+	
+\end{frame}
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Halo 2: least accurate 2x2 fit}	
+	
+	\begin{figure}
+			\begin{center}
+				\includegraphics[scale=0.22]{halo2pct2x25x5.pdf}
+			\end{center}
+	\end{figure}	
+	
+\end{frame}
+%---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+\begin{frame}[shrink]{Halo 2 results}
+	
+	\begin{itemize}
+		\item top is 5x5
+		\item bottom is 2x2
+		\item left is absolute difference between the true mixing proportions and the estimated ones
+		\item right is percent difference between the true mixing proportions and the estimated ones
+		\item 2x2 is pretty close, although not a perfect fit, it does reconstruct the formation history fairly accurately.
+	\end{itemize}
+	
+\end{frame}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Halo 5: most accurate 2x2 fit}
+	
+	\begin{figure}
+			\begin{center}
+				\includegraphics[scale=0.22]{halo5pct2x25x5.pdf}
+			\end{center}
+	\end{figure}	
+	
+\end{frame}
+%---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+\begin{frame}[shrink]{Halo 5 results}
+	
+	\begin{itemize}
+		\item Running the same algorithm for another halo realization
+		\item In this case, the 2x2 is dead-on
+		\item The large percent differences are caused by a true value of 0 and an estimated value of $< 1 x 10^{-6}$
+		\item In general, the 10 different halo realizations have accuracies falling somewhere in between the good fit pictured here, and the less good fit from the previous slide.
+
+	\end{itemize}
+	
+\end{frame}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{2x2: All 10 halos}
+	
+	\begin{figure}
+			\begin{center}
+				\includegraphics[scale=0.30]{s4t2m7allpctdiff.pdf}
+			\end{center}
+	\end{figure}	
+	
+\end{frame}
+%---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+\begin{frame}[shrink]{2x2: All 10 halos}
+	
+	\begin{itemize}
+		\item Same graphs, but all 10 halo realizations stacked on top of eachother
+		\item In general, the 2x2 reconstructs the formation history fairly well
+	\end{itemize}
+	
+\end{frame}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Convergence and minimum observation size}
+	
+	\begin{figure}
+			\begin{center}
+				\includegraphics[width=\textwidth]{diag_simple.pdf}
+			\end{center}
+	\end{figure}
+	
+	\begin{itemize}
+		\item Works with as few as 1,000 observations
+		\item Insensitive to initialization of $\vect{\pi}$
+		\item Always converges
+		\item Large weights identified after 10 iterations
+		\item $\llp$ stops changing appreciably after 60 ($m$=4) or 600 ($m$=25) iterations
+	\end{itemize}
+
+	
+\end{frame}
+%---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+\begin{frame}[shrink]{Convergence and minimum observation size}
+		
+%	1,000 obs, 62 runs, 0.3s m=4
+	
+%	50,000 obs, 1371 runs, 460s, m=25
+	\begin{itemize}
+		\item The EM algorithm is not known to converge particularly quickly
+		\item For a 2x2 with 1,000 observations, it takes about 60 iterations, or 0.3 seconds, to trigger the stopping condition of less than $10^{-4}$ change in log likelihood
+		
+		\item since our mixture model is not the true generative model, we can consistently converge on estimates of the mixing proportions that are incorrect.
+		\item this happened with 5x5 grids especially, and could be a reflection of over-fitting, or a symptom of too-tight a grid
+		\item we did not see any degeneracies--we always converged on the same answers, even if they weren't the "true" values.
+		
+	\end{itemize}
+	
+\end{frame}
+
+
+
+
+
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Covariance and confidence intervals}
+	
+	The asymptotic covariance matrix of $\vph$ can be approximated by the inverse of the observed Fisher information matrix, $I$:
+	
+	\eqn{	
+		I(\vpg|\vx,\vy)=-\frac{\partial^2 \llpp}{\partial \vp^\prime \partial \vp^{\prime T}}
+	}
+	
+	
+	
+	\eqn{
+		\text{Cov}(\hat{\pi}_p,\hat{\pi}_q) = \big[I^{-1}(\vpgh) \big]_{pq}
+	}
+	
+	\;\;
+	with variance and correlation given by
+	
+	\eqn{
+		\text{Var}(\hat{\pi}_j) &= \sigma^2_j = \Bl  \text{Cov}(\vph) \Br_{jj}
+	}
+	
+	\eqn{
+		\text{Corr}(\hat{\pi}_p,\hat{\pi}_q) = \frac{\text{Cov}(\hat{\pi}_p,\hat{\pi}_q)}{\sqrt{\sigma^2_p \sigma^2_q}}
+	}
+	
+
+	
+\end{frame}
+%---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+\begin{frame}[shrink]{Covariance and confidence intervals}
+	
+	\begin{itemize}
+		\item 1
+	\end{itemize}
+	
+\end{frame}
+
+
+
+
+
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Confidence Intervals}
+	
+	\begin{figure}
+			\begin{center}
+				\includegraphics[scale=0.3]{5x5eb.pdf}
+			\end{center}
+	\end{figure}
+	
+\end{frame}
+%---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+\begin{frame}[shrink]{Confidence Intervals}
+	
+	\begin{itemize}
+		\item Using m-out-of-n bootstrapping, at a 95\% confidence level, produced similar results
+		\item for 5x5 grids the estimates of the mixing proportions were not always inside 2 standard deviations, or the 95\% bootstrapped confidence interval
+		\item for 2x2 grids, the estimates are almost always inside 2 standard deviations, or the 95\% bootstrapped confidence interval
+	\end{itemize}
+	
+\end{frame}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Correlation between $\vp$}	
+	
+	\begin{figure}
+			\begin{center}
+				\includegraphics[scale=0.17]{correl.pdf}
+			\end{center}
+	\end{figure}	
+	
+\end{frame}
+%---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+\begin{frame}[shrink]{Correlation between $\vp$}
+	
+	\begin{itemize}
+		\item larger spheres represent higher values of pi hat
+		\item red spheres are negative correlation
+		\item blue spheres are positive correlation
+		\item mixing components that are right next to eachother, and thus have similar mass and accretion time ranges, tend to have larger correlations.
+		\item one way to reduce the correlation might be to produce mixing components on different grids of mass and accretion time
+		
+		\item Again, m-out-of-n bootstrapping produced similar covariance structures
+		
+	\end{itemize}
+	
+\end{frame}
+
+
+
+
+
+
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Conclusion}
+	
+	Poor results
+	\begin{itemize}
+		\item 5x5 grids, except in a few cases
+		\item Parametric bootstrapping
+	\end{itemize}	
+	
+	
+	Good results
+	\begin{itemize}
+		\item 2x2 grids
+		\item EM
+		\item 5x5 in a few cases
+		\item Confidence intervals
+		\begin{itemize}
+			\item Observed Fisher information
+			\item M-of-n bootstrapping
+		\end{itemize}
+	\end{itemize}	
+	
+	
+	
+	
+	Future work
+	\begin{itemize}
+		\item Adaptive partitioning of mass and time since accretion for mixing components
+		\item Smoothing the 1,500 metallicity curves and constructing mixing components from them
+	\end{itemize}	
+	
+\end{frame}
+%---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+\begin{frame}[shrink]{Conclusion}
+	
+	\begin{itemize}
+		\item starting with what didn't work
+		\item 5x5 grids tended to converge to the wrong answers in all but a handful of cases
+		\item since our mixture model is not the true generative model, we can consistently converge on estimates of the mixing proportions that are incorrect.
+		\item this is also likely the reason that parametric bootstrapping didn't work--the observed points are not actually generated from a set of mixing components, and so when we make the grid too granular, we find patterns that are not found in the simulated data.
+	\end{itemize}	
+	\begin{itemize}
+		\item we did have success with 2x2 grids
+		\item the EM algorithm converged, and we did not see any degeneracies--we always converged on the same answers, even if they weren't the "true" values.
+		\item in some cases, the 5x5 grids were fit quite well
+		\item m-out-of-n bootstrapping confirmed confidence intervals and covariance matrices derived from observed Fisher information
+		
+	\end{itemize}
+	
+	\begin{itemize}
+		\item we have done some work on adaptive gridding, based on finding the partitions of mass and time since accretion that maximize the difference between the mixing components, and the underlying metallicity curves
+		\item adaptive gridding looks promising, but is still in the early stages
+		
+		\item since we have 1,500 metallicity curves, we have also investigated smoothing the curves to create 1,500 mixture components
+		\item this might increase sensitivity of the algorithm
+		\item this approach is also compatible with adaptive gridding
+	\end{itemize}
+	
+\end{frame}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\end{document}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\begin{frame}[shrink]{A generative finite mixture model}
+	
+	\alert{hello}
+	
+	\structure{hello}
+	
+	\pgfputat{\pgfxy(0,-6.5)}{\pgfbox[left,base]{\pgfimage[width=\textwidth]{denstoobs}}}
+	
+	\begin{itemize}
+		\item \clr{red}{a}bc
+	\end{itemize}
+	
+	\eqn{
+		\Bigg[\feh,\afe\Bigg]_{i=1}^{N} \text{i.i.d} \sim f(\alert{x},\structure{y}) = \sum^m_{j=1} \pi_j f_j(x,y)
+	}
+	
+\end{frame}
+
+
+
+
+\begin{frame}{Rigid body dynamics}
+	
+	\tikzstyle{na} = [baseline=-.5ex]
+			
+			A modest attempt at using PGF/TikZ. \\		Green's Theorem: \\		\begin{itemize}		\item		Curl \tikz\node[fill=yellow!20,draw,circle] (n4){};		\item		Divergence \tikz\node[fill=green!20,draw,circle] (n2){};		\end{itemize}		\begin{equation}		\oint_{\tikz[baseline]{\node[fill=red!20,anchor=base] (t1) {$\partial D$};}} \,		\tikz[baseline]{\node[fill=green!20,anchor=base] (t2) {$F\cdot ds$};}		\ = \		\int\int_{\tikz[baseline]{\node[fill=blue!20,anchor=base] (t3) {$D$};}} \,(		\tikz[baseline]{\node[fill=yellow!20,anchor=base] (t4) {$\nabla \times F$};})\cdot k \,dA		\end{equation}		\begin{itemize}		\item		Boundary of Region \tikz\node[fill=red!20,draw,circle] (n1){};		\item		Region \tikz\node[fill=blue!20,draw,circle] (n3){};		\end{itemize}		\begin{tikzpicture}[overlay]		\path[->] (n1) edge [out=90, in=-90] (t1);		\path[->] (n2) edge [bend left] (t2);		\path[->] (n3) edge [out=0, in=-90] (t3);		\path[->] (n4) edge [out=0, in=90] (t4);		\end{tikzpicture}
+	\end{frame}
 
 
 
@@ -512,180 +970,7 @@
 
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{frame}{EM overview}
-	
-	\begin{figure}
-			\begin{center}
-				\includegraphics[width=\textwidth]{diag_simple.pdf}
-			\end{center}
-	\end{figure}
-	
-	\begin{itemize}
-		\item Works with as few as 1,000 observations
-		\item Insensitive to initialization of $\vect{\pi}$
-		\item Always converges
-		\item Large weights identified after 10 iterations
-		\item $\llp$ stops changing appreciably after 60 ($m$=4) or 600 ($m$=25) iterations
-	\end{itemize}
-	
-%	1,000 obs, 62 runs, 0.3s m=4
-	
-%	50,000 obs, 1371 runs, 460s, m=25
-	
-\end{frame}
 
 
-
-
-
-
-
-
-
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{frame}{Confidence intervals from observed Fisher Information}
-	
-	\begin{figure}
-			\begin{center}
-				\includegraphics[scale=0.3]{5x5eb.pdf}
-			\end{center}
-	\end{figure}
-	
-\end{frame}
-
-
-
-
-
-
-
-
-
-
-
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{frame}{Confidence intervals from observed Fisher Information}
-	
-	\begin{figure}
-			\begin{center}
-				\includegraphics[scale=0.3]{2x2eb.pdf}
-			\end{center}
-	\end{figure}
-	
-\end{frame}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{frame}{Correlation between $\vp$}
-	
-	\eqn{	
-		I(\vpg|\vx,\vy)=-\frac{\partial^2 \llpp}{\partial \vp^\prime \partial \vp^{\prime T}}
-	}		
-	
-	\begin{figure}
-			\begin{center}
-				\includegraphics[width=\textwidth]{correl.pdf}
-			\end{center}
-	\end{figure}	
-	
-\end{frame}
-
-
-
-
-
-
-
-
-
-
-
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{frame}{Conclusion}
-	
-	Worked
-	\begin{itemize}
-		\item 2x2
-		\item EM
-		\item 5x5 in a few cases
-		\item M-of-n bootstrapped errors
-	\end{itemize}	
-	
-	Did not work
-	\begin{itemize}
-		\item 5x5
-		\item Parametric bootstrapped errors
-	\end{itemize}	
-	
-	
-	Future improvements
-	\begin{itemize}
-		\item Non-arbitrary gridding
-		\item Smoothing of $f_j$
-	\end{itemize}	
-	
-\end{frame}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-\end{document}
 
 

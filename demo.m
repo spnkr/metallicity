@@ -16,9 +16,128 @@ mi = Mixture.load(halonames{1});
 
 
 %% pick a halo here and all code after runs on this halo
-halo_ndx = 1;% the index in the list halonames above
+halo_ndx = 4;% the index in the list halonames above
 mi = Mixture.load(halonames{halo_ndx});
 
+
+
+%% 
+
+
+mxv = 1;
+
+im=1;
+h=figure(im);
+clf(h)
+
+minw=50;
+maxw=100;
+hold on
+mmm = {'new s4t2m72'};%,'5','7','8','9','10','12','14','15','17','20'};
+for i=1:length(mmm)
+	abc=strcat('temp/',mmm{i});
+	mi = Mixture.load(abc);
+
+	w = (mi.pi_true.*10000).^2;
+	w = w./range(w);
+	w = minw + (w.*maxw);
+
+	st = (mi.pi_est-mi.pi_true);
+
+
+	subplot(1,2,1)
+	hold on
+	plot([0 mi.num_models+1], [0 0],'k--');
+
+	cll = i/length(mmm);
+	cll = cll./range(cll);
+	cll = 0.3 + (cll.*0.68);
+		
+	
+	
+	scatter(1:mi.num_models, st, w, 'filled');
+	
+	title(mi.filename);
+	ylabel('|Est-True|')
+	xlabel('j')
+ 	axis([0 mi.num_models+1 -mxv mxv])
+	
+	
+	
+	
+	
+	subplot(1,2,2)
+	hold on
+	st = (mi.pi_est-mi.pi_true)./mi.pi_true;
+	ndx= st==Inf;
+	st(ndx) = 1;
+
+	plot([0 mi.num_models+1], [0 0],'k--');
+
+
+	scatter(1:mi.num_models, st, w, 'filled');
+
+
+	title(mi.filename);
+	ylabel('|Est-True|/True')
+	xlabel('j')
+ 	axis([0 mi.num_models -mxv mxv])
+end
+hold off
+
+%% 
+%% 
+abc='temp/new s4t2m75';
+mi = Mixture.load(abc);
+
+mxv = 1;
+
+im=1;
+fig;
+
+minw=50;
+maxw=100;
+
+w = (mi.pi_true.*10000).^2;
+w = w./range(w);
+w = minw + (w.*maxw);
+
+clrs = .6.*ones(mi.num_models,3);
+
+subplot(1,2,1)
+st = (mi.pi_est-mi.pi_true)./mi.pi_true;
+ndx= st==Inf;
+st(ndx) = 1;
+clrs(ndx,:) = clrs(ndx,:).*rand;
+
+plot([0 mi.num_models+1], [0 0],'k-');
+
+hold on
+scatter(1:mi.num_models, st, w, clrs, 'filled');
+hold off
+
+title(mi.filename);
+ylabel('|Est-True|/True')
+xlabel('j')
+axis([0 mi.num_models -mxv mxv])
+
+
+
+subplot(1,2,2)
+
+st = (mi.pi_est-mi.pi_true);
+
+
+
+plot([0 mi.num_models+1], [0 0],'k-');
+
+hold on
+scatter(1:mi.num_models, st, w, .6.*ones(mi.num_models,3), 'filled');
+hold off
+title(mi.filename);
+ylabel('|Est-True|')
+xlabel('j')
+axis([0 mi.num_models+1 -mxv mxv])
 
 %% view info about the selected halo
 mi
