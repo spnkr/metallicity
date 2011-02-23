@@ -6,6 +6,8 @@ Tex/images/*
 *.bbl
 *.blg
 *.log
+*.nav
+*.toc
 .DS_Store
 *.psd
 *.ai

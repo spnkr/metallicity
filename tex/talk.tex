@@ -1,21 +1,20 @@
 % small.tex
 \documentclass{beamer}
 \usetheme{default}
-\usepackage{amsmath, amsfonts, amssymb, amsthm}
-\usepackage{graphicx}
+\usepackage{amsmath, amsfonts, amssymb, amsthm, pstricks, pgf,color,tikz}
+\usetikzlibrary{arrows,shapes}
 
-\newcommand{\afe}{\frac{\alpha}{Fe}}
-\newcommand{\feh}{\frac{Fe}{H}}
 
+% shared
+\newenvironment{frcseries}{\fontfamily{frc}\selectfont}{}
+\newcommand{\textfrc}[1]{{\frcseries#1}}
+\newcommand{\mathfrc}[1]{\raisebox{-0.8mm}{\text{\textfrc{\small #1}}}\hspace{0.4mm}}
 \newcommand{\eqn}[1]{\begin{align*}
 #1
 \end{align*}}
 \newcommand{\eqnl}[2]{\begin{align} \label{#1}
 #2
 \end{align}}
-
-
-
 \newcommand{\vect}[1]{\boldsymbol{\mathbf{#1}}}
 \newcommand{\degree}[1]{${#1}^{\circ}$}
 \newcommand{\highlight}{ \rowcolor{lightgrass} }
@@ -30,10 +29,17 @@
         #4
 \end{array} \right. \] 
 }
+\definecolor{lemonchiffon}{rgb}{1, .98, .80}
+\definecolor{lightgrass}{rgb}{.89, 1, .87}
+\newcommand{\clr}[2]{{\color{#1}{#2}}}
+\newcommand{\indicator}{\mathbf{1}}
+\newcommand{\leftlbl}[1]{\mbox{#1} \;\;\;\;\;\;}
+\newcommand{\eqnsep}{,\;\;\;\;\;\;\;\;}
 
 
-
-
+% custom
+\newcommand{\afe}{\frac{\alpha}{Fe}}
+\newcommand{\feh}{\frac{Fe}{H}}
 \newcommand{\vz}{\vect{z}}
 \newcommand{\vx}{\vect{x}}
 \newcommand{\vy}{\vect{y}}
@@ -46,14 +52,25 @@
 \newcommand{\sumg}{\sum^g_{j=1}}
 \newcommand{\sumk}{\sum^m_{k=1}}
 \newcommand{\fab}{f_j}
-\newcommand{\llp}{L(\vp)}
 
 \newcommand{\vpg}{\vp^{\prime}}
 \newcommand{\vpgh}{\hat{\vp}^{\prime}}
-\newcommand{\llpp}{L(\vpg)}
-\newcommand{\llpph}{L(\vpgh)}
+\newcommand{\llp}{\mathfrc{l}(\vect{\pi})}
+\newcommand{\llpph}{\mathfrc{l}(\vpgh)}
+\newcommand{\llpp}{\mathfrc{l}(\vpg)}
+
+
+
 
 \begin{document}
+% For every picture that defines or uses external nodes, you'll have to
+% apply the 'remember picture' style. To avoid some typing, we'll apply
+% the style to all pictures.
+\tikzstyle{every picture}+=[remember picture]
+
+% By default all math in TikZ nodes are set in inline mode. Change this to
+% displaystyle so that we don't get small fractions.
+\everymath{\displaystyle}
 
 
 
@@ -61,45 +78,74 @@
 
 
 
-%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}[shrink]{A generative finite mixture model}
+	
+	\alert{hello}
+	
+	\structure{hello}
+	
+	\pgfputat{\pgfxy(0,-6.5)}{\pgfbox[left,base]{\pgfimage[width=\textwidth]{denstoobs}}}
+	
+	\begin{itemize}
+		\item \clr{red}{a}bc
+	\end{itemize}
+	
+	\eqn{
+		\Bigg[\feh,\afe\Bigg]_{i=1}^{N} \text{i.i.d} \sim f(\alert{x},\structure{y}) = \sum^m_{j=1} \pi_j f_j(x,y)
+	}
+	
+\end{frame}
+
+
+
+
+\begin{frame}{Rigid body dynamics}
+	
+	\tikzstyle{na} = [baseline=-.5ex]
+			
+			A modest attempt at using PGF/TikZ. \\		Green's Theorem: \\		\begin{itemize}		\item		Curl \tikz\node[fill=yellow!20,draw,circle] (n4){};		\item		Divergence \tikz\node[fill=green!20,draw,circle] (n2){};		\end{itemize}		\begin{equation}		\oint_{\tikz[baseline]{\node[fill=red!20,anchor=base] (t1) {$\partial D$};}} \,		\tikz[baseline]{\node[fill=green!20,anchor=base] (t2) {$F\cdot ds$};}		\ = \		\int\int_{\tikz[baseline]{\node[fill=blue!20,anchor=base] (t3) {$D$};}} \,(		\tikz[baseline]{\node[fill=yellow!20,anchor=base] (t4) {$\nabla \times F$};})\cdot k \,dA		\end{equation}		\begin{itemize}		\item		Boundary of Region \tikz\node[fill=red!20,draw,circle] (n1){};		\item		Region \tikz\node[fill=blue!20,draw,circle] (n3){};		\end{itemize}		\begin{tikzpicture}[overlay]		\path[->] (n1) edge [out=90, in=-90] (t1);		\path[->] (n2) edge [bend left] (t2);		\path[->] (n3) edge [out=0, in=-90] (t3);		\path[->] (n4) edge [out=0, in=90] (t4);		\end{tikzpicture}
+	\end{frame}
+
+
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{frame}{A generative finite mixture model}
 	
 	
 		
 	\begin{figure}
 			\begin{center}
-				\includegraphics[width=\textwidth]{denstoobs.pdf}
+				\includegraphics[scale=0.31]{denstoobs.pdf}
 			\end{center}
 	\end{figure}
 	
-	\eqn{
-		\Bigg[\feh,\afe\Bigg]_{i=1}^{N} \text{i.i.d} \sim f(x,y) = \sum^m_{j=1} \pi_j f_j(x,y)
-	}	
+	\vspace{-8mm}
 	
-\end{frame}
-
-
-
-
-
-
-
-
-
-%%%%%%%%%%%%%%%%%%%%%
-\begin{frame}{A generative finite mixture model}
-	
-	define x
 	\eqn{
 		\Bigg[\feh,\afe\Bigg]_{i=1}^{N} \text{i.i.d} \sim f(x,y) = \sum^m_{j=1} \pi_j f_j(x,y)
 	}
 	
+	\begin{center}
+		Where the mixing proportions, $\vp$, give the formation history.
+	\end{center}
 	
-	where the mixing proportions, $\vp$, give the formation history of the halo \eqn{
-		\sum^m_{j=1} \pi_j = 1,  \hspace{3mm}    \pi_j \geq 0, \hspace{3mm} j=1,\ldots,m
-	 }
+\end{frame}
+%---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+\begin{frame}[shrink]{A generative finite mixture model}
 	
-
+	\begin{itemize}
+		
+		\item each observed point comes from one of $m$ mixture components (pictured)
+		\item we propose a generative model in the form of a finite mixture model
+		\item since each mixture component has an associated mass and accretion time range, the formation history is specified if we know what percentage of observations come from each mixture component
+		\item our goal, then, is to determine the mixing proportions, $\vp$
+	\end{itemize}
 	
 \end{frame}
 
@@ -109,7 +155,58 @@
 
 
 
-%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Model definition}
+	
+	\eqn{
+		\leftlbl{Let} x=\afe \eqnsep y=\feh
+	 }
+	
+	Given $m$ mixture components, we propose that the density from which observations are generated is
+		\begin{equation}
+		f(x,y) = \sum^m_{j=1}		\tikz[baseline]{\node[fill=blue!20,anchor=base] (t3) {$\pi_j$};}		\tikz[baseline]{\node[fill=red!20,anchor=base] (t4) {$f_j(x,y)$};}	\end{equation}	\begin{itemize}		\item		Mixing proportion \tikz\node[fill=blue!20,draw,circle] (n3){};		\item		Mixture component $j$ \tikz\node[fill=red!20,draw,circle] (n4){};	\end{itemize}
+			\begin{tikzpicture}[overlay]		\path[->] (n3) edge [out=0, in=-90] (t3);		\path[->] (n4) edge [out=0, in=-90] (t4);	\end{tikzpicture}
+	
+	
+	
+	
+	
+	
+	\eqn{
+		\leftlbl{where} \sum^m_{j=1} \pi_j = 1 \eqnsep   \pi_j \geq 0  \eqnsep   j=1,\ldots,m
+	 }
+	
+\end{frame}
+%---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+\begin{frame}[shrink]{Definitions}
+	
+	\begin{itemize}
+		\item For notational simplicity, x=$\afe$ and y=$\feh$
+		\item Formally, given m mixture components, the density from which all observations are drawn is as shown
+		\item The mixing proportions, $\vp$ must be non-negative, and sum to 1
+	\end{itemize}
+	
+\end{frame}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{frame}{Estimating the mixing proportions $\vect{\pi}$}
 	
 	To estimate the mixing proportions, we can use a maximum likelihood approach
@@ -120,7 +217,7 @@
 	
 	
 	\eqn{
-		\mbox{where} \;\;\;\;\;\;\;\;\;\;\; L(\vect{\pi}) &= \sumn \log \Big( \summ \pi_j \fab(x_i,y_i)  \Big)
+		\leftlbl{where} \script{L}(\vect{\pi}) &= \sumn \log \Big( \summ \pi_j \fab(x_i,y_i)  \Big)
 	}
 	
 	Unfortunately the standard MLE procedure for estimating $\vp$ is intractable with this likelihood.\newline
@@ -130,63 +227,61 @@
 	
 	
 \end{frame}
+%---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+\begin{frame}[shrink]{Estimating the mixing proportions $\vect{\pi}$}
+	
+	\begin{itemize}
+		\item hi
+	\end{itemize}
+	
+\end{frame}
 
 
 
 
 
-%different L notation
 
-%%%%%%%%%%%%%%%%%%%%%
-\begin{frame}{Adding the latent variable $\vect{z}$}
+
+
+
+
+
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Expectation Maximization}
 	
 	Suppose we knew which mixture component $f_j$ each observation came from:
 	
-	\eqn{
-		z_{ij} 	= \hspace{1mm} & 1  \hspace{4mm} \text{if} \hspace{1mm} (x_i,y_i) \sim f_j	\\
-				& 0 \hspace{4mm} \text{otherwise}
+	\eqnset{z_{ij} = \indicator(x_i,y_i \sim f_j) }{}{ll}{
+		1			& (x_i,y_i) \sim f_j 		\\
+		0		& \text{otherwise}
 	}
-	
 	
 	The log likelihood can then be expressed as
 	
 	\eqn{
-		L(\vect{\pi}) &= \sumn \summ z_{ij}  \log \bl \pi_j  \fab(x_i,y_i) \br
+		\llp &= \sumn \summ z_{ij}  \log \bl \pi_j  \fab(x_i,y_i) \br
 	}
 	
 	The addition of the latent variable $\vect{z}$ actually makes things easier because it is easily differentiable in $\vp$.
 	
 \end{frame}
-
-
-
-
-
-
-
-
-
-
-%%%%%%%%%%%%%%%%%%%%%
-\begin{frame}{Finding $\vph$ using expectation maximization}
-	
-	but we dont know z.
-	the true likelihood is increasing in each iteration
-	
-	\eqn{
-		\vph^{(t)} &= \argmax_{\vp} \mathbb{E}_{\vect{z}| \vx,\vy,\vph^{(t-1)} }\Big[\llp \Big]   
-	}
-	
-	At each time $t$, the estimate for $\vp$ is the argmax of the expected log likelihood, given the data and the estimate of $\vp$ from the previous time.
+%---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+\begin{frame}[shrink]{Expectation Maximization}
 	
 	\begin{itemize}
-		\item First we find the expected value of $\llp$ using the current expected values of the latent variable $\vect{z}$
-		\item $\vph^{(t)}$ is the $\argmax_{\vp}$ of this expectation, which is simple to compute
-		\item We repeat until $\llp$ stabilizes
+		\item Suppose we knew which mixture component $f_j$ each observation came from
+		\item Then we could construct a latent indicator variable, $z_{ij}$, which is 1 if point $i$ comes from mixture component $j$, and 0 otherwise
+		\item The log like then becomes
+		\item Since we're supposing that we know $z_{ij}$, it's trivial to differentiate this log likelihood with respect to $\vph$
+		\item 
 	\end{itemize}
-	
-	
-	
 	
 \end{frame}
 
@@ -195,7 +290,54 @@
 
 
 
-%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Estimating $\vph$ using expectation maximization}
+	
+	We don't know $\vect{z}$, so we replace $\vect{z}$ with the expected value of $\vect{z}$, conditioned on the data and the last known $\vph$:
+	
+	%Expectation Maximization replaces the unobservable $\vect{z}$ with the expected value of $\vect{z}$, conditional on the data
+	
+	\eqn{
+		\vph^{(t)} &= \argmax_{\vp} \mathbb{E}\Big[\llp \big| \vx,\vy,\vph^{(t-1)} \Big]   
+	}
+	
+	Starting with some random initial value for $\vph^{(0)}$, we iteratively
+	
+	\begin{itemize}
+		\item Find the expected value of $\llp$ using the current expected values of the latent variable $\vect{z}$
+		\item Set $\vph^{(t)}$ to the $\argmax_{\vp}$ of this expectation, which is simple to compute
+	\end{itemize}
+	
+	And repeat until $\llp$ stabilizes to a range  $< 10^{-4}$
+	
+	
+	
+\end{frame}
+%---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+\begin{frame}[shrink]{Estimating the mixing proportions $\vect{\pi}$}
+	
+	\begin{itemize}
+		\item We don't know $\vect{z}$, so we replace $\vect{z}$ with the expected value of $\vect{z}$, conditioned on the data and the last known $\vph$:
+		\item 
+		\item the true likelihood is increasing in each iteration
+	\end{itemize}
+	
+\end{frame}
+
+
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{frame}{Find the expected value of $L(\vect{\pi})$ using the current expected value of the latent variable}
 	
 	The expected value of $\llp$, with respect to the conditional distribution of $\vect{z}$, given observed data and $\vp^{(t-1)}$ is
@@ -210,9 +352,13 @@
 										&= \frac{p(x_i,y_i|z_{ij}=1)p(z_{ij}=1)}{p(x_i,y_i)}	\\
 										&=  \frac{\pi_j \fab(x_i,y_i)  }{\summ \pi_j \fab(x_i,y_i)}
 	}
+\end{frame}
+%---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+\begin{frame}[shrink]{Find the expected value of $L(\vect{\pi})$ using the current expected value of the latent variable}
 	
-	
-		
+	\begin{itemize}
+		\item cond prob
+	\end{itemize}
 	
 \end{frame}
 
@@ -229,8 +375,8 @@
 
 
 
-
-%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{frame}{Find the $\argmax_{\vp}$ of this expectation}
 	
 		
@@ -241,21 +387,26 @@
 		\vph^{(t)} &= \argmax_{\vp} \mathbb{E}\Big[\llp \big| \vx,\vy,\vph^{(t-1)} \Big]   
 	}
 	
-	Let
+	
+	Which can be analytically specified, at each time $t$, as:
 	
 	\eqn{
-		\hat{\vect{w}}^{(t)} = \mathbb{E}_{\vp}\Big[  z_{ij} | x_i, y_i \Big]
+		\hat{\pi}^{(t)}_k  = \frac{\sumn w^{(t-1)}_{ij}}{n}
 	}
-	
-	Accounting for the $m-1$ free parameters of $\vp$, differentiation proceeds, for $k=1,\ldots,m-1$, as:
 	
 	\eqn{
-		\frac{\partial}{\partial \pi_k} \mathbb{E}\Big[\llp \big| \vect{x},\vect{y}\Big]   &=      \sumn \Bl  w^{(t-1)}_{ik} \frac{1}{\pi_k} - w^{(t-1)}_{im} \frac{1}{1-\pi_1-\ldots-\pi_{m-1}}   \Br
-	}
-	\eqn{
-		\frac{1}{\pi_k} \sumn w_{ik}^{(t-1)} &= \frac{1}{1-\pi_1-\ldots-\pi_{m-1}} \sumn w_{im}^{(t-1)}
+		\leftlbl{where} w^{(t+1)}_{ij} = \frac{\pi^{(t)}_{j} \fab(x_i,y_i)}{\sumk \pi^{(t)}_{k}f_k(x_i,y_i)}	
 	}
 	
+
+	
+\end{frame}
+%---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+\begin{frame}[shrink]{Find the $\argmax_{\vp}$ of this expectation}
+	
+	\begin{itemize}
+		\item Note how simple this is to compute
+	\end{itemize}
 	
 \end{frame}
 
@@ -273,31 +424,14 @@
 
 
 
-%%%%%%%%%%%%%%%%%%%%%
-\begin{frame}{Find the $\argmax_{\vp}$ of this expectation}
-	
-	
-	Consequently
-	\eqnset{\hat{\pi}^{(t)}_k }{}{ll}{
-		\frac{\sumn w^{(t-1)}_{ij}}{n}			& k=1,\ldots,m-1	\\
-		\vspace{1mm} & \\
-		1-\pi_1-\ldots-\pi_{m-1}		& k=m
-	}
-	
-		Where
-	\eqnset{w^{(t+1)}_{ij}}{}{ll}{
-		\frac{\displaystyle\pi^{(t)}_{j} \fab(x_i,y_i)}{\displaystyle\sumk \pi^{(t)}_{k}f_k(x_i,y_i)}				& j=1,\ldots,m-1	\\
-		\vspace{1mm} & \\
-		1 - w_{i1} - \ldots - w_{i,m-1}		& j=m
-	}
-	
-\end{frame}
 
 
 
 
 
-%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{frame}{Simulations}
 	
 	
@@ -331,7 +465,12 @@
 
 
 
-%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{frame}{EM formation history for $m$=25}
 	
 	\begin{figure}
@@ -346,7 +485,15 @@
 
 
 
-%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{frame}{EM formation history for $m$=4}
 	
 	\begin{figure}
@@ -365,7 +512,8 @@
 
 
 
-%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{frame}{EM overview}
 	
 	\begin{figure}
@@ -398,7 +546,8 @@
 
 
 
-%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{frame}{Confidence intervals from observed Fisher Information}
 	
 	\begin{figure}
@@ -421,7 +570,8 @@
 
 
 
-%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{frame}{Confidence intervals from observed Fisher Information}
 	
 	\begin{figure}
@@ -441,7 +591,14 @@
 
 
 
-%%%%
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{frame}{Correlation between $\vp$}
 	
 	\eqn{	
@@ -463,7 +620,13 @@
 
 
 
-%%%%
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{frame}{Conclusion}
 	
 	Worked
