@@ -16,6 +16,13 @@ mi = Mixture.load(mnames{1});
 
 
 
+%% 
+h=figure(1);clf(h);
+ellipse(1,2,pi/8,1,1,'r')
+
+
+
+
 
 %% 
 clc
