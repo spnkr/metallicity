@@ -22,7 +22,104 @@ ellipse(1,2,pi/8,1,1,'r')
 
 
 
+%% 
 
+scale=300;
+pval = 0.95;
+hi = 10;
+mi = Mixture.load(mnames{hi});
+hlosmfn = mnames{hi};
+% h = figure(1);
+% clf(h);
+
+%indice comments by index, not halo #
+%1
+%indices = [1 2; 1 4; 1 5; 1 6; 2 6; 2 3; 2 4; 2 5; 4 5; 4 6; 8 7;8 9;11 10;12 10;14 9;13 15;11 15];
+
+% 5
+%indices = [1 2;1 3;1 4; 1 6;6 5;6 4;8 7; 8 6;12 11;12 10;15 16;16 17;17 18;20 19;19 18;21 22;20 17];
+
+
+% 10
+indices = [1 2;1 6; 1 8;2 3;3 4; 4 5; 5 6;6 7;7 8;8 9;9 10;10 11;11 12;12 13;13 14;14 15;15 16;16 17;17 18;18 19;19 20;20 21;21 22;19 14;...
+	14 10;9 6;14 17;18 22];
+
+ROWS = ceil(sqrt(M));
+COLS = ceil(sqrt(M));
+% ROWS = 3;
+% COLS = 3;
+M = size(indices,1);
+for ndx=1:M
+	tic
+	ndxi = indices(ndx,1);
+	ndxj = indices(ndx,2);
+	sig = [mi.covar(ndxi,ndxi) mi.covar(ndxi,ndxj);mi.covar(ndxj,ndxi) mi.covar(ndxj,ndxj)];
+	sigi = inv(sig);
+
+	pi_true = [mi.pi_true(ndxi) mi.pi_true(ndxj)];
+	pih = [mi.pi_est(ndxi) mi.pi_est(ndxj)];
+	pstdev = [mi.stdev(ndxi) mi.stdev(ndxj)];
+	pi_eb_ndx = [ndxi ndxj];
+
+	rnk = rank(sigi);
+	if rnk ~= 2;warning('rank of inv(sigma) < 2');end
+	cval = chi2inv(pval,rnk);
+
+
+	map = zeros(scale.^2,2);
+	for k = 1:scale
+		map((k-1)*scale+1:k*scale,1) = k;
+		map((k-1)*scale+1:k*scale,2) = linspace(1,scale,scale)';
+	end
+
+
+
+	map=map./scale;
+	omap = map;
+	map(:,1) = map(:,1)-pih(1);
+	map(:,2) = map(:,2)-pih(2);
+
+	filled = zeros(1,2);
+	z = 1;
+	pp=length(map);
+	for i = 1:pp
+		a = map(i,:)';
+		if (a' * sigi * a) < cval
+			filled(z,:) = omap(i,:);
+			z = z+1;
+		end
+	end
+
+
+
+% 	subplot(ROWS,COLS,ndx);
+	h = figure(1);
+	clf(h);
+	plot(filled(:,1),filled(:,2),'Color', [0.8 0.8 0.8], 'Marker', '.', 'LineStyle', 'none');
+	axis([0 1 0 1]);
+
+	hold on
+
+	h1=plot(pi_true(1),pi_true(2),'ko','MarkerSize',10,'LineWidth',2);
+	h2=plot(pih(1),pih(2),'gx','MarkerSize',10,'LineWidth',2,'Color',[10 198 28]./255);
+	legend([h1 h2],strcat(['True \pi: ' num2str(round(pi_true(1)*10000)/100) '%, ' num2str(round(pi_true(2)*10000)/100) '%']),...
+		strcat(['Est \pi: ' num2str(round(pih(1)*10000)/100) '%, ' num2str(round(pih(2)*10000)/100) '%']));
+
+	title(strcat(['\pi_' num2str(ndxi) ' and \pi_' num2str(ndxj) '(' num2str(pval*100) '%)']));
+	hold off
+	saveas(h,strcat(['media_local/el_h' hlosmfn '_' num2str(ndxi) 'v' num2str(ndxj) '.pdf']),'pdf');
+
+	toc
+end
+
+'DONE'
+%% 
+im=10;
+mi.plot_info_error_bars(1)
+
+
+im=20;
+mi.plot_correl(true,true);
 
 %% 
 clc
