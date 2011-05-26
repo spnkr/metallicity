@@ -1,7 +1,6 @@
-function show(inputs)
-	
-	if length(inputs) > 0
-		vs = inputs;
+function show(varargin)
+	if length(varargin) > 0
+		vs = varargin;
 		vals = {};
 		
 		all_chars = true;
@@ -12,20 +11,17 @@ function show(inputs)
 			end
 		end
 		
-		
-		if all_chars || strcmp(class(inputs),'char')
-			disp(strcat(inputs));
-		else
-			for i=1:length(vs)
-				v = vs{i};
-				if ischar(v)
-					vals{i} = v;
-				else
-					vals{i} = num2str(v);
-				end
+
+
+		for i=1:length(vs)
+			v = vs{i};
+			if ischar(v)
+				vals{i} = v;
+			else
+				vals{i} = num2str(v);
 			end
-			disp(strcat(vals));
 		end
+		disp(strcat(vals));
 		
 		
 	end

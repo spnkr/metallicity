@@ -75,6 +75,9 @@ classdef Mixture < handle
 	
 	
 	methods
+		function a = grid_size(mi)
+			a=mi.bin_step;
+		end
 		%--loading
 		function mi = Mixture(varargin)
 			load_args
