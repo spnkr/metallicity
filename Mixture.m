@@ -91,6 +91,8 @@ classdef Mixture < handle
 			mi.pi_true = arg('pi_true',NaN);
 			mi.bin_step = arg('bin_step',mi.bin_step);
 			graph = arg('graph',false);
+			model_obj = arg('model_obj',NaN);
+			
 			if graph
 				fig
 			end
@@ -105,20 +107,34 @@ classdef Mixture < handle
  			if isfinite(mi.f)
 				mi.num_models = size(mi.f,2);
 			else
-				if with_headers
-					[h,models] = hdrload(model_path);
-				else
-					models = load(model_path);
-				end
- 				
-				mi.model_path = model_path;
+				if ~isfinite(model_obj)
+					if with_headers
+						[h,models] = hdrload(model_path);
+					else
+						models = load(model_path);
+					end
+					mi.model_path = model_path;
 				
-				xbin = models(:,4);
-				ybin = models(:,5);
-				x_bin_num = max(xbin)+1;
-				y_bin_num = max(ybin)+1;
-				num_models=0;
-				models_sparse=[];
+					xbin = models(:,4);
+					ybin = models(:,5);
+					x_bin_num = max(xbin)+1;
+					y_bin_num = max(ybin)+1;
+					num_models=0;
+					models_sparse=[];
+				else
+					models = model_obj;
+					mi.model_path = model_path;
+
+					xbin = models(:,4);
+					ybin = models(:,5);
+					x_bin_num = max(xbin)+1;
+					y_bin_num = max(ybin)+1;
+					num_models=0;
+					models_sparse=[];
+				end
+				
+ 				
+				
 				
 				kk=1;
 				for i=0:x_bin_num-1
@@ -177,8 +193,13 @@ classdef Mixture < handle
 						for ix = 1:xn,
 							for iy = 1:yn,
 								l = l + 1;
-								sq(ix,iy) = distx(l,3);
-								f(k,ix,iy) = distx(l,3);
+								try
+									sq(ix,iy) = distx(l,3);
+									f(k,ix,iy) = distx(l,3);
+								catch
+									sq(ix,iy) = 0;
+									f(k,ix,iy) = 0;
+								end
 							end
 						end
 						if graph
@@ -211,7 +232,11 @@ classdef Mixture < handle
 			end
 			
 			if isfinite(mi.pi_true)
-				mi.loglike_true = mi.complete_log_like(mi.f,mi.pi_true,length(mi.x),mi.num_models);
+				try
+					mi.loglike_true = mi.complete_log_like(mi.f,mi.pi_true,length(mi.x),mi.num_models);
+				catch
+					display('failed loglike');
+				end
 			end
 			
 			
