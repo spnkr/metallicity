@@ -12,7 +12,74 @@ constant_im=false;
 
 %% load saved
 mnames = {'halo3', 'halo2','halo5','halo7','halo8','halo9','halo10','halo12','halo14','halo15','halo17','halo20'};
-mi = Mixture.load('halo2_NEW_05');
+
+
+%% 
+mi = Mixture.load('halo3')
+
+
+
+
+%% 
+mi.export_flat_results();
+
+
+%% 
+data = load(mi.model_path);
+massbins=[unique(data(:,9)) unique(data(:,8))];
+timebins=[unique(data(:,6)) unique(data(:,7))];
+
+M=size(mi.model_skip_ndx,2);
+P=sqrt(M);
+
+%% 
+clc
+%dimensions: time bin min, time bin max, mass bin min, mass bin max, true
+%pi, est pi, info base standard deviation (sigma)
+r = zeros(P,P,7);
+for i=1:P
+	r(:,i,1) = timebins(i,1); %time bin min
+	r(:,i,2) = timebins(i,2); %time bin max
+	r(P-i+1,:,3) = massbins(i,1); %mass bin min
+	r(P-i+1,:,4) = massbins(i,2); %mass bin max
+end
+
+nonzeromodels = reshape(mi.model_skip_ndx,P,P);
+
+i=1;
+k=1;
+j=1;
+for nn=1:M
+	if nonzeromodels(i,j)==1
+		r(i,j,5) = mi.pi_true(k)*100;
+		r(i,j,6) = mi.pi_est(k)*100;
+		r(i,j,7) = mi.stdev(k)*100;
+		k = k+1;
+	end
+	j = j+1;
+	if j == P+1
+		j=1;
+		i = i+1;
+	end
+end
+
+r
+
+
+%% 
+
+
+j=1;
+for i=1:length(mi.model_skip_ndx)
+	if mi.model_skip_ndx(i)==0
+		%there is data
+		res(i,:) = [massbins(i,1) massbins(i,2) timebins(i,1) timebins(i,2) mi.pi_true(j) mi.pi_est(j)];
+	else
+		res(i,:) = [massbins(i,1) massbins(i,2) timebins(i,1) timebins(i,2) mi.pi_true(j) mi.pi_est(j)];
+	end
+end
+
+
 
 
 

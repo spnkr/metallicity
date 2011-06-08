@@ -75,6 +75,55 @@ classdef Mixture < handle
 	
 	
 	methods
+		function export_flat_results(mi)
+			r = mi.flat_results;
+			dlmwrite(strcat(['media/exports/' mi.filename '_all.txt']), r, '\t');
+			dlmwrite(strcat(['media/exports/' mi.filename '_min_time.txt']), r(:,:,1), '\t');
+			dlmwrite(strcat(['media/exports/' mi.filename '_max_time.txt']), r(:,:,2), '\t');
+			dlmwrite(strcat(['media/exports/' mi.filename '_min_mass.txt']), r(:,:,3), '\t');
+			dlmwrite(strcat(['media/exports/' mi.filename '_max_mass.txt']), r(:,:,4), '\t');
+			dlmwrite(strcat(['media/exports/' mi.filename '_true_pi.txt']), r(:,:,5), '\t');
+			dlmwrite(strcat(['media/exports/' mi.filename '_est_pi.txt']), r(:,:,6), '\t');
+			dlmwrite(strcat(['media/exports/' mi.filename '_sigma.txt']), r(:,:,7), '\t');
+		end
+		function r = flat_results(mi)
+			data = load(mi.model_path);
+			massbins=[unique(data(:,9)) unique(data(:,8))];
+			timebins=[unique(data(:,6)) unique(data(:,7))];
+
+			M=size(mi.model_skip_ndx,2);
+			P=sqrt(M);
+
+			
+			%dimensions: time bin min, time bin max, mass bin min, mass bin max, true
+			%pi, est pi, info base standard deviation (sigma)
+			r = zeros(P,P,7);
+			for i=1:P
+				r(:,i,1) = timebins(i,1); %time bin min
+				r(:,i,2) = timebins(i,2); %time bin max
+				r(P-i+1,:,3) = massbins(i,1); %mass bin min
+				r(P-i+1,:,4) = massbins(i,2); %mass bin max
+			end
+
+			nonzeromodels = reshape(mi.model_skip_ndx,P,P);
+
+			i=1;
+			k=1;
+			j=1;
+			for nn=1:M
+				if nonzeromodels(i,j)==1
+					r(i,j,5) = mi.pi_true(k);
+					r(i,j,6) = mi.pi_est(k);
+					r(i,j,7) = mi.stdev(k);
+					k = k+1;
+				end
+				j = j+1;
+				if j == P+1
+					j=1;
+					i = i+1;
+				end
+			end
+		end
 		function a = grid_size(mi)
 			a=mi.bin_step;
 		end
